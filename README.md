@@ -1,7 +1,7 @@
 # 🍃 WindUI-Better
 
 > **An enhanced, modern, community-driven edition of WindUI for Roblox.**  
-> Built with customizable 2-column card layouts, frosted glass aesthetics, high-density typography, live FPS/Ping watermarks, in-tab search filtering, interactive notifications, animated icons, and community-requested features.
+> Built with customizable 2-column card layouts, frosted glass aesthetics, live FPS/Ping watermarks, in-tab search filtering, interactive notifications, animated icons, and community-requested features.
 
 Original library created by **Footagesus**. Enhanced, maintained, and expanded by **caomod2077** and the WindUI community.
 
@@ -31,11 +31,17 @@ local Window = WindUI:CreateWindow({
 
 ---
 
-## 🌟 What's New in WindUI-Better
+## 🌟 Visual Feature Showcase
 
-### 1. 🔲 Configurable 2-Column Card Layout (`TwoColumns`)
+### 1. 🔲 Modern 2-Column Card Layout & Frosted Glass (`TwoColumns`)
+
+<p align="center">
+  <img src="assets/two_columns.png" alt="2-Column Layout & Frosted Glass" width="850"/>
+</p>
+
 - **Universal compatibility**: By default, `TwoColumns = false`, preserving the traditional 1-column layout for existing scripts.
 - Set `TwoColumns = true` in `CreateWindow` to automatically alternate sections into Left & Right columns.
+- **Frosted Glass Styling**: Cards feature a semi-transparent appearance (`0.93` transparency) with clean outlines, allowing your background gradients to shine through cleanly.
 - **Per-Tab Override**: A specific tab can enable or disable 2-column mode:
   ```lua
   local SingleColTab = Window:Tab({ Title = "Info", TwoColumns = false })
@@ -50,22 +56,15 @@ local Window = WindUI:CreateWindow({
   local RightCard = Tab:Card({ Title = "Combat", Side = "Right" })
   ```
 
-### 2. 💎 Ultra-Subtle Frosted Glass Cards
-- Section and Card backgrounds now feature an ultra-clean **frosted glass appearance (`0.93` transparency)** with fine outlines (`0.85` transparency).
-- Window gradients and background images shine through smoothly without turning into opaque blocks.
+---
 
-### 3. 📐 High-Density Compact Typography & Padding
-- Control titles are set to **14px SemiBold** and descriptions to **12px Medium**.
-- Compact internal paddings (8–9px) allow **6 to 9 controls to fit in a single card view** without requiring excessive scrolling.
-- Window sizes are balanced for both PC (`720x475` to `880x560`) and mobile devices (automatic safe margin calculation).
+### 2. 📊 Live Watermark & Server Stats (`Window:Watermark`)
 
-### 4. 🚀 Silky Smooth, Non-Intrusive Animations
-- Jittery scale oscillations on click have been removed.
-- Chevron dropdown arrows now rotate smoothly with clean `Quad Out` easing.
-- Interactive **Card Hover Glow** highlights the card border when mouse hovers over the header.
+<p align="center">
+  <img src="assets/watermark.png" alt="Live Watermark" width="400"/>
+</p>
 
-### 5. 📊 Live Watermark & Server Stats (`Window:Watermark`)
-- Display real-time **FPS**, **Ping (ms)**, and an active online status badge in the topbar:
+- Display real-time **FPS**, **Ping (ms)**, and an active online status badge directly on the topbar:
   ```lua
   local watermark = Window:Watermark({
       Title = "Script Hub",
@@ -76,30 +75,29 @@ local Window = WindUI:CreateWindow({
   watermark:SetVisible(true)
   ```
 
-### 6. 📱 Universal Open Button (PC & Mobile Support)
-- The floating **Open Button** works on both PC and mobile:
-  ```lua
-  Window:EditOpenButton({
-      Title = "Open Hub",
-      Icon = "rbxassetid://86146615808159",
-      CornerRadius = UDim.new(0, 16),
-      StrokeThickness = 2,
-      Draggable = true,
-      Color = ColorSequence.new(Color3.fromRGB(0, 191, 255), Color3.fromRGB(255, 105, 180)),
-      Enabled = true,
-      OnlyMobile = false, -- false = visible on PC as well!
-  })
-  -- Or force it anytime via code:
-  Window:ForceOpenButton(true)
-  ```
+---
 
-### 7. 🔍 In-Tab Real-Time Feature Search (`Tab:AddSearch`)
+### 3. 🔍 In-Tab Real-Time Feature Search (`Tab:AddSearch`)
+
+<p align="center">
+  <img src="assets/tab_search.png" alt="In-Tab Search Filter" width="750"/>
+</p>
+
 - Add a live search bar inside any tab to filter cards and features dynamically as the user types:
   ```lua
   MainTab:AddSearch("Search features in Main...")
   ```
 
-### 8. 🖼️ Tab Banners & Sidebar Banners
+---
+
+### 4. 🖼️ Sidebar Banners & Tab Banners
+
+<p align="center">
+  <img src="assets/banners.png" alt="Sidebar Banner" width="320"/>
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <img src="assets/tab_banner.png" alt="Tab Banner" width="500"/>
+</p>
+
 - **Sidebar Banner**: Header banner above the sidebar tabs list:
   ```lua
   Window:SetSidebarBanner({
@@ -118,7 +116,14 @@ local Window = WindUI:CreateWindow({
   })
   ```
 
-### 9. 🏷️ Tag Pills on All Controls
+---
+
+### 5. 🏷️ Tag Pills on All Controls
+
+<p align="center">
+  <img src="assets/tag_pills.png" alt="Tag Pills on Controls" width="700"/>
+</p>
+
 - Every control (`Button`, `Toggle`, `Slider`, `Dropdown`, `Input`, `Paragraph`) supports visual tag badges:
   ```lua
   Tab:Toggle({
@@ -137,8 +142,15 @@ local Window = WindUI:CreateWindow({
   })
   ```
 
-### 10. ⏳ HoldButton Component
-- A safety confirmation button requiring the user to press and hold for $N$ seconds. Features a filling green progress bar to prevent accidental clicks:
+---
+
+### 6. ⏳ HoldButton Component (Safety Confirmation)
+
+<p align="center">
+  <img src="assets/hold_button.png" alt="HoldButton with Animated Fill" width="500"/>
+</p>
+
+- A safety confirmation button requiring the user to press and hold for $N$ seconds. Features an animated filling green progress bar to prevent accidental clicks:
   ```lua
   Tab:HoldButton({
       Title = "Emergency Server Reset",
@@ -152,11 +164,25 @@ local Window = WindUI:CreateWindow({
   })
   ```
 
-### 11. 📋 Changelog Component
-- A beautifully formatted update log element with automatic color-coded markers:
-  - `+` = Green (Added)
-  - `-` = Red (Removed/Fixed)
-  - `*` or `~` = Blue (Changed/Improved)
+---
+
+### 7. 📋 Changelog & ⏱️ Live Event Countdown Components
+
+<p align="center">
+  <img src="assets/changelog_countdown.png" alt="Changelog and Countdown" width="750"/>
+</p>
+
+- **Countdown**: An automated countdown clock (`dd : hh : mm : ss`) that ticks every second and fires a callback upon completion:
+  ```lua
+  Tab:Countdown({
+      Title = "Limited Event Ends In",
+      Seconds = 86400, -- Countdown from 24 hours
+      OnEnd = function()
+          print("Countdown completed!")
+      end,
+  })
+  ```
+- **Changelog**: A beautifully formatted update log element with automatic color-coded markers (`+` Green, `-` Red, `*` Blue):
   ```lua
   Tab:Changelog({
       Version = "2.0.0",
@@ -169,19 +195,79 @@ local Window = WindUI:CreateWindow({
   })
   ```
 
-### 12. ⏱️ Live Event Countdown Component
-- An automated countdown clock (`dd : hh : mm : ss`) that ticks every second and fires a callback upon completion:
+---
+
+### 8. 🔔 Interactive Notifications with Action Buttons & Progress
+
+<p align="center">
+  <img src="assets/notification.png" alt="Interactive Notification" width="450"/>
+</p>
+
+- `WindUI:Notify` supports interactive action buttons and a live progress bar:
   ```lua
-  Tab:Countdown({
-      Title = "Limited Event Ends In",
-      Seconds = 7200, -- 2 hours from now
-      OnEnd = function()
-          print("Countdown completed!")
-      end,
+  WindUI:Notify({
+      Title = "Update Complete",
+      Content = "WindUI Better v2.0 is installed and ready to use.",
+      Icon = "sparkles",
+      Progress = 0.85, -- 85% progress bar
+      Duration = 8,
+      Buttons = {
+          {
+              Title = "Accept",
+              Variant = "Primary",
+              Callback = function()
+                  print("Accepted!")
+              end,
+          },
+          {
+              Title = "Dismiss",
+              Variant = "Secondary",
+              Callback = function() end,
+          },
+      },
   })
   ```
 
-### 13. 🔒 Tab Security & Access Gating (`LockedTo` / `HiddenTo` / `Whitelist`)
+---
+
+### 9. 🪟 Interactive Dialogs with Controls
+
+<p align="center">
+  <img src="assets/interactive_dialog.png" alt="Interactive Dialog with Controls" width="550"/>
+</p>
+
+- `Window:Dialog` can host Sliders, Toggles, Dropdowns, and Inputs directly inside popup modals:
+  ```lua
+  local dlg = Window:Dialog({
+      Title = "Interactive Dialog",
+      Content = "Tune controls directly inside popup modals:",
+      Buttons = {
+          { Title = "Apply", Variant = "Primary" },
+          { Title = "Cancel", Variant = "Secondary" },
+      },
+  })
+  dlg:Toggle({ Title = "Super Fast Mode", Value = true })
+  dlg:Slider({ Title = "Performance Level", Value = 80, Min = 10, Max = 100 })
+  dlg:Dropdown({ Title = "Execution Engine", Values = { "Native", "Interpreted", "JIT Fast" }, Value = "JIT Fast" })
+  ```
+
+---
+
+### 10. ↔️ Collapsible Sidebar (`Window:ToggleSidebar`)
+
+<p align="center">
+  <img src="assets/collapsible_sidebar.png" alt="Collapsible Sidebar in Icon Mode" width="850"/>
+</p>
+
+- Collapse the sidebar into a slim 52px icon mode to give maximum space to the main content:
+  ```lua
+  Window:ToggleSidebar() -- Toggles between 52px icon mode and 175px expanded mode
+  ```
+
+---
+
+### 11. 🔒 Tab Security & Access Gating (`LockedTo` / `HiddenTo` / `Whitelist`)
+
 - Restrict or hide specific tabs by player UserId:
   ```lua
   Window:Tab({
@@ -193,47 +279,10 @@ local Window = WindUI:CreateWindow({
   })
   ```
 
-### 14. 🔔 Interactive Notifications with Action Buttons & Progress
-- `WindUI:Notify` now supports interactive buttons and progress bars:
-  ```lua
-  WindUI:Notify({
-      Title = "New Update Available",
-      Content = "Version 2.0 is out! Do you want to load it now?",
-      Icon = "sparkles",
-      Progress = 0.75, -- 75% progress bar
-      Duration = 10,
-      Buttons = {
-          {
-              Title = "Update Now",
-              Variant = "Primary",
-              Callback = function()
-                  print("Updating...")
-              end,
-          },
-          {
-              Title = "Later",
-              Variant = "Secondary",
-          },
-      },
-  })
-  ```
+---
 
-### 15. 🪟 Interactive Dialogs with Controls
-- `Window:Dialog` can now host Sliders, Toggles, Dropdowns, and Inputs inside popup modals:
-  ```lua
-  local dlg = Window:Dialog({
-      Title = "Quick Configuration",
-      Content = "Tune settings directly from this popup:",
-      Buttons = {
-          { Title = "Done", Variant = "Primary" },
-      },
-  })
-  dlg:Toggle({ Title = "Fast Mode", Value = true })
-  dlg:Slider({ Title = "Speed", Value = 50, Min = 10, Max = 100 })
-  dlg:Dropdown({ Title = "Mode", Values = { "Safe", "Aggressive" }, Value = "Safe" })
-  ```
+### 12. 🎨 Runtime Theme Overrides (`Window:SetColor`)
 
-### 16. 🎨 Runtime Theme Overrides (`Window:SetColor`)
 - Modify theme accent, background, text, or dialog colors on the fly without declaring a new theme:
   ```lua
   Window:SetColor({
@@ -242,19 +291,19 @@ local Window = WindUI:CreateWindow({
   })
   ```
 
-### 17. ↔️ Collapsible Sidebar (`Window:ToggleSidebar`)
-- Collapse the sidebar into a slim 52px icon mode to give maximum space to the main content:
-  ```lua
-  Window:ToggleSidebar() -- Toggles between 52px icon mode and 175px expanded mode
-  ```
+---
 
-### 18. 🔊 Sound Effects (`Window:EnableSounds`)
+### 13. 🔊 Audio Feedback (`Window:EnableSounds`)
+
 - Subtle audio feedback on tab selection and control toggles:
   ```lua
   Window:EnableSounds(true)
   ```
 
-### 19. 🔝 Notification Placement & Layer Order
+---
+
+### 14. 🔝 Notification Placement & Layer Order
+
 - Shift notification toast position to top-right:
   ```lua
   WindUI:SetNotificationUpper(true)
@@ -293,18 +342,6 @@ local watermark = Window:Watermark({
     Title = "Ultimate Hub",
     FPS = true,
     Ping = true,
-})
-
--- Floating Open Button for PC & Mobile
-Window:EditOpenButton({
-    Title = "Open Hub",
-    Icon = "rbxassetid://86146615808159",
-    CornerRadius = UDim.new(0, 16),
-    StrokeThickness = 2,
-    Draggable = true,
-    Color = ColorSequence.new(Color3.fromRGB(0, 191, 255), Color3.fromRGB(255, 105, 180)),
-    Enabled = true,
-    OnlyMobile = false,
 })
 
 -- Navigation Tabs
@@ -432,4 +469,3 @@ InterfaceSection:Button({
 
 This project is licensed under the [MIT License](LICENSE).  
 Feel free to use it in all your scripts, projects, and hubs!
-
