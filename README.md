@@ -35,10 +35,6 @@ local Window = WindUI:CreateWindow({
 
 ### 1. 🔲 Modern 2-Column Card Layout & Frosted Glass (`TwoColumns`)
 
-<p align="center">
-  <img src="assets/two_columns.png" alt="2-Column Layout & Frosted Glass" width="850"/>
-</p>
-
 - **Universal compatibility**: By default, `TwoColumns = false`, preserving the traditional 1-column layout for existing scripts.
 - Set `TwoColumns = true` in `CreateWindow` to automatically alternate sections into Left & Right columns.
 - **Frosted Glass Styling**: Cards feature a semi-transparent appearance (`0.93` transparency) with clean outlines, allowing your background gradients to shine through cleanly.
@@ -60,10 +56,6 @@ local Window = WindUI:CreateWindow({
 
 ### 2. 📊 Live Watermark & Server Stats (`Window:Watermark`)
 
-<p align="center">
-  <img src="assets/watermark.png" alt="Live Watermark" width="400"/>
-</p>
-
 - Display real-time **FPS**, **Ping (ms)**, and an active online status badge directly on the topbar:
   ```lua
   local watermark = Window:Watermark({
@@ -79,10 +71,6 @@ local Window = WindUI:CreateWindow({
 
 ### 3. 🔍 In-Tab Real-Time Feature Search (`Tab:AddSearch`)
 
-<p align="center">
-  <img src="assets/tab_search.png" alt="In-Tab Search Filter" width="750"/>
-</p>
-
 - Add a live search bar inside any tab to filter cards and features dynamically as the user types:
   ```lua
   MainTab:AddSearch("Search features in Main...")
@@ -91,12 +79,6 @@ local Window = WindUI:CreateWindow({
 ---
 
 ### 4. 🖼️ Sidebar Banners & Tab Banners
-
-<p align="center">
-  <img src="assets/banners.png" alt="Sidebar Banner" width="320"/>
-  &nbsp;&nbsp;&nbsp;&nbsp;
-  <img src="assets/tab_banner.png" alt="Tab Banner" width="500"/>
-</p>
 
 - **Sidebar Banner**: Header banner above the sidebar tabs list:
   ```lua
@@ -120,10 +102,6 @@ local Window = WindUI:CreateWindow({
 
 ### 5. 🏷️ Tag Pills on All Controls
 
-<p align="center">
-  <img src="assets/tag_pills.png" alt="Tag Pills on Controls" width="700"/>
-</p>
-
 - Every control (`Button`, `Toggle`, `Slider`, `Dropdown`, `Input`, `Paragraph`) supports visual tag badges:
   ```lua
   Tab:Toggle({
@@ -146,10 +124,6 @@ local Window = WindUI:CreateWindow({
 
 ### 6. ⏳ HoldButton Component (Safety Confirmation)
 
-<p align="center">
-  <img src="assets/hold_button.png" alt="HoldButton with Animated Fill" width="500"/>
-</p>
-
 - A safety confirmation button requiring the user to press and hold for $N$ seconds. Features an animated filling green progress bar to prevent accidental clicks:
   ```lua
   Tab:HoldButton({
@@ -167,10 +141,6 @@ local Window = WindUI:CreateWindow({
 ---
 
 ### 7. 📋 Changelog & ⏱️ Live Event Countdown Components
-
-<p align="center">
-  <img src="assets/changelog_countdown.png" alt="Changelog and Countdown" width="750"/>
-</p>
 
 - **Countdown**: An automated countdown clock (`dd : hh : mm : ss`) that ticks every second and fires a callback upon completion:
   ```lua
@@ -198,10 +168,6 @@ local Window = WindUI:CreateWindow({
 ---
 
 ### 8. 🔔 Interactive Notifications with Action Buttons & Progress
-
-<p align="center">
-  <img src="assets/notification.png" alt="Interactive Notification" width="450"/>
-</p>
 
 - `WindUI:Notify` supports interactive action buttons and a live progress bar:
   ```lua
@@ -232,10 +198,6 @@ local Window = WindUI:CreateWindow({
 
 ### 9. 🪟 Interactive Dialogs with Controls
 
-<p align="center">
-  <img src="assets/interactive_dialog.png" alt="Interactive Dialog with Controls" width="550"/>
-</p>
-
 - `Window:Dialog` can host Sliders, Toggles, Dropdowns, and Inputs directly inside popup modals:
   ```lua
   local dlg = Window:Dialog({
@@ -254,10 +216,6 @@ local Window = WindUI:CreateWindow({
 ---
 
 ### 10. ↔️ Collapsible Sidebar (`Window:ToggleSidebar`)
-
-<p align="center">
-  <img src="assets/collapsible_sidebar.png" alt="Collapsible Sidebar in Icon Mode" width="850"/>
-</p>
 
 - Collapse the sidebar into a slim 52px icon mode to give maximum space to the main content:
   ```lua
