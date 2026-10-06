@@ -12678,7 +12678,8 @@ TextTransparency=not ar.Locked and 0.3 or 0.65,
 TextSize=14,
 Size=UDim2.new(1,0,0,0),
 FontFace=Font.new(ak.Font,Enum.FontWeight.Medium),
-TextWrapped=true,
+TextWrapped=false,
+TextTruncate="AtEnd",
 RichText=true,
 AutomaticSize="Y",
 LayoutOrder=2,
@@ -15336,9 +15337,14 @@ else
 aw.SidebarCollapsed = not aw.SidebarCollapsed
 end
 local collapsed = aw.SidebarCollapsed
-local sideW = collapsed and 52 or (aw.IsMobile and 160 or 175)
+local sideW = collapsed and 52 or aw.SideBarWidth
 local ts = game:GetService("TweenService")
 local ti = TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+local sidebarFrame = aw.UIElements.SideBar and aw.UIElements.SideBar:FindFirstChild("Frame")
+local sidebarBanner = sidebarFrame and sidebarFrame:FindFirstChild("SidebarBanner")
+if sidebarBanner then
+sidebarBanner.Visible = not collapsed
+end
 
 ts:Create(aw.UIElements.SideBarContainer, ti, {
 Size = UDim2.new(0, sideW, 1, -aw.Topbar.Height)
@@ -15352,9 +15358,12 @@ if aw.TabModule and aw.TabModule.Tabs then
 for _, tab in pairs(aw.TabModule.Tabs) do
 local lbl = tab.UIElements and tab.UIElements.Main and tab.UIElements.Main.Frame and tab.UIElements.Main.Frame.TextLabel
 if lbl then
+lbl.Visible = not collapsed
+if not collapsed then
 ts:Create(lbl, TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-TextTransparency = collapsed and 1 or (tab.Selected and 0 or 0.25)
+TextTransparency = tab.Selected and 0 or 0.25
 }):Play()
+end
 end
 end
 end
