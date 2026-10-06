@@ -848,6 +848,9 @@ end
 end
 
 function r.GetThemeProperty(u,v)
+if type(v)~="table"then
+return nil
+end
 local function getValue(x,z)
 local A=z[x]
 
@@ -4085,12 +4088,78 @@ TabBackgroundHover=Color3.fromHex"#241E1C",
 TabBackgroundActive=Color3.fromHex"#2E2522",
 TabTitle=Color3.fromHex"#F2ECE8",
 },
-["Mid Summer"]={Name="Mid Summer",Accent=aa:Gradient({["0"]={Color=Color3.fromHex"#FFD194",Transparency=0},["50"]={Color=Color3.fromHex"#FF7E5F",Transparency=0},["100"]={Color=Color3.fromHex"#FF5F6D",Transparency=0}},{Rotation=45}),Dialog=aa:Gradient({["0"]={Color=Color3.fromHex"#FFF3E0",Transparency=0},["50"]={Color=Color3.fromHex"#FFE0B2",Transparency=0},["100"]={Color=Color3.fromHex"#FFD194",Transparency=0}},{Rotation=45}),Outline=aa:Gradient({["0"]={Color=Color3.fromHex"#FF8C42",Transparency=0},["50"]={Color=Color3.fromHex"#FF7E5F",Transparency=0},["100"]={Color=Color3.fromHex"#FF6A88",Transparency=0}},{Rotation=45}),Text=aa:Gradient({["0"]={Color=Color3.fromHex"#6B4226",Transparency=0},["50"]={Color=Color3.fromHex"#8B4513",Transparency=0},["100"]={Color=Color3.fromHex"#A0522D",Transparency=0}},{Rotation=45}),Placeholder=aa:Gradient({["0"]={Color=Color3.fromHex"#D9B08C",Transparency=0},["50"]={Color=Color3.fromHex"#C68642",Transparency=0},["100"]={Color=Color3.fromHex"#B5651D",Transparency=0}},{Rotation=45}),Background=aa:Gradient({["0"]={Color=Color3.fromHex"#FFE5B4",Transparency=0},["50"]={Color=Color3.fromHex"#FFC87C",Transparency=0},["100"]={Color=Color3.fromHex"#FFAA5C",Transparency=0}},{Rotation=45}),Button=aa:Gradient({["0"]={Color=Color3.fromHex"#FFAA5C",Transparency=0},["50"]={Color=Color3.fromHex"#FF7E5F",Transparency=0},["100"]={Color=Color3.fromHex"#FF5F6D",Transparency=0}},{Rotation=45}),Icon=aa:Gradient({["0"]={Color=Color3.fromHex"#FF7F50",Transparency=0},["50"]={Color=Color3.fromHex"#FF6A88",Transparency=0},["100"]={Color=Color3.fromHex"#FF5F6D",Transparency=0}},{Rotation=45}),ElementBackground=Color3.fromHex"#FFE0B2",ElementBackgroundTransparency=0},
-["Lunar Moon"]={Name="Lunar Moon",Accent=aa:Gradient({["0"]={Color=Color3.fromHex"#232526",Transparency=0},["50"]={Color=Color3.fromHex"#636363",Transparency=0},["100"]={Color=Color3.fromHex"#E0E0E0",Transparency=0}},{Rotation=90}),Dialog=aa:Gradient({["0"]={Color=Color3.fromHex"#1C1C1C",Transparency=0},["50"]={Color=Color3.fromHex"#3A3A3A",Transparency=0},["100"]={Color=Color3.fromHex"#636363",Transparency=0}},{Rotation=90}),Outline=aa:Gradient({["0"]={Color=Color3.fromHex"#B0B0B0",Transparency=0},["50"]={Color=Color3.fromHex"#C0C0C0",Transparency=0},["100"]={Color=Color3.fromHex"#E0E0E0",Transparency=0}},{Rotation=90}),Text=aa:Gradient({["0"]={Color=Color3.fromHex"#FFFFFF",Transparency=0},["50"]={Color=Color3.fromHex"#D9D9D9",Transparency=0},["100"]={Color=Color3.fromHex"#BFBFBF",Transparency=0}},{Rotation=90}),Placeholder=aa:Gradient({["0"]={Color=Color3.fromHex"#A0A0A0",Transparency=0},["50"]={Color=Color3.fromHex"#B0B0B0",Transparency=0},["100"]={Color=Color3.fromHex"#C0C0C0",Transparency=0}},{Rotation=90}),Background=aa:Gradient({["0"]={Color=Color3.fromHex"#101010",Transparency=0},["50"]={Color=Color3.fromHex"#3A3A3A",Transparency=0},["100"]={Color=Color3.fromHex"#636363",Transparency=0}},{Rotation=90}),Button=aa:Gradient({["0"]={Color=Color3.fromHex"#3A3A3A",Transparency=0},["50"]={Color=Color3.fromHex"#636363",Transparency=0},["100"]={Color=Color3.fromHex"#A2A2A2",Transparency=0}},{Rotation=90}),Icon=aa:Gradient({["0"]={Color=Color3.fromHex"#C0C0C0",Transparency=0},["50"]={Color=Color3.fromHex"#E0E0E0",Transparency=0},["100"]={Color=Color3.fromHex"#FFFFFF",Transparency=0}},{Rotation=90}),ElementBackground=Color3.fromHex"#292929",ElementBackgroundTransparency=0},
-["Winter Frost"]={Name="Winter Frost",Accent=aa:Gradient({["0"]={Color=Color3.fromHex"#D0E8F2",Transparency=0},["50"]={Color=Color3.fromHex"#A0D4F2",Transparency=0},["100"]={Color=Color3.fromHex"#70C0F2",Transparency=0}},{Rotation=45}),Dialog=aa:Gradient({["0"]={Color=Color3.fromHex"#E0F7FF",Transparency=0},["50"]={Color=Color3.fromHex"#B0EFFF",Transparency=0},["100"]={Color=Color3.fromHex"#80E7FF",Transparency=0}},{Rotation=45}),Outline=aa:Gradient({["0"]={Color=Color3.fromHex"#70C0F2",Transparency=0},["50"]={Color=Color3.fromHex"#50B0E0",Transparency=0},["100"]={Color=Color3.fromHex"#30A0D0",Transparency=0}},{Rotation=45}),Text=aa:Gradient({["0"]={Color=Color3.fromHex"#0D3B66",Transparency=0},["50"]={Color=Color3.fromHex"#145DA0",Transparency=0},["100"]={Color=Color3.fromHex"#1E81B0",Transparency=0}},{Rotation=45}),Placeholder=aa:Gradient({["0"]={Color=Color3.fromHex"#7FB3D5",Transparency=0},["50"]={Color=Color3.fromHex"#5FA2C5",Transparency=0},["100"]={Color=Color3.fromHex"#3F91B5",Transparency=0}},{Rotation=45}),Background=aa:Gradient({["0"]={Color=Color3.fromHex"#E6F0FA",Transparency=0},["50"]={Color=Color3.fromHex"#CDE0F5",Transparency=0},["100"]={Color=Color3.fromHex"#B4D1F0",Transparency=0}},{Rotation=45}),Button=aa:Gradient({["0"]={Color=Color3.fromHex"#50B0E0",Transparency=0},["50"]={Color=Color3.fromHex"#30A0D0",Transparency=0},["100"]={Color=Color3.fromHex"#108FC0",Transparency=0}},{Rotation=45}),Icon=aa:Gradient({["0"]={Color=Color3.fromHex"#30A0D0",Transparency=0},["50"]={Color=Color3.fromHex"#108FC0",Transparency=0},["100"]={Color=Color3.fromHex"#0D81B0",Transparency=0}},{Rotation=45}),ElementBackground=Color3.fromHex"#D7EAF5",ElementBackgroundTransparency=0},
-["Elegant Night"]={Name="Elegant Night",Accent=aa:Gradient({["0"]={Color=Color3.fromHex"#3B0D5C",Transparency=0},["50"]={Color=Color3.fromHex"#6A1B9A",Transparency=0},["100"]={Color=Color3.fromHex"#9C27B0",Transparency=0}},{Rotation=45}),Dialog=aa:Gradient({["0"]={Color=Color3.fromHex"#1A001A",Transparency=0},["50"]={Color=Color3.fromHex"#3D003D",Transparency=0},["100"]={Color=Color3.fromHex"#6A006A",Transparency=0}},{Rotation=45}),Outline=aa:Gradient({["0"]={Color=Color3.fromHex"#9C27B0",Transparency=0},["50"]={Color=Color3.fromHex"#7B1FA2",Transparency=0},["100"]={Color=Color3.fromHex"#6A1B9A",Transparency=0}},{Rotation=45}),Text=aa:Gradient({["0"]={Color=Color3.fromHex"#FFFFFF",Transparency=0},["50"]={Color=Color3.fromHex"#E0E0E0",Transparency=0},["100"]={Color=Color3.fromHex"#C0C0C0",Transparency=0}},{Rotation=45}),Placeholder=aa:Gradient({["0"]={Color=Color3.fromHex"#B0A0B5",Transparency=0},["50"]={Color=Color3.fromHex"#9C8FA0",Transparency=0},["100"]={Color=Color3.fromHex"#7B6F8C",Transparency=0}},{Rotation=45}),Background=aa:Gradient({["0"]={Color=Color3.fromHex"#10001A",Transparency=0},["50"]={Color=Color3.fromHex"#1A0033",Transparency=0},["100"]={Color=Color3.fromHex"#30004D",Transparency=0}},{Rotation=45}),Button=aa:Gradient({["0"]={Color=Color3.fromHex"#6A1B9A",Transparency=0},["50"]={Color=Color3.fromHex"#9C27B0",Transparency=0},["100"]={Color=Color3.fromHex"#B55BC5",Transparency=0}},{Rotation=45}),Icon=aa:Gradient({["0"]={Color=Color3.fromHex"#9C27B0",Transparency=0},["50"]={Color=Color3.fromHex"#B55BC5",Transparency=0},["100"]={Color=Color3.fromHex"#D084E0",Transparency=0}},{Rotation=45}),ElementBackground=Color3.fromHex"#291638",ElementBackgroundTransparency=0},
-["Lunar Abyss"]={Name="Lunar Abyss",Accent=aa:Gradient({["0"]={Color=Color3.fromHex"#0D0D1A",Transparency=0},["50"]={Color=Color3.fromHex"#1A1A33",Transparency=0},["100"]={Color=Color3.fromHex"#2E2E5C",Transparency=0}},{Rotation=90}),Dialog=aa:Gradient({["0"]={Color=Color3.fromHex"#101026",Transparency=0},["50"]={Color=Color3.fromHex"#1A1A3D",Transparency=0},["100"]={Color=Color3.fromHex"#333366",Transparency=0}},{Rotation=90}),Outline=aa:Gradient({["0"]={Color=Color3.fromHex"#2E2E5C",Transparency=0},["50"]={Color=Color3.fromHex"#404080",Transparency=0},["100"]={Color=Color3.fromHex"#5050A0",Transparency=0}},{Rotation=90}),Text=aa:Gradient({["0"]={Color=Color3.fromHex"#A0A0FF",Transparency=0},["50"]={Color=Color3.fromHex"#C0C0FF",Transparency=0},["100"]={Color=Color3.fromHex"#E0E0FF",Transparency=0}},{Rotation=90}),Placeholder=aa:Gradient({["0"]={Color=Color3.fromHex"#6060A0",Transparency=0},["50"]={Color=Color3.fromHex"#8080C0",Transparency=0},["100"]={Color=Color3.fromHex"#A0A0E0",Transparency=0}},{Rotation=90}),Background=aa:Gradient({["0"]={Color=Color3.fromHex"#0A0A1A",Transparency=0},["50"]={Color=Color3.fromHex"#1A1A33",Transparency=0},["100"]={Color=Color3.fromHex"#2E2E5C",Transparency=0}},{Rotation=90}),Button=aa:Gradient({["0"]={Color=Color3.fromHex"#404080",Transparency=0},["50"]={Color=Color3.fromHex"#5050A0",Transparency=0},["100"]={Color=Color3.fromHex"#6060C0",Transparency=0}},{Rotation=90}),Icon=aa:Gradient({["0"]={Color=Color3.fromHex"#6060C0",Transparency=0},["50"]={Color=Color3.fromHex"#8080E0",Transparency=0},["100"]={Color=Color3.fromHex"#A0A0FF",Transparency=0}},{Rotation=90}),ElementBackground=Color3.fromHex"#20203D",ElementBackgroundTransparency=0},
-["Lunar Eclipse"]={Name="Lunar Eclipse",Accent=aa:Gradient({["0"]={Color=Color3.fromHex"#33001A",Transparency=0},["50"]={Color=Color3.fromHex"#660033",Transparency=0},["100"]={Color=Color3.fromHex"#99004D",Transparency=0}},{Rotation=45}),Dialog=aa:Gradient({["0"]={Color=Color3.fromHex"#1A0014",Transparency=0},["50"]={Color=Color3.fromHex"#330028",Transparency=0},["100"]={Color=Color3.fromHex"#66003F",Transparency=0}},{Rotation=45}),Outline=aa:Gradient({["0"]={Color=Color3.fromHex"#99004D",Transparency=0},["50"]={Color=Color3.fromHex"#CC3366",Transparency=0},["100"]={Color=Color3.fromHex"#FF6699",Transparency=0}},{Rotation=45}),Text=aa:Gradient({["0"]={Color=Color3.fromHex"#FFE6F0",Transparency=0},["50"]={Color=Color3.fromHex"#FFB3CC",Transparency=0},["100"]={Color=Color3.fromHex"#FF80A0",Transparency=0}},{Rotation=45}),Placeholder=aa:Gradient({["0"]={Color=Color3.fromHex"#CC6699",Transparency=0},["50"]={Color=Color3.fromHex"#FF99CC",Transparency=0},["100"]={Color=Color3.fromHex"#FFB3D9",Transparency=0}},{Rotation=45}),Background=aa:Gradient({["0"]={Color=Color3.fromHex"#1A0014",Transparency=0},["50"]={Color=Color3.fromHex"#330028",Transparency=0},["100"]={Color=Color3.fromHex"#66003F",Transparency=0}},{Rotation=45}),Button=aa:Gradient({["0"]={Color=Color3.fromHex"#66003F",Transparency=0},["50"]={Color=Color3.fromHex"#99004D",Transparency=0},["100"]={Color=Color3.fromHex"#CC3366",Transparency=0}},{Rotation=45}),Icon=aa:Gradient({["0"]={Color=Color3.fromHex"#99004D",Transparency=0},["50"]={Color=Color3.fromHex"#CC3366",Transparency=0},["100"]={Color=Color3.fromHex"#FF6699",Transparency=0}},{Rotation=45}),ElementBackground=Color3.fromHex"#361629",ElementBackgroundTransparency=0},
+["Mid Summer"]={
+Name="Mid Summer",
+Accent=aa:Gradient({["0"]={Color=Color3.fromHex"#FFD194",Transparency=0},["50"]={Color=Color3.fromHex"#FF7E5F",Transparency=0},["100"]={Color=Color3.fromHex"#FF5F6D",Transparency=0}},{Rotation=45}),
+Dialog=aa:Gradient({["0"]={Color=Color3.fromHex"#FFF3E0",Transparency=0},["50"]={Color=Color3.fromHex"#FFE0B2",Transparency=0},["100"]={Color=Color3.fromHex"#FFD194",Transparency=0}},{Rotation=45}),
+Outline=aa:Gradient({["0"]={Color=Color3.fromHex"#FF8C42",Transparency=0},["50"]={Color=Color3.fromHex"#FF7E5F",Transparency=0},["100"]={Color=Color3.fromHex"#FF6A88",Transparency=0}},{Rotation=45}),
+Text=aa:Gradient({["0"]={Color=Color3.fromHex"#6B4226",Transparency=0},["50"]={Color=Color3.fromHex"#8B4513",Transparency=0},["100"]={Color=Color3.fromHex"#A0522D",Transparency=0}},{Rotation=45}),
+Placeholder=aa:Gradient({["0"]={Color=Color3.fromHex"#D9B08C",Transparency=0},["50"]={Color=Color3.fromHex"#C68642",Transparency=0},["100"]={Color=Color3.fromHex"#B5651D",Transparency=0}},{Rotation=45}),
+Background=aa:Gradient({["0"]={Color=Color3.fromHex"#FFE5B4",Transparency=0},["50"]={Color=Color3.fromHex"#FFC87C",Transparency=0},["100"]={Color=Color3.fromHex"#FFAA5C",Transparency=0}},{Rotation=45}),
+Button=aa:Gradient({["0"]={Color=Color3.fromHex"#FFAA5C",Transparency=0},["50"]={Color=Color3.fromHex"#FF7E5F",Transparency=0},["100"]={Color=Color3.fromHex"#FF5F6D",Transparency=0}},{Rotation=45}),
+Icon=aa:Gradient({["0"]={Color=Color3.fromHex"#FF7F50",Transparency=0},["50"]={Color=Color3.fromHex"#FF6A88",Transparency=0},["100"]={Color=Color3.fromHex"#FF5F6D",Transparency=0}},{Rotation=45}),
+ElementBackground=Color3.fromHex"#FFE0B2",ElementBackgroundTransparency=0,
+},
+["Lunar Moon"]={
+Name="Lunar Moon",
+Accent=aa:Gradient({["0"]={Color=Color3.fromHex"#232526",Transparency=0},["50"]={Color=Color3.fromHex"#636363",Transparency=0},["100"]={Color=Color3.fromHex"#E0E0E0",Transparency=0}},{Rotation=90}),
+Dialog=aa:Gradient({["0"]={Color=Color3.fromHex"#1C1C1C",Transparency=0},["50"]={Color=Color3.fromHex"#3A3A3A",Transparency=0},["100"]={Color=Color3.fromHex"#636363",Transparency=0}},{Rotation=90}),
+Outline=aa:Gradient({["0"]={Color=Color3.fromHex"#B0B0B0",Transparency=0},["50"]={Color=Color3.fromHex"#C0C0C0",Transparency=0},["100"]={Color=Color3.fromHex"#E0E0E0",Transparency=0}},{Rotation=90}),
+Text=aa:Gradient({["0"]={Color=Color3.fromHex"#FFFFFF",Transparency=0},["50"]={Color=Color3.fromHex"#D9D9D9",Transparency=0},["100"]={Color=Color3.fromHex"#BFBFBF",Transparency=0}},{Rotation=90}),
+Placeholder=aa:Gradient({["0"]={Color=Color3.fromHex"#A0A0A0",Transparency=0},["50"]={Color=Color3.fromHex"#B0B0B0",Transparency=0},["100"]={Color=Color3.fromHex"#C0C0C0",Transparency=0}},{Rotation=90}),
+Background=aa:Gradient({["0"]={Color=Color3.fromHex"#101010",Transparency=0},["50"]={Color=Color3.fromHex"#3A3A3A",Transparency=0},["100"]={Color=Color3.fromHex"#636363",Transparency=0}},{Rotation=90}),
+Button=aa:Gradient({["0"]={Color=Color3.fromHex"#3A3A3A",Transparency=0},["50"]={Color=Color3.fromHex"#636363",Transparency=0},["100"]={Color=Color3.fromHex"#A2A2A2",Transparency=0}},{Rotation=90}),
+Icon=aa:Gradient({["0"]={Color=Color3.fromHex"#C0C0C0",Transparency=0},["50"]={Color=Color3.fromHex"#E0E0E0",Transparency=0},["100"]={Color=Color3.fromHex"#FFFFFF",Transparency=0}},{Rotation=90}),
+ElementBackground=Color3.fromHex"#292929",ElementBackgroundTransparency=0,
+},
+["Winter Frost"]={
+Name="Winter Frost",
+Accent=aa:Gradient({["0"]={Color=Color3.fromHex"#D0E8F2",Transparency=0},["50"]={Color=Color3.fromHex"#A0D4F2",Transparency=0},["100"]={Color=Color3.fromHex"#70C0F2",Transparency=0}},{Rotation=45}),
+Dialog=aa:Gradient({["0"]={Color=Color3.fromHex"#E0F7FF",Transparency=0},["50"]={Color=Color3.fromHex"#B0EFFF",Transparency=0},["100"]={Color=Color3.fromHex"#80E7FF",Transparency=0}},{Rotation=45}),
+Outline=aa:Gradient({["0"]={Color=Color3.fromHex"#70C0F2",Transparency=0},["50"]={Color=Color3.fromHex"#50B0E0",Transparency=0},["100"]={Color=Color3.fromHex"#30A0D0",Transparency=0}},{Rotation=45}),
+Text=aa:Gradient({["0"]={Color=Color3.fromHex"#0D3B66",Transparency=0},["50"]={Color=Color3.fromHex"#145DA0",Transparency=0},["100"]={Color=Color3.fromHex"#1E81B0",Transparency=0}},{Rotation=45}),
+Placeholder=aa:Gradient({["0"]={Color=Color3.fromHex"#7FB3D5",Transparency=0},["50"]={Color=Color3.fromHex"#5FA2C5",Transparency=0},["100"]={Color=Color3.fromHex"#3F91B5",Transparency=0}},{Rotation=45}),
+Background=aa:Gradient({["0"]={Color=Color3.fromHex"#E6F0FA",Transparency=0},["50"]={Color=Color3.fromHex"#CDE0F5",Transparency=0},["100"]={Color=Color3.fromHex"#B4D1F0",Transparency=0}},{Rotation=45}),
+Button=aa:Gradient({["0"]={Color=Color3.fromHex"#50B0E0",Transparency=0},["50"]={Color=Color3.fromHex"#30A0D0",Transparency=0},["100"]={Color=Color3.fromHex"#108FC0",Transparency=0}},{Rotation=45}),
+Icon=aa:Gradient({["0"]={Color=Color3.fromHex"#30A0D0",Transparency=0},["50"]={Color=Color3.fromHex"#108FC0",Transparency=0},["100"]={Color=Color3.fromHex"#0D81B0",Transparency=0}},{Rotation=45}),
+ElementBackground=Color3.fromHex"#D7EAF5",ElementBackgroundTransparency=0,
+},
+["Elegant Night"]={
+Name="Elegant Night",
+Accent=aa:Gradient({["0"]={Color=Color3.fromHex"#3B0D5C",Transparency=0},["50"]={Color=Color3.fromHex"#6A1B9A",Transparency=0},["100"]={Color=Color3.fromHex"#9C27B0",Transparency=0}},{Rotation=45}),
+Dialog=aa:Gradient({["0"]={Color=Color3.fromHex"#1A001A",Transparency=0},["50"]={Color=Color3.fromHex"#3D003D",Transparency=0},["100"]={Color=Color3.fromHex"#6A006A",Transparency=0}},{Rotation=45}),
+Outline=aa:Gradient({["0"]={Color=Color3.fromHex"#9C27B0",Transparency=0},["50"]={Color=Color3.fromHex"#7B1FA2",Transparency=0},["100"]={Color=Color3.fromHex"#6A1B9A",Transparency=0}},{Rotation=45}),
+Text=aa:Gradient({["0"]={Color=Color3.fromHex"#FFFFFF",Transparency=0},["50"]={Color=Color3.fromHex"#E0E0E0",Transparency=0},["100"]={Color=Color3.fromHex"#C0C0C0",Transparency=0}},{Rotation=45}),
+Placeholder=aa:Gradient({["0"]={Color=Color3.fromHex"#B0A0B5",Transparency=0},["50"]={Color=Color3.fromHex"#9C8FA0",Transparency=0},["100"]={Color=Color3.fromHex"#7B6F8C",Transparency=0}},{Rotation=45}),
+Background=aa:Gradient({["0"]={Color=Color3.fromHex"#10001A",Transparency=0},["50"]={Color=Color3.fromHex"#1A0033",Transparency=0},["100"]={Color=Color3.fromHex"#30004D",Transparency=0}},{Rotation=45}),
+Button=aa:Gradient({["0"]={Color=Color3.fromHex"#6A1B9A",Transparency=0},["50"]={Color=Color3.fromHex"#9C27B0",Transparency=0},["100"]={Color=Color3.fromHex"#B55BC5",Transparency=0}},{Rotation=45}),
+Icon=aa:Gradient({["0"]={Color=Color3.fromHex"#9C27B0",Transparency=0},["50"]={Color=Color3.fromHex"#B55BC5",Transparency=0},["100"]={Color=Color3.fromHex"#D084E0",Transparency=0}},{Rotation=45}),
+ElementBackground=Color3.fromHex"#291638",ElementBackgroundTransparency=0,
+},
+["Lunar Abyss"]={
+Name="Lunar Abyss",
+Accent=aa:Gradient({["0"]={Color=Color3.fromHex"#0D0D1A",Transparency=0},["50"]={Color=Color3.fromHex"#1A1A33",Transparency=0},["100"]={Color=Color3.fromHex"#2E2E5C",Transparency=0}},{Rotation=90}),
+Dialog=aa:Gradient({["0"]={Color=Color3.fromHex"#101026",Transparency=0},["50"]={Color=Color3.fromHex"#1A1A3D",Transparency=0},["100"]={Color=Color3.fromHex"#333366",Transparency=0}},{Rotation=90}),
+Outline=aa:Gradient({["0"]={Color=Color3.fromHex"#2E2E5C",Transparency=0},["50"]={Color=Color3.fromHex"#404080",Transparency=0},["100"]={Color=Color3.fromHex"#5050A0",Transparency=0}},{Rotation=90}),
+Text=aa:Gradient({["0"]={Color=Color3.fromHex"#A0A0FF",Transparency=0},["50"]={Color=Color3.fromHex"#C0C0FF",Transparency=0},["100"]={Color=Color3.fromHex"#E0E0FF",Transparency=0}},{Rotation=90}),
+Placeholder=aa:Gradient({["0"]={Color=Color3.fromHex"#6060A0",Transparency=0},["50"]={Color=Color3.fromHex"#8080C0",Transparency=0},["100"]={Color=Color3.fromHex"#A0A0E0",Transparency=0}},{Rotation=90}),
+Background=aa:Gradient({["0"]={Color=Color3.fromHex"#0A0A1A",Transparency=0},["50"]={Color=Color3.fromHex"#1A1A33",Transparency=0},["100"]={Color=Color3.fromHex"#2E2E5C",Transparency=0}},{Rotation=90}),
+Button=aa:Gradient({["0"]={Color=Color3.fromHex"#404080",Transparency=0},["50"]={Color=Color3.fromHex"#5050A0",Transparency=0},["100"]={Color=Color3.fromHex"#6060C0",Transparency=0}},{Rotation=90}),
+Icon=aa:Gradient({["0"]={Color=Color3.fromHex"#6060C0",Transparency=0},["50"]={Color=Color3.fromHex"#8080E0",Transparency=0},["100"]={Color=Color3.fromHex"#A0A0FF",Transparency=0}},{Rotation=90}),
+ElementBackground=Color3.fromHex"#20203D",ElementBackgroundTransparency=0,
+},
+["Lunar Eclipse"]={
+Name="Lunar Eclipse",
+Accent=aa:Gradient({["0"]={Color=Color3.fromHex"#33001A",Transparency=0},["50"]={Color=Color3.fromHex"#660033",Transparency=0},["100"]={Color=Color3.fromHex"#99004D",Transparency=0}},{Rotation=45}),
+Dialog=aa:Gradient({["0"]={Color=Color3.fromHex"#1A0014",Transparency=0},["50"]={Color=Color3.fromHex"#330028",Transparency=0},["100"]={Color=Color3.fromHex"#66003F",Transparency=0}},{Rotation=45}),
+Outline=aa:Gradient({["0"]={Color=Color3.fromHex"#99004D",Transparency=0},["50"]={Color=Color3.fromHex"#CC3366",Transparency=0},["100"]={Color=Color3.fromHex"#FF6699",Transparency=0}},{Rotation=45}),
+Text=aa:Gradient({["0"]={Color=Color3.fromHex"#FFE6F0",Transparency=0},["50"]={Color=Color3.fromHex"#FFB3CC",Transparency=0},["100"]={Color=Color3.fromHex"#FF80A0",Transparency=0}},{Rotation=45}),
+Placeholder=aa:Gradient({["0"]={Color=Color3.fromHex"#CC6699",Transparency=0},["50"]={Color=Color3.fromHex"#FF99CC",Transparency=0},["100"]={Color=Color3.fromHex"#FFB3D9",Transparency=0}},{Rotation=45}),
+Background=aa:Gradient({["0"]={Color=Color3.fromHex"#1A0014",Transparency=0},["50"]={Color=Color3.fromHex"#330028",Transparency=0},["100"]={Color=Color3.fromHex"#66003F",Transparency=0}},{Rotation=45}),
+Button=aa:Gradient({["0"]={Color=Color3.fromHex"#66003F",Transparency=0},["50"]={Color=Color3.fromHex"#99004D",Transparency=0},["100"]={Color=Color3.fromHex"#CC3366",Transparency=0}},{Rotation=45}),
+Icon=aa:Gradient({["0"]={Color=Color3.fromHex"#99004D",Transparency=0},["50"]={Color=Color3.fromHex"#CC3366",Transparency=0},["100"]={Color=Color3.fromHex"#FF6699",Transparency=0}},{Rotation=45}),
+ElementBackground=Color3.fromHex"#361629",ElementBackgroundTransparency=0,
+},
 Dark={
 Name="Dark",
 
@@ -17325,7 +17394,11 @@ end
 
 local b=true
 
-local d=aa.Themes[aA.Theme or"Dark"]
+local d=aa.Themes[aA.Theme or"Dark"]or aa.Themes.Dark
+if not d then
+error("WindUI: no valid theme found for '"..tostring(aA.Theme).."'")
+end
+aa.Theme=d
 
 
 as.SetTheme(d)
