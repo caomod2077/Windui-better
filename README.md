@@ -286,124 +286,165 @@ Window:SetBackgroundBlur(false) -- Disable and remove the blur effect
 local WindUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/caomod2077/Windui-better/main/windui.lua"))()
 
 local Window = WindUI:CreateWindow({
-    Title = "Ultimate Hub",
-    Author = "by Developer",
-    Theme = "Dark",
-    Size = UDim2.fromOffset(840, 540),
-    TwoColumns = true, -- Modern 2-column layout
-    BackgroundBlur = false, -- Optional; toggle at runtime with Window:SetBackgroundBlur(true/false)
-    Glow = Color3.fromRGB(0, 145, 255),
+    Title = "WindUI Feature Demo",
+    Author = "Example",
+    Folder = "WindUIFeatureDemo",
+    Theme = "Mid Summer", -- Also try Lunar Moon, Winter Frost, Elegant Night, Lunar Abyss, Lunar Eclipse
+    Size = UDim2.fromOffset(860, 580),
+    TwoColumns = true,
+    BackgroundBlur = false,
     Icon = "rbxassetid://82225829203828",
     IconAnimation = "Spin",
     SidebarBanner = {
         Image = "rbxassetid://133610205520685",
-        Height = 75,
-        Title = "v2.0 Community",
+        Height = 72,
+        Title = "WindUI Demo",
     },
 })
 
--- Topbar Watermark
-local watermark = Window:Watermark({
-    Title = "Ultimate Hub",
-    FPS = true,
-    Ping = true,
-})
+WindUI:SetNotificationUpper(true)
+WindUI:SetDisplayOrder(999)
+Window:EnableSounds(true)
 
--- Navigation Tabs
-local MainTab = Window:Tab({ Title = "Main", Icon = "terminal" })
+local watermark = Window:Watermark({ Title = "WindUI Demo", FPS = true, Ping = true })
+local MainTab = Window:Tab({ Title = "Features", Icon = "terminal" })
 local UpdatesTab = Window:Tab({ Title = "Updates", Icon = "zap" })
 local SettingsTab = Window:Tab({ Title = "Settings", Icon = "settings" })
 
--- In-Tab Real-time Search
-MainTab:AddSearch("Search features...")
+MainTab:AddSearch("Search controls")
 
--- Left Column Card
-local FarmCard = MainTab:Card({
-    Title = "Auto Farming",
-    Icon = "wheat",
+local Controls = MainTab:Card({
+    Title = "Controls",
+    Icon = "sliders-horizontal",
     Side = "Left",
-    Badge = "HOT",
-    BadgeColor = Color3.fromRGB(249, 115, 22),
+    Badge = "DEMO",
+    BadgeColor = Color3.fromRGB(255, 126, 95),
 })
 
-FarmCard:Toggle({
-    Title = "Auto Farm Mobs",
-    Desc = "Attacks nearest enemies automatically",
-    Tag = "OP",
-    TagColor = Color3.fromRGB(239, 68, 68),
-    Value = true,
-    Callback = function(v)
-        print("Auto Farm:", v)
+Controls:Toggle({
+    Title = "Enable feature",
+    Desc = "Toggle callback example",
+    Tag = "LIVE",
+    Value = false,
+    Callback = function(value)
+        print("Enabled:", value)
     end,
 })
 
-FarmCard:Slider({
-    Title = "Attack Distance",
-    Value = 25,
-    Min = 5,
+Controls:Slider({
+    Title = "Intensity",
+    Value = 35,
+    Min = 0,
     Max = 100,
-    Callback = function(v)
-        print("Distance:", v)
+    Callback = function(value)
+        print("Intensity:", value)
     end,
 })
 
-FarmCard:HoldButton({
-    Title = "Emergency Reset",
-    Desc = "Hold 2s to clear all aggro",
-    HoldTime = 2,
+Controls:Dropdown({
+    Title = "Mode",
+    Values = { "Balanced", "Fast", "Precise" },
+    Value = "Balanced",
+    Callback = function(value)
+        print("Mode:", value)
+    end,
+})
+
+Controls:Input({
+    Title = "Text input",
+    Placeholder = "Type something",
+    Callback = function(value)
+        print("Input:", value)
+    end,
+})
+
+Controls:Button({
+    Title = "Show notification",
     Callback = function()
-        Window:Toast({ Title = "Reset", Content = "Aggro cleared!" })
+        WindUI:Notify({ Title = "WindUI", Content = "Button pressed", Duration = 4 })
     end,
 })
 
--- Right Column Card
-local PlayerCard = MainTab:Card({
-    Title = "Player Modifications",
-    Icon = "user",
-    Side = "Right",
+Controls:HoldButton({
+    Title = "Hold to confirm",
+    HoldTime = 1.5,
+    Callback = function()
+        WindUI:Notify({ Title = "Confirmed", Content = "Hold completed", Duration = 3 })
+    end,
 })
 
-PlayerCard:Toggle({
-    Title = "Infinite Stamina",
-    Value = true,
-})
+local Info = MainTab:Card({ Title = "Status", Icon = "activity", Side = "Right" })
+Info:Paragraph({ Title = "Ready", Content = "This card is independent of any game-specific logic." })
+Info:Keybind({ Title = "Toggle window", Value = "RightControl" })
 
-PlayerCard:Dropdown({
-    Title = "Speed Mode",
-    Values = { "Normal", "Fast", "Insane" },
-    Value = "Fast",
-})
-
--- Countdown in Updates Tab
-UpdatesTab:Countdown({
-    Title = "Season 2 Starts In",
-    Seconds = 86400,
-})
-
+UpdatesTab:Countdown({ Title = "Demo countdown", Seconds = 3600 })
 UpdatesTab:Changelog({
-    Version = "2.0.0",
-    Items = {
-        "+ Modern 2-column card layout",
-        "+ HoldButton and Countdown elements",
-        "+ Tag pills on all controls",
-        "- Fixed window scaling bugs",
-    },
+    Version = "1.0.0",
+    Items = { "+ Built-in custom themes", "+ Search and two-column cards", "+ Runtime appearance controls" },
 })
 
--- Settings Tab
-local InterfaceSection = SettingsTab:Section({ Title = "Interface Controls" })
-
-InterfaceSection:Button({
-    Title = "Toggle Sidebar Mode",
+local Interface = SettingsTab:Section({ Title = "Interface" })
+Interface:Dropdown({
+    Title = "Theme",
+    Values = { "Dark", "Obsidian", "Light", "Mid Summer", "Lunar Moon", "Winter Frost", "Elegant Night", "Lunar Abyss", "Lunar Eclipse" },
+    Value = "Mid Summer",
+    Callback = function(theme)
+        WindUI:SetTheme(theme)
+    end,
+})
+Interface:Toggle({
+    Title = "Background blur",
+    Value = false,
+    Callback = function(value)
+        Window:SetBackgroundBlur(value)
+    end,
+})
+Interface:Toggle({
+    Title = "Watermark",
+    Value = true,
+    Callback = function(value)
+        watermark:SetVisible(value)
+    end,
+})
+Interface:Toggle({
+    Title = "Compact sidebar",
+    Value = false,
+    Callback = function(value)
+        Window:ToggleSidebar(value)
+    end,
+})
+Interface:Button({
+    Title = "Change accent",
     Callback = function()
-        Window:ToggleSidebar()
+        Window:SetColor({ Accent = Color3.fromRGB(0, 200, 160) })
+    end,
+})
+Interface:Button({
+    Title = "Open dialog",
+    Callback = function()
+        Window:Dialog({
+            Title = "Demo dialog",
+            Content = "Dialog controls can be added here.",
+            Buttons = {
+                { Title = "Close", Callback = function() end },
+            },
+        })
     end,
 })
 
-InterfaceSection:Button({
-    Title = "Change Accent Color",
+local Config = SettingsTab:Section({ Title = "Configuration" })
+local ConfigManager = Window.ConfigManager
+local DemoConfig = ConfigManager:CreateConfig("demo")
+Config:Button({
+    Title = "Save config",
     Callback = function()
-        Window:SetColor({ Accent = Color3.fromRGB(0, 255, 170) })
+        DemoConfig:Save()
+    end,
+})
+Config:Button({
+    Title = "Load config",
+    Callback = function()
+        DemoConfig:Load()
     end,
 })
 ```
@@ -416,7 +457,6 @@ InterfaceSection:Button({
 |---|---|
 | `Dark` | Standard clean modern dark theme |
 | `Obsidian` | Deep charcoal base with electric blue accents |
-| `BigFroot` | Warm dark obsidian with vibrant orange accents |
 | `Light` | Clean bright daytime theme |
 | `Rose` | Elegant wine & dark rose palette |
 | `Plant` | Deep forest green with emerald accents |
@@ -427,6 +467,12 @@ InterfaceSection:Button({
 | `Amber` | Warm amber gradient theme |
 | `Midnight` | Navy and deep royal blue |
 | `MonokaiPro` | Developer-favorite Monokai Pro colors |
+| `Mid Summer` | Warm coral and sunset gradients |
+| `Lunar Moon` | Monochrome silver gradients |
+| `Winter Frost` | Cool ice-blue gradients |
+| `Elegant Night` | Deep violet gradients |
+| `Lunar Abyss` | Dark indigo gradients |
+| `Lunar Eclipse` | Deep rose and magenta gradients |
 
 ---
 
