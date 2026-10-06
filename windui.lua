@@ -14349,12 +14349,13 @@ local compactViewport = isMobileDevice or (al and al.ViewportSize and al.Viewpor
 aw.MinSize = av.MinSize or Vector2.new(460, 320)
 aw.MaxSize = av.MaxSize or Vector2.new(2560, 1600)
 
--- Sleek, balanced PC dimensions (720x480) vs mobile (780x500)
+-- Compact viewports use a smaller logical form so controls remain readable after scaling.
 local defaultW = compactViewport and 560 or (isMobileDevice and 780 or 720)
 local defaultH = isMobileDevice and 500 or 470
 
 local ax = aw.Size or UDim2.new(0, defaultW, 0, defaultH)
-local windowWidth = compactViewport and ax.X.Offset > 0 and math.min(ax.X.Offset, 560) or ax.X.Offset
+local requestedWidth = ax.X.Offset > 0 and ax.X.Offset or defaultW
+local windowWidth = compactViewport and math.min(requestedWidth, 560) or requestedWidth
 
 aw.Size = UDim2.new(
 ax.X.Scale,
