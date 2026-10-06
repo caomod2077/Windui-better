@@ -12567,7 +12567,7 @@ Selected=false,
 Index=nil,
 Parent=ap.Parent,
 Window=Window,
-TwoColumns=(ap.TwoColumns ~= nil and ap.TwoColumns) or (Window and (Window.TwoColumns or Window.Columns == 2)) or false,
+TwoColumns=not Window.CompactLayout and ((ap.TwoColumns ~= nil and ap.TwoColumns) or (Window and (Window.TwoColumns or Window.Columns == 2)) or false),
 UIElements={},
 Elements={},
 ContainerFrame=nil,
@@ -14344,19 +14344,21 @@ aw.IsMobile = isMobileDevice
 if isMobileDevice then
 aw.IsPC = false
 end
+local compactViewport = isMobileDevice or (al and al.ViewportSize and al.ViewportSize.X > 0 and al.ViewportSize.X <= 600) or false
 
 aw.MinSize = av.MinSize or Vector2.new(460, 320)
 aw.MaxSize = av.MaxSize or Vector2.new(2560, 1600)
 
 -- Sleek, balanced PC dimensions (720x480) vs mobile (780x500)
-local defaultW = isMobileDevice and 780 or 720
+local defaultW = compactViewport and 560 or (isMobileDevice and 780 or 720)
 local defaultH = isMobileDevice and 500 or 470
 
 local ax = aw.Size or UDim2.new(0, defaultW, 0, defaultH)
+local windowWidth = compactViewport and ax.X.Offset > 0 and math.min(ax.X.Offset, 560) or ax.X.Offset
 
 aw.Size = UDim2.new(
 ax.X.Scale,
-math.clamp(ax.X.Offset, aw.MinSize.X, aw.MaxSize.X),
+math.clamp(windowWidth, aw.MinSize.X, aw.MaxSize.X),
 ax.Y.Scale,
 math.clamp(ax.Y.Offset, aw.MinSize.Y, aw.MaxSize.Y)
 )
@@ -14365,9 +14367,10 @@ aw.TwoColumns = (av.TwoColumns == true) or (av.Columns == 2) or false
 aw.Columns = aw.TwoColumns and 2 or (av.Columns or 1)
 aw.BackgroundBlur = av.BackgroundBlur == true
 aw.Glow = av.Glow or av.GlowColor
+aw.CompactLayout = compactViewport
 
 aw.UICorner=aw.Radius
-aw.SideBarWidth=isMobileDevice and 160 or 175
+aw.SideBarWidth=aw.CompactLayout and math.min(av.SideBarWidth or 175,112) or (av.SideBarWidth or 175)
 
 aw.TopBarButtonIconSize=aw.TopBarButtonIconSize or(aw.Topbar.ButtonsType=="Mac"and 11 or 16)
 
@@ -15477,6 +15480,7 @@ return aw
 end
 
 function aw.SetSidebarBanner(self, bConfig)
+if aw.CompactLayout then return end
 bConfig = bConfig or {}
 local bImg = bConfig.Image or bConfig[1] or ""
 local bHeight = tonumber(bConfig.Height) or 90
@@ -16216,7 +16220,7 @@ if isPhone then
 local targetH = view.Y * 0.84
 local targetW = view.X * 0.80
 local fit = math.min(targetH / winH, targetW / winW)
-return math.clamp(fit, 0.45, 0.78)
+return math.clamp(fit, 0.25, 0.78)
 else
 -- On PC: Keep standard 1.0 scale! Only downscale if screen is tiny
 local availW = math.max(view.X - 50, 100)
@@ -16235,7 +16239,7 @@ if aw.AutoScale and al and al.ViewportSize and al.ViewportSize.Y > 50 then
 local best = CalculateBestScale()
 targetScale = math.min(targetScale, best)
 end
-targetScale = math.clamp(targetScale, 0.40, 1.25)
+targetScale = math.clamp(targetScale, 0.25, 1.25)
 av.WindUI.UIScale=targetScale
 if av.WindUI.UIScaleObj then
 ap(av.WindUI.UIScaleObj,0.18,{Scale=targetScale},Enum.EasingStyle.Quad,Enum.EasingDirection.Out):Play()
