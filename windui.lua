@@ -11661,15 +11661,20 @@ New = function(self, cfg)
 local btnModule = a.load'E'
 local cb = cfg.Callback or function() end
 local holdDuration = tonumber(cfg.HoldTime) or 1.5
-if not cfg.Desc then
-cfg.Desc = "Hold for " .. tostring(holdDuration) .. "s"
+local buttonConfig = {}
+for key, value in pairs(cfg) do
+buttonConfig[key] = value
 end
-if not cfg.Tag then
-cfg.Tag = "HOLD"
-cfg.TagColor = Color3.fromRGB(249, 115, 22)
+buttonConfig.Callback = nil
+if not cfg.Desc then
+buttonConfig.Desc = "Hold for " .. tostring(holdDuration) .. "s"
+end
+if not buttonConfig.Tag then
+buttonConfig.Tag = "HOLD"
+buttonConfig.TagColor = Color3.fromRGB(249, 115, 22)
 end
 
-local typeName, btn = btnModule:New(cfg)
+local typeName, btn = btnModule:New(buttonConfig)
 
 local ef = btn and (btn.ElementFrame or (btn.ButtonFrame and btn.ButtonFrame.UIElements and btn.ButtonFrame.UIElements.Main))
 if ef then
@@ -15909,6 +15914,21 @@ end
 if v then
 v.Size=G
 end
+end
+
+function aw.SetBackgroundBlur(C, enabled)
+aw.BackgroundBlur = enabled == true
+local lighting = game:GetService("Lighting")
+local blur = lighting:FindFirstChild("WindUI_BackgroundBlur")
+if aw.BackgroundBlur and not aw.Closed then
+blur = blur or Instance.new("BlurEffect")
+blur.Name = "WindUI_BackgroundBlur"
+blur.Size = 16
+blur.Parent = lighting
+elseif not aw.BackgroundBlur and blur then
+blur:Destroy()
+end
+return aw
 end
 
 function aw.Open(C)

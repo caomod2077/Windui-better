@@ -18,7 +18,7 @@ local Window = WindUI:CreateWindow({
     Theme = "Dark",
     Size = UDim2.fromOffset(800, 520),
     TwoColumns = true, -- Enable modern 2-column card layout (optional, default is false)
-    BackgroundBlur = true, -- Automatically blurs background when window is open
+    BackgroundBlur = false, -- Optional; can also be changed at runtime
     Glow = Color3.fromRGB(0, 145, 255), -- Glowing neon window outline
     IconAnimation = "Spin", -- "Spin" | "Pulse" | "Rainbow"
     SidebarBanner = {
@@ -27,6 +27,13 @@ local Window = WindUI:CreateWindow({
         Title = "Hub Version",
     },
 })
+```
+
+`BackgroundBlur` is disabled by default in the showcase because some users find it distracting. Enable or disable it at runtime without recreating the window:
+
+```lua
+Window:SetBackgroundBlur(true)  -- Enable while the window is open
+Window:SetBackgroundBlur(false) -- Disable and remove the blur effect
 ```
 
 ---
@@ -284,7 +291,7 @@ local Window = WindUI:CreateWindow({
     Theme = "Dark",
     Size = UDim2.fromOffset(840, 540),
     TwoColumns = true, -- Modern 2-column layout
-    BackgroundBlur = true,
+    BackgroundBlur = false, -- Optional; toggle at runtime with Window:SetBackgroundBlur(true/false)
     Glow = Color3.fromRGB(0, 145, 255),
     Icon = "rbxassetid://82225829203828",
     IconAnimation = "Spin",
