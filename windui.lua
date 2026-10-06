@@ -11690,12 +11690,29 @@ fillCorner.CornerRadius = UDim.new(0, 10)
 fillCorner.Parent = fillBar
 
 local holding = false
+local holdGeneration = 0
+local activeInputType
 local ts = game:GetService("TweenService")
+local userInputService = game:GetService("UserInputService")
 local fillTween
+
+local function cancelHold()
+if holding then
+holding = false
+holdGeneration += 1
+activeInputType = nil
+if fillTween then fillTween:Cancel() end
+ts:Create(fillBar, TweenInfo.new(0.18, Enum.EasingStyle.Quad), { Size = UDim2.new(0, 0, 1, 0) }):Play()
+end
+end
 
 ef.InputBegan:Connect(function(input)
 if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+cancelHold()
+holdGeneration += 1
+local generation = holdGeneration
 holding = true
+activeInputType = input.UserInputType
 fillBar.Size = UDim2.new(0, 0, 1, 0)
 fillBar.BackgroundTransparency = 0.6
 fillTween = ts:Create(fillBar, TweenInfo.new(holdDuration, Enum.EasingStyle.Linear), {
@@ -11704,7 +11721,9 @@ Size = UDim2.new(1, 0, 1, 0)
 fillTween:Play()
 task.spawn(function()
 task.wait(holdDuration)
-if holding then
+if holding and generation == holdGeneration and activeInputType == input.UserInputType then
+holding = false
+activeInputType = nil
 pcall(cb)
 fillBar.BackgroundTransparency = 0.25
 ts:Create(fillBar, TweenInfo.new(0.3, Enum.EasingStyle.Quad), { BackgroundTransparency = 1 }):Play()
@@ -11715,16 +11734,13 @@ end)
 end
 end)
 
-local function cancelHold()
-if holding then
-holding = false
-if fillTween then fillTween:Cancel() end
-ts:Create(fillBar, TweenInfo.new(0.18, Enum.EasingStyle.Quad), { Size = UDim2.new(0, 0, 1, 0) }):Play()
-end
-end
-
 ef.InputEnded:Connect(cancelHold)
 ef.MouseLeave:Connect(cancelHold)
+userInputService.InputEnded:Connect(function(input)
+if input.UserInputType == activeInputType then
+cancelHold()
+end
+end)
 end
 return "HoldButton", btn
 end,
