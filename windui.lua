@@ -14542,7 +14542,7 @@ av.WindUI
 end
 
 aw.UIElements.MainBar=ao("Frame",{
-Size=UDim2.new(1,-aw.UIElements.SideBarContainer.AbsoluteSize.X,1,-aw.Topbar.Height),
+Size=UDim2.new(1,-aw.SideBarWidth,1,-aw.Topbar.Height),
 Position=UDim2.new(1,0,1,0),
 AnchorPoint=Vector2.new(1,1),
 BackgroundTransparency=1,
@@ -14612,7 +14612,7 @@ end
 d=ao("TextButton",{
 Size=UDim2.new(
 0,
-aw.UIElements.SideBarContainer.AbsoluteSize.X-(aw.UIPadding/2),
+aw.SideBarWidth-(aw.UIPadding/2),
 0,
 42+aw.UIPadding
 ),
