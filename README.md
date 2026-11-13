@@ -1,13 +1,14 @@
-# 🍃 WindUI-Better
+# WindUI-Better
 
-> **An enhanced, modern, community-driven edition of WindUI for Roblox.**  
-> Built with customizable 2-column card layouts, frosted glass aesthetics, live FPS/Ping watermarks, in-tab search filtering, interactive notifications, animated icons, and community-requested features.
+[English](README.md) | [Tiếng Việt](README_VI.md)
 
-Original library created by **Footagesus**. Enhanced, maintained, and expanded by **caomod2077** and the WindUI community.
+An enhanced edition of WindUI for Roblox with support for two-column card layouts, in-tab search filtering, built-in gradient themes, watermark stats, tab access control, and runtime window customization.
+
+Original library by Footagesus. Maintained and expanded by caomod2077.
 
 ---
 
-## ⚡ Quick Start
+## Quick Start
 
 ```lua
 local WindUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/caomod2077/Windui-better/main/windui.lua"))()
@@ -17,9 +18,9 @@ local Window = WindUI:CreateWindow({
     Author = "by Creator",
     Theme = "Dark",
     Size = UDim2.fromOffset(800, 520),
-    TwoColumns = true, -- Enable modern 2-column card layout (optional, default is false)
-    BackgroundBlur = false, -- Optional; can also be changed at runtime
-    Glow = Color3.fromRGB(0, 145, 255), -- Glowing neon window outline
+    TwoColumns = true, -- Optional 2-column card layout (default: false)
+    BackgroundBlur = false, -- Optional background blur (default: false)
+    Glow = Color3.fromRGB(0, 145, 255),
     IconAnimation = "Spin", -- "Spin" | "Pulse" | "Rainbow"
     SidebarBanner = {
         Image = "rbxassetid://133610205520685",
@@ -29,31 +30,30 @@ local Window = WindUI:CreateWindow({
 })
 ```
 
-`BackgroundBlur` is disabled by default in the showcase because some users find it distracting. Enable or disable it at runtime without recreating the window:
+Background blur can also be toggled at runtime without recreating the window:
 
 ```lua
-Window:SetBackgroundBlur(true)  -- Enable while the window is open
-Window:SetBackgroundBlur(false) -- Disable and remove the blur effect
+Window:SetBackgroundBlur(true)
+Window:SetBackgroundBlur(false)
 ```
 
 ---
 
-## 🌟 Visual Feature Showcase
+## Features and API Reference
 
-### 1. 🔲 Modern 2-Column Card Layout & Frosted Glass (`TwoColumns`)
+### Two-Column Card Layout (TwoColumns)
 
-- **Universal compatibility**: By default, `TwoColumns = false`, preserving the traditional 1-column layout for existing scripts.
-- Set `TwoColumns = true` in `CreateWindow` to automatically alternate sections into Left & Right columns.
-- **Frosted Glass Styling**: Cards feature a semi-transparent appearance (`0.93` transparency) with clean outlines, allowing your background gradients to shine through cleanly.
-- **Per-Tab Override**: A specific tab can enable or disable 2-column mode:
+By default, `TwoColumns = false` keeps the standard single-column layout. When enabled in `CreateWindow`, sections alternate between left and right columns.
+
+- Override two-column mode per tab:
   ```lua
   local SingleColTab = Window:Tab({ Title = "Info", TwoColumns = false })
   ```
-- **Per-Section Override**: Use `FullWidth = true` to force a section to stretch across both columns:
+- Make a section span both columns:
   ```lua
   Tab:Section({ Title = "Full Width Section", FullWidth = true })
   ```
-- **Explicit Side Placement**: You can explicitly pin cards to the left or right:
+- Explicitly assign cards to a side:
   ```lua
   local LeftCard = Tab:Card({ Title = "Farming", Side = "Left" })
   local RightCard = Tab:Card({ Title = "Combat", Side = "Right" })
@@ -61,33 +61,36 @@ Window:SetBackgroundBlur(false) -- Disable and remove the blur effect
 
 ---
 
-### 2. 📊 Live Watermark & Server Stats (`Window:Watermark`)
+### Watermark and Stats (Window:Watermark)
 
-- Display real-time **FPS**, **Ping (ms)**, and an active online status badge directly on the topbar:
-  ```lua
-  local watermark = Window:Watermark({
-      Title = "Script Hub",
-      FPS = true,
-      Ping = true,
-  })
-  watermark:SetTitle("Custom Hub")
-  watermark:SetVisible(true)
-  ```
+Displays an FPS and Ping counter on the window topbar:
 
----
+```lua
+local watermark = Window:Watermark({
+    Title = "Script Hub",
+    FPS = true,
+    Ping = true,
+})
 
-### 3. 🔍 In-Tab Real-Time Feature Search (`Tab:AddSearch`)
-
-- Add a live search bar inside any tab to filter cards and features dynamically as the user types:
-  ```lua
-  MainTab:AddSearch("Search features in Main...")
-  ```
+watermark:SetTitle("Custom Title")
+watermark:SetVisible(true)
+```
 
 ---
 
-### 4. 🖼️ Sidebar Banners & Tab Banners
+### In-Tab Search (Tab:AddSearch)
 
-- **Sidebar Banner**: Header banner above the sidebar tabs list:
+Adds a real-time search input inside a tab to filter cards and elements by title:
+
+```lua
+MainTab:AddSearch("Search features...")
+```
+
+---
+
+### Sidebar and Tab Banners
+
+- Header banner above the sidebar tab list:
   ```lua
   Window:SetSidebarBanner({
       Image = "rbxassetid://133610205520685",
@@ -95,7 +98,7 @@ Window:SetBackgroundBlur(false) -- Disable and remove the blur effect
       Title = "Welcome",
   })
   ```
-- **In-Tab Banner**: Prominent visual banner at the top of a tab:
+- Banner at the top of a specific tab:
   ```lua
   DiscordTab:Banner({
       Image = "rbxassetid://133610205520685",
@@ -107,59 +110,61 @@ Window:SetBackgroundBlur(false) -- Disable and remove the blur effect
 
 ---
 
-### 5. 🏷️ Tag Pills on All Controls
+### Tag Badges on Controls
 
-- Every control (`Button`, `Toggle`, `Slider`, `Dropdown`, `Input`, `Paragraph`) supports visual tag badges:
-  ```lua
-  Tab:Toggle({
-      Title = "Auto Farm",
-      Tag = "HOT",
-      TagColor = Color3.fromRGB(249, 115, 22),
-      Value = true,
-      Callback = function(v) end,
-  })
-  
-  Tab:Button({
-      Title = "Instant Kill",
-      Tag = "OP",
-      TagColor = Color3.fromRGB(239, 68, 68),
-      Callback = function() end,
-  })
-  ```
+All standard controls (`Button`, `Toggle`, `Slider`, `Dropdown`, `Input`, `Paragraph`) support pill badges:
 
----
+```lua
+Tab:Toggle({
+    Title = "Auto Farm",
+    Tag = "HOT",
+    TagColor = Color3.fromRGB(249, 115, 22),
+    Value = true,
+    Callback = function(v) end,
+})
 
-### 6. ⏳ HoldButton Component (Safety Confirmation)
-
-- A safety confirmation button requiring the user to press and hold for $N$ seconds. Features an animated filling green progress bar to prevent accidental clicks:
-  ```lua
-  Tab:HoldButton({
-      Title = "Emergency Server Reset",
-      Desc = "Hold 2 seconds to activate",
-      HoldTime = 2,
-      Tag = "HOLD",
-      TagColor = Color3.fromRGB(239, 68, 68),
-      Callback = function()
-          print("Action confirmed!")
-      end,
-  })
-  ```
+Tab:Button({
+    Title = "Quick Reset",
+    Tag = "ACTION",
+    TagColor = Color3.fromRGB(239, 68, 68),
+    Callback = function() end,
+})
+```
 
 ---
 
-### 7. 📋 Changelog & ⏱️ Live Event Countdown Components
+### HoldButton (Hold to Confirm)
 
-- **Countdown**: An automated countdown clock (`dd : hh : mm : ss`) that ticks every second and fires a callback upon completion:
+Requires holding down the button for a set duration before firing the callback:
+
+```lua
+Tab:HoldButton({
+    Title = "Emergency Reset",
+    Desc = "Hold for 2 seconds to confirm",
+    HoldTime = 2,
+    Tag = "HOLD",
+    TagColor = Color3.fromRGB(239, 68, 68),
+    Callback = function()
+        print("Confirmed")
+    end,
+})
+```
+
+---
+
+### Changelog and Countdown
+
+- Automated countdown timer:
   ```lua
   Tab:Countdown({
-      Title = "Limited Event Ends In",
-      Seconds = 86400, -- Countdown from 24 hours
+      Title = "Event Ends In",
+      Seconds = 86400,
       OnEnd = function()
-          print("Countdown completed!")
+          print("Event ended")
       end,
   })
   ```
-- **Changelog**: A beautifully formatted update log element with automatic color-coded markers (`+` Green, `-` Red, `*` Blue):
+- Formatted update log (`+` green, `-` red, `*` blue):
   ```lua
   Tab:Changelog({
       Version = "2.0.0",
@@ -167,120 +172,133 @@ Window:SetBackgroundBlur(false) -- Disable and remove the blur effect
           "+ Added 2-column card layout",
           "+ Added HoldButton and Countdown",
           "- Fixed memory leaks in loops",
-          "* Upgraded animation smoothness",
+          "* Updated theme handling",
       },
   })
   ```
 
 ---
 
-### 8. 🔔 Interactive Notifications with Action Buttons & Progress
+### Notifications (WindUI:Notify)
 
-- `WindUI:Notify` supports interactive action buttons and a live progress bar:
-  ```lua
-  WindUI:Notify({
-      Title = "Update Complete",
-      Content = "WindUI Better v2.0 is installed and ready to use.",
-      Icon = "sparkles",
-      Progress = 0.85, -- 85% progress bar
-      Duration = 8,
-      Buttons = {
-          {
-              Title = "Accept",
-              Variant = "Primary",
-              Callback = function()
-                  print("Accepted!")
-              end,
-          },
-          {
-              Title = "Dismiss",
-              Variant = "Secondary",
-              Callback = function() end,
-          },
-      },
-  })
-  ```
+Toasts with optional progress bar and interactive action buttons:
 
----
-
-### 9. 🪟 Interactive Dialogs with Controls
-
-- `Window:Dialog` can host Sliders, Toggles, Dropdowns, and Inputs directly inside popup modals:
-  ```lua
-  local dlg = Window:Dialog({
-      Title = "Interactive Dialog",
-      Content = "Tune controls directly inside popup modals:",
-      Buttons = {
-          { Title = "Apply", Variant = "Primary" },
-          { Title = "Cancel", Variant = "Secondary" },
-      },
-  })
-  dlg:Toggle({ Title = "Super Fast Mode", Value = true })
-  dlg:Slider({ Title = "Performance Level", Value = 80, Min = 10, Max = 100 })
-  dlg:Dropdown({ Title = "Execution Engine", Values = { "Native", "Interpreted", "JIT Fast" }, Value = "JIT Fast" })
-  ```
+```lua
+WindUI:Notify({
+    Title = "Update Complete",
+    Content = "WindUI is ready to use.",
+    Icon = "sparkles",
+    Progress = 0.85,
+    Duration = 8,
+    Buttons = {
+        {
+            Title = "Accept",
+            Variant = "Primary",
+            Callback = function() end,
+        },
+        {
+            Title = "Dismiss",
+            Variant = "Secondary",
+            Callback = function() end,
+        },
+    },
+})
+```
 
 ---
 
-### 10. ↔️ Collapsible Sidebar (`Window:ToggleSidebar`)
+### Dialog Modals (Window:Dialog)
 
-- Collapse the sidebar into a slim 52px icon mode to give maximum space to the main content:
-  ```lua
-  Window:ToggleSidebar() -- Toggles between 52px icon mode and 175px expanded mode
-  ```
+Popups that can embed controls (Toggles, Sliders, Dropdowns, Inputs):
 
----
+```lua
+local dlg = Window:Dialog({
+    Title = "Settings Confirmation",
+    Content = "Adjust settings before continuing:",
+    Buttons = {
+        { Title = "Apply", Variant = "Primary" },
+        { Title = "Cancel", Variant = "Secondary" },
+    },
+})
 
-### 11. 🔒 Tab Security & Access Gating (`LockedTo` / `HiddenTo` / `Whitelist`)
-
-- Restrict or hide specific tabs by player UserId:
-  ```lua
-  Window:Tab({
-      Title = "Admin & Testing",
-      Icon = "shield-alert",
-      LockedTo = { 12345678, 87654321 }, -- Tab is locked for other players
-      -- Or:
-      Whitelist = { 12345678 }, -- Tab is completely invisible to non-whitelisted players
-  })
-  ```
+dlg:Toggle({ Title = "Fast Mode", Value = true })
+dlg:Slider({ Title = "Speed", Value = 80, Min = 10, Max = 100 })
+dlg:Dropdown({ Title = "Preset", Values = { "Low", "Medium", "High" }, Value = "High" })
+```
 
 ---
 
-### 12. 🎨 Runtime Theme Overrides (`Window:SetColor`)
+### Collapsible Sidebar (Window:ToggleSidebar)
 
-- Modify theme accent, background, text, or dialog colors on the fly without declaring a new theme:
-  ```lua
-  Window:SetColor({
-      Accent = Color3.fromRGB(0, 255, 170),
-      Background = Color3.fromRGB(15, 18, 24),
-  })
-  ```
+Switches the sidebar between full width (175px) and collapsed icon mode (52px):
 
----
-
-### 13. 🔊 Audio Feedback (`Window:EnableSounds`)
-
-- Subtle audio feedback on tab selection and control toggles:
-  ```lua
-  Window:EnableSounds(true)
-  ```
+```lua
+Window:ToggleSidebar()       -- Toggle
+Window:ToggleSidebar(true)   -- Force collapsed
+Window:ToggleSidebar(false)  -- Force expanded
+```
 
 ---
 
-### 14. 🔝 Notification Placement & Layer Order
+### Tab Access Control (LockedTo / Whitelist)
 
-- Shift notification toast position to top-right:
+Restricts tab access by player UserId:
+
+```lua
+-- Locked with an alert overlay
+Window:Tab({
+    Title = "Admin",
+    Icon = "shield-alert",
+    LockedTo = { 12345678, 87654321 },
+})
+
+-- Completely hidden from non-whitelisted users
+Window:Tab({
+    Title = "Private",
+    Icon = "lock",
+    Whitelist = { 12345678 },
+})
+```
+
+---
+
+### Runtime Color Overrides (Window:SetColor)
+
+Modifies theme colors on the fly without declaring a custom theme:
+
+```lua
+Window:SetColor({
+    Accent = Color3.fromRGB(0, 255, 170),
+    Background = Color3.fromRGB(15, 18, 24),
+})
+```
+
+---
+
+### Audio Feedback (Window:EnableSounds)
+
+Enables sound effects on tab switching and control interaction:
+
+```lua
+Window:EnableSounds(true)
+```
+
+---
+
+### Notification Position and Layer Order
+
+- Anchor notifications to top-right instead of bottom-right:
   ```lua
   WindUI:SetNotificationUpper(true)
   ```
-- Change DisplayOrder to ensure the UI renders above custom game GUIs:
+- Change DisplayOrder to render above other CoreGui elements:
   ```lua
   WindUI:SetDisplayOrder(999) -- Aliased as SetZIndex and SetLayer
   ```
 
 ---
 
-## 📖 Complete Boilerplate Example
+## Complete Example
 
 ```lua
 local WindUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/caomod2077/Windui-better/main/windui.lua"))()
@@ -451,32 +469,31 @@ Config:Button({
 
 ---
 
-## 🎨 Built-in Themes
+## Built-in Themes
 
 | Theme Name | Description |
 |---|---|
-| `Dark` | Standard clean modern dark theme |
-| `Obsidian` | Deep charcoal base with electric blue accents |
+| `Dark` | Standard dark theme |
+| `Obsidian` | Dark charcoal base with orange accents |
 | `Light` | Clean bright daytime theme |
-| `Rose` | Elegant wine & dark rose palette |
+| `Rose` | Dark wine and rose palette |
 | `Plant` | Deep forest green with emerald accents |
 | `Red` | Crimson dark theme |
 | `Indigo` | Deep indigo blue palette |
 | `Sky` | Cyan and navy aesthetic |
-| `Violet` | Purple & violet neon look |
+| `Violet` | Purple and violet palette |
 | `Amber` | Warm amber gradient theme |
 | `Midnight` | Navy and deep royal blue |
-| `MonokaiPro` | Developer-favorite Monokai Pro colors |
+| `MonokaiPro` | Monokai Pro colors |
 | `Mid Summer` | Warm coral and sunset gradients |
 | `Lunar Moon` | Monochrome silver gradients |
-| `Winter Frost` | Cool ice-blue gradients |
+| `Winter Frost` | Ice-blue gradients |
 | `Elegant Night` | Deep violet gradients |
 | `Lunar Abyss` | Dark indigo gradients |
 | `Lunar Eclipse` | Deep rose and magenta gradients |
 
 ---
 
-## 📄 License
+## License
 
-This project is licensed under the [MIT License](LICENSE).  
-Feel free to use it in all your scripts, projects, and hubs!
+This project is licensed under the [MIT License](LICENSE).
