@@ -1037,30 +1037,57 @@ r.UpdateTheme(u,false,true,x,z,A)
 end
 
 function r.SetLangForObject(u)
-if r.Localization and r.Localization.Enabled then
 local v=r.LocalizationObjects[u]
-if not v then
+if not v or not v.Object or v.Object.Parent==nil then
 return
 end
 
 local x=v.Object
-local z=v.TranslationId
+local orig=v.OriginalText or x.Text
+local z=v.TranslationId or orig
+local curLang=r.Language or "en"
 
-local A=r.Localization.Translations[r.Language]
-if A and A[z]then
-x.Text=A[z]
+local customDict=r.Localization and r.Localization.Translations and r.Localization.Translations[curLang]
+local autoDict=a.load'e'.AutoDictionary and a.load'e'.AutoDictionary[curLang]
+
+local translated=nil
+if customDict and customDict[z] then
+translated=customDict[z]
+elseif customDict and customDict[orig] then
+translated=customDict[orig]
+elseif autoDict and autoDict[z] then
+translated=autoDict[z]
+elseif autoDict and autoDict[orig] then
+translated=autoDict[orig]
+end
+
+if translated then
+x.Text=translated
 else
-local B=r.Localization
-and r.Localization.Translations
-and r.Localization.Translations.en
-or nil
-if B and B[z]then
-x.Text=B[z]
-else
-x.Text="["..z.."]"
+x.Text=orig
 end
 end
+
+function r.AddTranslations(lang, dict)
+if not r.Localization then
+r.Localization={Enabled=true,Translations={},Prefix="loc:",DefaultLanguage="en"}
 end
+r.Localization.Translations[lang]=r.Localization.Translations[lang] or {}
+if type(dict)=="table" then
+for k,val in pairs(dict) do
+r.Localization.Translations[lang][k]=val
+end
+end
+r.UpdateLang()
+end
+
+function r.Translate(text, lang)
+lang=lang or r.Language or "en"
+local customDict=r.Localization and r.Localization.Translations and r.Localization.Translations[lang]
+local autoDict=a.load'e'.AutoDictionary and a.load'e'.AutoDictionary[lang]
+if customDict and customDict[text] then return customDict[text] end
+if autoDict and autoDict[text] then return autoDict[text] end
+return text
 end
 
 function r.ChangeTranslationKey(u,v,x)
@@ -1123,14 +1150,15 @@ for A,B in next,v or{}do
 if A~="ThemeTag"then
 z[A]=B
 end
-if r.Localization and r.Localization.Enabled and A=="Text"then
-local C=string.match(B,"^"..r.Localization.Prefix.."(.+)")
-if C then
+if typeof(B)=="string" and B~="" and A=="Text" then
+local C=string.match(B,"^"..(r.Localization and r.Localization.Prefix or "loc:").."(.+)")
 local F=#r.LocalizationObjects+1
-r.LocalizationObjects[F]={TranslationId=C,Object=z}
-
+r.LocalizationObjects[F]={
+TranslationId=C or B,
+OriginalText=C and nil or B,
+Object=z,
+}
 r.SetLangForObject(F)
-end
 end
 end
 
@@ -1608,27 +1636,150 @@ G=G+1
 end
 end
 
-if A>=F and A<=C then
-local H=A-F+1
-return calculate(H,G)
-end
-
 return nil,4
 end
 
 return r end function a.e()
 
-local b={}
-
-
-
-
-
-
+local b={
+AutoDictionary = {
+vi = {
+["Home"] = "Trang Chủ",
+["Settings"] = "Cài Đặt",
+["Controls"] = "Điều Khiển",
+["Main"] = "Chính",
+["Features"] = "Tính Năng",
+["Updates"] = "Cập Nhật",
+["Community"] = "Cộng Đồng",
+["Status"] = "Trạng Thái",
+["Layout"] = "Bố Cục",
+["Advanced"] = "Nâng Cao",
+["Display"] = "Hiển Thị",
+["Basic Controls"] = "Điều Khiển Cơ Bản",
+["Advanced Inputs"] = "Nhập Liệu Nâng Cao",
+["Enabled"] = "Bật",
+["Disabled"] = "Tắt",
+["Enable"] = "Bật",
+["Disable"] = "Tắt",
+["On"] = "Bật",
+["Off"] = "Tắt",
+["Save"] = "Lưu",
+["Load"] = "Tải",
+["Save Config"] = "Lưu Cấu Hình",
+["Load Config"] = "Tải Cấu Hình",
+["Create Config"] = "Tạo Cấu Hình",
+["Delete Config"] = "Xóa Cấu Hình",
+["Config"] = "Cấu Hình",
+["Configuration"] = "Cấu Hình",
+["Config Management"] = "Quản Lý Cấu Hình",
+["Theme"] = "Giao Diện",
+["Themes"] = "Giao Diện",
+["Select Theme"] = "Chọn Giao Diện",
+["Theme Selector"] = "Chọn Giao Diện",
+["Interface"] = "Giao Diện",
+["Interface Options"] = "Tùy Chọn Giao Diện",
+["Language"] = "Ngôn Ngữ",
+["Watermark"] = "Watermark",
+["Watermark Visibility"] = "Hiển Thị Watermark",
+["Sound"] = "Âm Thanh",
+["Sounds"] = "Âm Thanh",
+["UI Sound Effects"] = "Hiệu Ứng Âm Thanh",
+["Speed"] = "Tốc Độ",
+["Close"] = "Đóng",
+["Cancel"] = "Hủy",
+["Apply"] = "Áp Dụng",
+["Reset"] = "Khôi Phục",
+["Confirm"] = "Xác Nhận",
+["Search..."] = "Tìm kiếm...",
+["Search features..."] = "Tìm kiếm tính năng...",
+["Search controls..."] = "Tìm kiếm điều khiển...",
+["Copy"] = "Sao Chép",
+["Copied"] = "Đã Sao Chép",
+["Keybind"] = "Phím Tắt",
+["Color"] = "Màu Sắc",
+["Transparency"] = "Độ Mờ",
+["Background"] = "Hình Nền",
+["Background Blur"] = "Làm Mờ Hậu Cảnh",
+["Toggle"] = "Công Tắc",
+["Button"] = "Nút Bấm",
+["Slider"] = "Thanh Kéo",
+["Dropdown"] = "Menu Thả Xuống",
+["Input"] = "Nhập Liệu",
+["Text Input"] = "Nhập Văn Bản",
+["Progress"] = "Tiến Độ",
+["Task Progress"] = "Tiến Độ Nhiệm Vụ",
+["Documentation"] = "Tài Liệu",
+["Locked"] = "Đã Khóa",
+["Unlocked"] = "Đã Mở Khóa",
+["Locked Tab"] = "Tab Đã Khóa",
+["Auto Farm"] = "Tự Động Farm",
+["Combat"] = "Chiến Đấu",
+["Tuning"] = "Tùy Chỉnh",
+["Level Farm"] = "Cấp Độ Farm",
+["Hold to confirm"] = "Giữ để xác nhận",
+["Hold to Confirm Action"] = "Giữ Để Xác Nhận Thao Tác",
+["Emergency Reset"] = "Khôi Phục Khẩn Cấp",
+["Compact Sidebar Mode"] = "Thu Gọn Sidebar",
+["Top-Right Notifications"] = "Thông Báo Góc Trên Phải",
+["UI Scale"] = "Tỷ Lệ Thu Phóng",
+["Interactive Dialog Modal"] = "Mở Hộp Thoại Dialog",
+["Standard Button"] = "Nút Bấm Tiêu Chuẩn",
+["Feature Toggle"] = "Công Tắc Tính Năng",
+["Checkbox Mode"] = "Chế Độ Checkbox",
+["Slider with Textbox"] = "Thanh Kéo Kèm Nhập Số",
+["Multi-Select Dropdown"] = "Menu Chọn Nhiều Mục",
+["Multi-line Textarea"] = "Văn Bản Nhiều Dòng",
+["Action Keybind"] = "Phím Tắt Kích Hoạt",
+["Color with Transparency"] = "Chọn Màu Và Độ Mờ",
+["3D Viewport Viewer"] = "Xem Mô Hình 3D Viewport",
+["Indeterminate Spinner"] = "Vòng Xoay Vô Hạn",
+["Lua Code Snippet"] = "Đoạn Code Mẫu",
+["Information Paragraph"] = "Đoạn Văn Thông Tin",
+["Official Community"] = "Cộng Đồng Chính Thức",
+["Next Release Countdown"] = "Đếm Ngược Bản Phát Hành",
+["Left Column Card"] = "Card Cột Trái",
+["Right Column Card"] = "Card Cột Phải",
+["Full Width Spanning Card"] = "Card Trải Rộng 2 Cột",
+["HStack Horizontal Group"] = "Nhóm Hàng Ngang HStack",
+},
+en = {
+["Trang Chủ"] = "Home",
+["Cài Đặt"] = "Settings",
+["Điều Khiển"] = "Controls",
+["Chính"] = "Main",
+["Tính Năng"] = "Features",
+["Cập Nhật"] = "Updates",
+["Cộng Đồng"] = "Community",
+["Trạng Thái"] = "Status",
+["Bố Cục"] = "Layout",
+["Nâng Cao"] = "Advanced",
+["Hiển Thị"] = "Display",
+["Bật"] = "Enabled",
+["Tắt"] = "Disabled",
+["Lưu Cấu Hình"] = "Save Config",
+["Tải Cấu Hình"] = "Load Config",
+["Tạo Cấu Hình"] = "Create Config",
+["Xóa Cấu Hình"] = "Delete Config",
+["Giao Diện"] = "Theme",
+["Chọn Giao Diện"] = "Select Theme",
+["Ngôn Ngữ"] = "Language",
+["Phím Tắt"] = "Keybind",
+["Màu Sắc"] = "Color",
+["Độ Mờ"] = "Transparency",
+["Hình Nền"] = "Background",
+["Làm Mờ Hậu Cảnh"] = "Background Blur",
+["Tự Động Farm"] = "Auto Farm",
+["Chiến Đấu"] = "Combat",
+["Tùy Chỉnh"] = "Tuning",
+["Cấp Độ Farm"] = "Level Farm",
+["Giữ để xác nhận"] = "Hold to confirm",
+["Khôi Phục Khẩn Cấp"] = "Emergency Reset",
+}
+}
 
 function b.New(d,e,f)
 local g={
-Enabled=e.Enabled or false,
+Enabled=true,
 Translations=e.Translations or{},
 Prefix=e.Prefix or"loc:",
 DefaultLanguage=e.DefaultLanguage or"en"
@@ -1638,8 +1789,6 @@ f.Localization=g
 
 return g
 end
-
-
 
 return b end function a.f()
 local b=a.load'd'
@@ -4159,6 +4308,58 @@ Background=aa:Gradient({["0"]={Color=Color3.fromHex"#1A0014",Transparency=0},["5
 Button=aa:Gradient({["0"]={Color=Color3.fromHex"#66003F",Transparency=0},["50"]={Color=Color3.fromHex"#99004D",Transparency=0},["100"]={Color=Color3.fromHex"#CC3366",Transparency=0}},{Rotation=45}),
 Icon=aa:Gradient({["0"]={Color=Color3.fromHex"#99004D",Transparency=0},["50"]={Color=Color3.fromHex"#CC3366",Transparency=0},["100"]={Color=Color3.fromHex"#FF6699",Transparency=0}},{Rotation=45}),
 ElementBackground=Color3.fromHex"#361629",ElementBackgroundTransparency=0,
+},
+["Liquid Glass"]={
+Name="Liquid Glass",
+Accent=aa:Gradient({["0"]={Color=Color3.fromHex"#00E5FF",Transparency=0},["50"]={Color=Color3.fromHex"#00B4D8",Transparency=0},["100"]={Color=Color3.fromHex"#0077B6",Transparency=0}},{Rotation=45}),
+Dialog=aa:Gradient({["0"]={Color=Color3.fromHex"#0A192F",Transparency=0},["50"]={Color=Color3.fromHex"#0D2538",Transparency=0},["100"]={Color=Color3.fromHex"#133E54",Transparency=0}},{Rotation=90}),
+Outline=aa:Gradient({["0"]={Color=Color3.fromHex"#38BDF8",Transparency=0},["50"]={Color=Color3.fromHex"#00E5FF",Transparency=0},["100"]={Color=Color3.fromHex"#7DD3FC",Transparency=0}},{Rotation=45}),
+Text=Color3.fromHex"#F0FDFE",
+Placeholder=Color3.fromHex"#7DD3FC",
+Background=aa:Gradient({["0"]={Color=Color3.fromHex"#08131D",Transparency=0},["50"]={Color=Color3.fromHex"#0B2231",Transparency=0},["100"]={Color=Color3.fromHex"#0F3347",Transparency=0}},{Rotation=135}),
+Button=aa:Gradient({["0"]={Color=Color3.fromHex"#00B4D8",Transparency=0},["100"]={Color=Color3.fromHex"#0077B6",Transparency=0}},{Rotation=45}),
+Icon=Color3.fromHex"#00E5FF",
+Toggle=Color3.fromHex"#00E5FF",
+Slider=Color3.fromHex"#00E5FF",
+Checkbox=Color3.fromHex"#00E5FF",
+PanelBackground=Color3.fromHex"#0A1C28",
+PanelBackgroundTransparency=0.5,
+ElementBackground=Color3.fromHex"#0F2838",
+ElementBackgroundTransparency=0.25,
+SectionBoxBackground=Color3.fromHex"#0D2536",
+SectionBoxBackgroundTransparency=0.35,
+SectionBoxBorder=Color3.fromHex"#38BDF8",
+SectionBoxBorderTransparency=0.7,
+TabBackground=Color3.fromHex"#0B1E2B",
+TabBackgroundHover=Color3.fromHex"#13364C",
+TabBackgroundActive=Color3.fromHex"#194562",
+TabTitle=Color3.fromHex"#F0FDFE",
+},
+LiquidGlass={
+Name="Liquid Glass",
+Accent=aa:Gradient({["0"]={Color=Color3.fromHex"#00E5FF",Transparency=0},["50"]={Color=Color3.fromHex"#00B4D8",Transparency=0},["100"]={Color=Color3.fromHex"#0077B6",Transparency=0}},{Rotation=45}),
+Dialog=aa:Gradient({["0"]={Color=Color3.fromHex"#0A192F",Transparency=0},["50"]={Color=Color3.fromHex"#0D2538",Transparency=0},["100"]={Color=Color3.fromHex"#133E54",Transparency=0}},{Rotation=90}),
+Outline=aa:Gradient({["0"]={Color=Color3.fromHex"#38BDF8",Transparency=0},["50"]={Color=Color3.fromHex"#00E5FF",Transparency=0},["100"]={Color=Color3.fromHex"#7DD3FC",Transparency=0}},{Rotation=45}),
+Text=Color3.fromHex"#F0FDFE",
+Placeholder=Color3.fromHex"#7DD3FC",
+Background=aa:Gradient({["0"]={Color=Color3.fromHex"#08131D",Transparency=0},["50"]={Color=Color3.fromHex"#0B2231",Transparency=0},["100"]={Color=Color3.fromHex"#0F3347",Transparency=0}},{Rotation=135}),
+Button=aa:Gradient({["0"]={Color=Color3.fromHex"#00B4D8",Transparency=0},["100"]={Color=Color3.fromHex"#0077B6",Transparency=0}},{Rotation=45}),
+Icon=Color3.fromHex"#00E5FF",
+Toggle=Color3.fromHex"#00E5FF",
+Slider=Color3.fromHex"#00E5FF",
+Checkbox=Color3.fromHex"#00E5FF",
+PanelBackground=Color3.fromHex"#0A1C28",
+PanelBackgroundTransparency=0.5,
+ElementBackground=Color3.fromHex"#0F2838",
+ElementBackgroundTransparency=0.25,
+SectionBoxBackground=Color3.fromHex"#0D2536",
+SectionBoxBackgroundTransparency=0.35,
+SectionBoxBorder=Color3.fromHex"#38BDF8",
+SectionBoxBorderTransparency=0.7,
+TabBackground=Color3.fromHex"#0B1E2B",
+TabBackgroundHover=Color3.fromHex"#13364C",
+TabBackgroundActive=Color3.fromHex"#194562",
+TabTitle=Color3.fromHex"#F0FDFE",
 },
 Dark={
 Name="Dark",
@@ -8942,6 +9143,9 @@ end
 ap.Value=ay.Original
 end
 Callback()
+if not ap.Multi then
+as:Close()
+end
 end)
 elseif ar=="Menu"then
 if not ay.Locked then
@@ -9048,15 +9252,16 @@ ap.UIElements.MenuCanvas.Active=false
 end)
 end
 
-ak.AddSignal(
-(
-ap.UIElements.Dropdown and ap.UIElements.Dropdown.MouseButton1Click
-or ap.DropdownFrame.UIElements.Main.MouseButton1Click
-),
-function()
+if ap.UIElements.Dropdown then
+ak.AddSignal(ap.UIElements.Dropdown.MouseButton1Click,function()
 as:Open()
+end)
 end
-)
+if ap.DropdownFrame and ap.DropdownFrame.UIElements and ap.DropdownFrame.UIElements.Main then
+ak.AddSignal(ap.DropdownFrame.UIElements.Main.MouseButton1Click,function()
+as:Open()
+end)
+end
 
 ak.AddSignal(af.InputBegan,function(au)
 if
@@ -11834,412 +12039,6 @@ return "Changelog", p
 end,
 }
 
-local function FormatNumberWithCommas(val)
-local str = tostring(math.max(tonumber(val) or 0, 0))
-while true do
-local res, cnt = str:gsub("^(%-?%d+)(%d%d%d)", "%1,%2")
-str = res
-if cnt == 0 then return str end
-end
-end
-
-local discordCardModule = {
-New = function(self, cfg)
-local aa = a.load'd'
-local af = aa.New
-local ai = aa.Tween
-
-local rawInvite = tostring(cfg.Invite or cfg.Code or cfg[1] or "mSrMzVuc3h")
-local inviteCode = rawInvite:gsub("^https?://discord%.gg/", ""):gsub("^discord%.gg/", ""):gsub("^https?://discord%.com/invite/", "")
-local fallbackTitle = cfg.Title or "Discord Community"
-local fallbackDesc = cfg.Desc or "Join our official community server!"
-local onJoin = cfg.OnJoin or cfg.Callback
-
-local targetParent = cfg.Parent or (cfg.Tab and cfg.Tab.LeftColumn) or (cfg.Tab and cfg.Tab.UIElements and cfg.Tab.UIElements.ContainerFrame)
-if cfg.Tab and cfg.Tab.TwoColumns and cfg.Side == "Right" and cfg.Tab.RightColumn then
-targetParent = cfg.Tab.RightColumn
-end
-
-local guildIconImg = cfg.Icon or "rbxassetid://133610205520685"
-
-local guildLabel = af("TextLabel", {
-Text = fallbackTitle,
-TextSize = 15,
-FontFace = Font.new(aa.Font, Enum.FontWeight.Bold),
-TextColor3 = Color3.new(1, 1, 1),
-BackgroundTransparency = 1,
-AutomaticSize = "XY",
-TextTruncate = "AtEnd",
-Name = "GuildName",
-})
-
-local vanityLabel = af("TextLabel", {
-Text = "discord.gg/" .. inviteCode,
-TextSize = 12,
-FontFace = Font.new(aa.Font, Enum.FontWeight.Medium),
-TextColor3 = Color3.fromRGB(148, 163, 184),
-BackgroundTransparency = 1,
-AutomaticSize = "XY",
-LayoutOrder = 2,
-Name = "VanityText",
-})
-
-local onlineLabel = af("TextLabel", {
-Text = '<font color="#22C55E"><b>--</b></font> Online',
-TextSize = 12,
-FontFace = Font.new(aa.Font, Enum.FontWeight.Medium),
-TextColor3 = Color3.fromRGB(220, 220, 220),
-BackgroundTransparency = 1,
-AutomaticSize = "XY",
-Name = "OnlineLabel",
-})
-
-local memberLabel = af("TextLabel", {
-Text = '<font color="#94A3B8"><b>--</b></font> Members',
-TextSize = 12,
-FontFace = Font.new(aa.Font, Enum.FontWeight.Medium),
-TextColor3 = Color3.fromRGB(220, 220, 220),
-BackgroundTransparency = 1,
-AutomaticSize = "XY",
-Name = "MemberLabel",
-})
-
-local descLabel = af("TextLabel", {
-Text = fallbackDesc,
-TextSize = 13,
-FontFace = Font.new(aa.Font, Enum.FontWeight.Regular),
-TextColor3 = Color3.fromRGB(210, 205, 200),
-BackgroundTransparency = 1,
-AutomaticSize = "Y",
-Size = UDim2.new(1, 0, 0, 0),
-TextWrapped = true,
-TextXAlignment = "Left",
-LayoutOrder = 3,
-Name = "DescText",
-})
-
-local iconImageObj = af("ImageLabel", {
-Size = UDim2.new(1, 0, 1, 0),
-BackgroundTransparency = 1,
-Image = guildIconImg,
-ScaleType = "Crop",
-Name = "IconImg",
-}, {
-af("UICorner", { CornerRadius = UDim.new(0, 12) }),
-})
-
-local joinBtn = af("TextButton", {
-Size = UDim2.new(0, 130, 0, 32),
-BackgroundColor3 = Color3.fromRGB(88, 101, 242),
-BorderSizePixel = 0,
-Text = "Join Server",
-TextColor3 = Color3.new(1, 1, 1),
-TextSize = 13,
-FontFace = Font.new(aa.Font, Enum.FontWeight.SemiBold),
-LayoutOrder = 1,
-Name = "JoinButton",
-}, {
-af("UICorner", { CornerRadius = UDim.new(0, 6) }),
-})
-
-local refreshBtn = af("TextButton", {
-Size = UDim2.new(0, 110, 0, 32),
-BackgroundColor3 = Color3.fromRGB(36, 30, 28),
-BorderSizePixel = 0,
-Text = "Refresh Stats",
-TextColor3 = Color3.fromRGB(230, 225, 220),
-TextSize = 13,
-FontFace = Font.new(aa.Font, Enum.FontWeight.Medium),
-LayoutOrder = 2,
-Name = "RefreshButton",
-}, {
-af("UICorner", { CornerRadius = UDim.new(0, 6) }),
-af("UIStroke", { Color = Color3.fromRGB(60, 52, 48), Thickness = 1 }),
-})
-
-local cardFrame = aa.NewRoundFrame(10, "Squircle", {
-Size = UDim2.new(1, 0, 0, 0),
-AutomaticSize = "Y",
-BackgroundTransparency = 1,
-Parent = targetParent,
-ImageColor3 = Color3.fromRGB(255, 255, 255),
-ImageTransparency = 0.93,
-Name = "DiscordWidgetCard",
-}, {
-aa.NewRoundFrame(9, "SquircleOutline", {
-Size = UDim2.new(1, 0, 1, 0),
-AutomaticSize = "Y",
-ImageColor3 = Color3.fromRGB(88, 101, 242),
-ImageTransparency = 0.72,
-Name = "Outline",
-ClipsDescendants = true,
-}, {
-af("UIListLayout", {
-FillDirection = "Vertical",
-SortOrder = "LayoutOrder",
-Padding = UDim.new(0, 0),
-}),
--- Discord Blurple Header Banner
-af("Frame", {
-Size = UDim2.new(1, 0, 0, 52),
-BackgroundColor3 = Color3.fromRGB(88, 101, 242),
-BackgroundTransparency = 0.2,
-BorderSizePixel = 0,
-LayoutOrder = 1,
-Name = "Banner",
-}, {
-af("UIGradient", {
-Color = ColorSequence.new{
-ColorSequenceKeypoint.new(0, Color3.fromRGB(88, 101, 242)),
-ColorSequenceKeypoint.new(0.55, Color3.fromRGB(114, 137, 218)),
-ColorSequenceKeypoint.new(1, Color3.fromRGB(88, 101, 242)),
-},
-Rotation = 45,
-}),
-af("ImageLabel", {
-Size = UDim2.new(0, 26, 0, 26),
-Position = UDim2.new(1, -12, 0.5, 0),
-AnchorPoint = Vector2.new(1, 0.5),
-BackgroundTransparency = 1,
-Image = aa.Icon"messages-square"[1],
-ImageRectSize = aa.Icon"messages-square"[2].ImageRectSize,
-ImageRectOffset = aa.Icon"messages-square"[2].ImageRectPosition,
-ImageColor3 = Color3.new(1, 1, 1),
-ImageTransparency = 0.35,
-}),
-}),
--- Card Body
-af("Frame", {
-Size = UDim2.new(1, 0, 0, 0),
-AutomaticSize = "Y",
-BackgroundTransparency = 1,
-LayoutOrder = 2,
-Name = "Body",
-}, {
-af("UIPadding", {
-PaddingTop = UDim.new(0, 10),
-PaddingBottom = UDim.new(0, 12),
-PaddingLeft = UDim.new(0, 12),
-PaddingRight = UDim.new(0, 12),
-}),
-af("UIListLayout", {
-FillDirection = "Vertical",
-Padding = UDim.new(0, 10),
-SortOrder = "LayoutOrder",
-}),
--- Server Info Row
-af("Frame", {
-Size = UDim2.new(1, 0, 0, 48),
-BackgroundTransparency = 1,
-LayoutOrder = 1,
-Name = "HeaderRow",
-}, {
-af("UIListLayout", {
-FillDirection = "Horizontal",
-VerticalAlignment = "Center",
-Padding = UDim.new(0, 10),
-SortOrder = "LayoutOrder",
-}),
-af("Frame", {
-Size = UDim2.new(0, 46, 0, 46),
-BackgroundColor3 = Color3.fromRGB(30, 26, 25),
-BorderSizePixel = 0,
-LayoutOrder = 1,
-Name = "IconHolder",
-}, {
-af("UICorner", { CornerRadius = UDim.new(0, 12) }),
-iconImageObj,
-}),
-af("Frame", {
-Size = UDim2.new(1, -58, 1, 0),
-BackgroundTransparency = 1,
-LayoutOrder = 2,
-}, {
-af("UIListLayout", {
-FillDirection = "Vertical",
-VerticalAlignment = "Center",
-Padding = UDim.new(0, 3),
-SortOrder = "LayoutOrder",
-}),
-af("Frame", {
-Size = UDim2.new(1, 0, 0, 20),
-BackgroundTransparency = 1,
-LayoutOrder = 1,
-}, {
-af("UIListLayout", {
-FillDirection = "Horizontal",
-VerticalAlignment = "Center",
-Padding = UDim.new(0, 6),
-}),
-guildLabel,
-af("Frame", {
-Size = UDim2.new(0, 0, 0, 18),
-AutomaticSize = "X",
-BackgroundColor3 = Color3.fromRGB(88, 101, 242),
-BackgroundTransparency = 0.8,
-BorderSizePixel = 0,
-}, {
-af("UICorner", { CornerRadius = UDim.new(0, 4) }),
-af("UIPadding", { PaddingLeft = UDim.new(0, 5), PaddingRight = UDim.new(0, 5) }),
-af("TextLabel", {
-Text = "COMMUNITY",
-TextSize = 9,
-FontFace = Font.new(aa.Font, Enum.FontWeight.Bold),
-TextColor3 = Color3.fromRGB(114, 137, 218),
-BackgroundTransparency = 1,
-AutomaticSize = "XY",
-}),
-}),
-}),
-vanityLabel,
-}),
-}),
--- Presence Bar
-af("Frame", {
-Size = UDim2.new(1, 0, 0, 24),
-BackgroundColor3 = Color3.fromRGB(20, 16, 15),
-BackgroundTransparency = 0.5,
-BorderSizePixel = 0,
-LayoutOrder = 2,
-Name = "PresenceBar",
-}, {
-af("UICorner", { CornerRadius = UDim.new(0, 6) }),
-af("UIPadding", { PaddingLeft = UDim.new(0, 10), PaddingRight = UDim.new(0, 10) }),
-af("UIListLayout", {
-FillDirection = "Horizontal",
-VerticalAlignment = "Center",
-Padding = UDim.new(0, 14),
-SortOrder = "LayoutOrder",
-}),
-af("Frame", {
-Size = UDim2.new(0, 0, 1, 0),
-AutomaticSize = "X",
-BackgroundTransparency = 1,
-LayoutOrder = 1,
-}, {
-af("UIListLayout", { FillDirection = "Horizontal", VerticalAlignment = "Center", Padding = UDim.new(0, 6) }),
-af("Frame", {
-Size = UDim2.new(0, 8, 0, 8),
-BackgroundColor3 = Color3.fromRGB(34, 197, 94),
-BorderSizePixel = 0,
-}, { af("UICorner", { CornerRadius = UDim.new(1, 0) }) }),
-onlineLabel,
-}),
-af("Frame", {
-Size = UDim2.new(0, 0, 1, 0),
-AutomaticSize = "X",
-BackgroundTransparency = 1,
-LayoutOrder = 2,
-}, {
-af("UIListLayout", { FillDirection = "Horizontal", VerticalAlignment = "Center", Padding = UDim.new(0, 6) }),
-af("Frame", {
-Size = UDim2.new(0, 8, 0, 8),
-BackgroundColor3 = Color3.fromRGB(148, 163, 184),
-BorderSizePixel = 0,
-}, { af("UICorner", { CornerRadius = UDim.new(1, 0) }) }),
-memberLabel,
-}),
-}),
-descLabel,
--- Action Buttons Row
-af("Frame", {
-Size = UDim2.new(1, 0, 0, 32),
-BackgroundTransparency = 1,
-LayoutOrder = 4,
-Name = "ActionButtons",
-}, {
-af("UIListLayout", {
-FillDirection = "Horizontal",
-Padding = UDim.new(0, 8),
-VerticalAlignment = "Center",
-SortOrder = "LayoutOrder",
-}),
-joinBtn,
-refreshBtn,
-}),
-}),
-}),
-})
-
-local function fetchDiscordData(silent)
-local req = http_request or request or (syn and syn.request) or (fluxus and fluxus.request)
-if not req then return end
-task.spawn(function()
-local ok, res = pcall(function()
-return game:GetService("HttpService"):JSONDecode(req({
-Url = "https://discord.com/api/v10/invites/" .. inviteCode .. "?with_counts=true&with_expiration=true",
-Method = "GET",
-Headers = { ["User-Agent"] = "RobloxBot/1.0", ["Accept"] = "application/json" },
-}).Body)
-end)
-if ok and res and res.guild then
-local g = res.guild
-if g.name then guildLabel.Text = g.name end
-if res.approximate_presence_count then
-onlineLabel.Text = '<font color="#22C55E"><b>' .. FormatNumberWithCommas(res.approximate_presence_count) .. '</b></font> Online'
-end
-if res.approximate_member_count then
-memberLabel.Text = '<font color="#94A3B8"><b>' .. FormatNumberWithCommas(res.approximate_member_count) .. '</b></font> Members'
-end
-if g.icon then
-local iconUrl = "https://cdn.discordapp.com/icons/" .. tostring(g.id) .. "/" .. tostring(g.icon) .. ".png?size=256"
-iconImageObj.Image = iconUrl
-end
-if g.description and g.description ~= "" then
-descLabel.Text = g.description
-end
-end
-end)
-end
-
-joinBtn.MouseButton1Click:Connect(function()
-pcall(function()
-if setclipboard then
-setclipboard("https://discord.gg/" .. inviteCode)
-elseif toclipboard then
-toclipboard("https://discord.gg/" .. inviteCode)
-end
-end)
-joinBtn.Text = "Copied Link!"
-joinBtn.BackgroundColor3 = Color3.fromRGB(34, 197, 94)
-if cfg.Window and cfg.Window.PlaySound then
-cfg.Window:PlaySound("tab")
-end
-if onJoin then pcall(onJoin) end
-task.delay(1.8, function()
-if joinBtn and joinBtn.Parent then
-joinBtn.Text = "Join Server"
-joinBtn.BackgroundColor3 = Color3.fromRGB(88, 101, 242)
-end
-end)
-end)
-
-refreshBtn.MouseButton1Click:Connect(function()
-fetchDiscordData(false)
-refreshBtn.Text = "Refreshing..."
-task.delay(1, function()
-if refreshBtn and refreshBtn.Parent then
-refreshBtn.Text = "Refresh Stats"
-end
-end)
-end)
-
-if cfg.AutoFetch ~= false then
-fetchDiscordData(true)
-end
-
-local handle = {
-SetTitle = function(s, t) guildLabel.Text = tostring(t) end,
-SetDesc = function(s, d) descLabel.Text = tostring(d) end,
-Refresh = function(s) fetchDiscordData(false) end,
-Destroy = function(s) cardFrame:Destroy() end,
-ElementFrame = cardFrame,
-__type = "DiscordCard",
-}
-
-return "DiscordCard", handle
-end,
-}
 local embedModule = {
 New = function(self, cfg)
 local aa = a.load'd'
@@ -12463,7 +12262,6 @@ Viewport=a.load'Z',
 HoldButton=holdButtonModule,
 Changelog=changelogModule,
 Countdown=countdownModule,
-DiscordCard=discordCardModule,
 Embed=embedModule,
 
 },
@@ -12699,7 +12497,11 @@ end
 if ap.Whitelist then
 local list = type(ap.Whitelist) == "table" and ap.Whitelist or { ap.Whitelist }
 if not table.find(list, localUserId) then
+if ap.WhitelistHidden == false or ap.WhitelistAction == "Show" or ap.WhitelistAction == "Lock" then
+ar.Locked = true
+else
 ap.Hidden = true
+end
 end
 end
 
@@ -13343,17 +13145,6 @@ LayoutOrder = 2,
 return bannerFrame
 end
 
-function ar.DiscordCard(self, dConfig)
-dConfig = dConfig or {}
-dConfig.Tab = self
-dConfig.Parent = self.LeftColumn or (self.UIElements and self.UIElements.ContainerFrame)
-local mod = a._().Elements.DiscordCard
-local typeName, card = mod:New(dConfig)
-table.insert(self.Elements, card)
-if self.HideEmpty then self:HideEmpty() end
-return card
-end
-
 function ar.Embed(self, eConfig)
 eConfig = eConfig or {}
 eConfig.Tab = self
@@ -13364,6 +13155,243 @@ table.insert(self.Elements, emb)
 if self.HideEmpty then self:HideEmpty() end
 return emb
 end
+
+function ar.SubTabs(self, tabsList)
+tabsList = tabsList or {}
+local sf = self.UIElements and self.UIElements.ContainerFrame
+if not sf then return {} end
+
+local navHolder = al("Frame", {
+Size = UDim2.new(1, 0, 0, 36),
+BackgroundTransparency = 1,
+LayoutOrder = -950,
+Parent = sf,
+Name = "SubTabsNav",
+})
+
+local navBg = ak.NewRoundFrame(8, "Squircle", {
+Size = UDim2.new(1, 0, 1, 0),
+ThemeTag = { ImageColor3 = "Dialog" },
+ImageColor3 = Color3.fromRGB(20, 18, 16),
+ImageTransparency = 0.5,
+Parent = navHolder,
+}, {
+ak.NewRoundFrame(7, "SquircleOutline", {
+Size = UDim2.new(1, 0, 1, 0),
+ThemeTag = { ImageColor3 = "Outline" },
+ImageColor3 = Color3.fromRGB(255, 255, 255),
+ImageTransparency = 0.88,
+Name = "Outline",
+}, {
+al("UIListLayout", {
+FillDirection = "Horizontal",
+VerticalAlignment = "Center",
+HorizontalAlignment = "Left",
+Padding = UDim.new(0, 4),
+SortOrder = "LayoutOrder",
+}),
+al("UIPadding", {
+PaddingLeft = UDim.new(0, 4),
+PaddingRight = UDim.new(0, 4),
+PaddingTop = UDim.new(0, 4),
+PaddingBottom = UDim.new(0, 4),
+}),
+}),
+})
+
+local pillListHolder = navBg.Outline
+
+if self.ColumnsHolder then
+self.ColumnsHolder.Visible = false
+end
+if self.HideEmpty then self:HideEmpty() end
+
+local subPages = {}
+local subButtons = {}
+local activeSub = nil
+
+local function selectSubPage(subKey)
+activeSub = subKey
+for k, pageData in pairs(subPages) do
+local isTarget = (k == subKey)
+pageData.Container.Visible = isTarget
+local btn = subButtons[k]
+if btn then
+if isTarget then
+ak.Tween(btn.Pill, 0.12, { ImageTransparency = 0 }):Play()
+ak.Tween(btn.Label, 0.12, { TextTransparency = 0 }):Play()
+if btn.Icon then
+ak.Tween(btn.Icon.ImageLabel, 0.12, { ImageTransparency = 0 }):Play()
+end
+else
+ak.Tween(btn.Pill, 0.12, { ImageTransparency = 1 }):Play()
+ak.Tween(btn.Label, 0.12, { TextTransparency = 0.4 }):Play()
+if btn.Icon then
+ak.Tween(btn.Icon.ImageLabel, 0.12, { ImageTransparency = 0.3 }):Play()
+end
+end
+end
+end
+if Window and Window.PlaySound then
+Window:PlaySound("tab")
+end
+end
+
+local firstKey = nil
+for idx, tConf in ipairs(tabsList) do
+local tTitle = type(tConf) == "table" and (tConf.Title or tConf[1]) or tostring(tConf)
+local tIcon = type(tConf) == "table" and tConf.Icon or nil
+if not firstKey then firstKey = tTitle end
+
+local pageContainer = al("Frame", {
+Size = UDim2.new(1, 0, 0, 0),
+AutomaticSize = "Y",
+BackgroundTransparency = 1,
+Parent = sf,
+Name = "SubPage_" .. tTitle,
+Visible = false,
+LayoutOrder = idx,
+})
+
+local subCols = al("Frame", {
+Size = UDim2.new(1, 0, 0, 0),
+AutomaticSize = "Y",
+BackgroundTransparency = 1,
+Parent = pageContainer,
+Name = "ColumnsHolder",
+}, {
+al("UIListLayout", {
+FillDirection = "Horizontal",
+SortOrder = "LayoutOrder",
+Padding = UDim.new(0, 10),
+HorizontalAlignment = "Center",
+VerticalAlignment = "Top",
+}),
+})
+
+local sLeft = al("Frame", {
+Size = UDim2.new(0.5, -5, 0, 0),
+AutomaticSize = "Y",
+BackgroundTransparency = 1,
+Parent = subCols,
+Name = "LeftColumn",
+LayoutOrder = 1,
+}, {
+al("UIListLayout", { FillDirection = "Vertical", SortOrder = "LayoutOrder", Padding = UDim.new(0, 10) }),
+})
+
+local sRight = al("Frame", {
+Size = UDim2.new(0.5, -5, 0, 0),
+AutomaticSize = "Y",
+BackgroundTransparency = 1,
+Parent = subCols,
+Name = "RightColumn",
+LayoutOrder = 2,
+}, {
+al("UIListLayout", { FillDirection = "Vertical", SortOrder = "LayoutOrder", Padding = UDim.new(0, 10) }),
+})
+
+local subObj = {
+Title = tTitle,
+Parent = pageContainer,
+Container = pageContainer,
+LeftColumn = sLeft,
+RightColumn = sRight,
+TwoColumns = true,
+Tab = self,
+Elements = {},
+}
+
+aA.Load(subObj, pageContainer, aA.Elements, Window, WindUI, nil, aA, aq, self)
+
+function subObj.Card(sself, copts)
+copts = copts or {}
+copts.Tab = subObj
+copts.Parent = copts.Side == "Right" and sRight or sLeft
+return self:Section(copts)
+end
+subObj.Section = subObj.Card
+subObj.Groupbox = subObj.Card
+
+subPages[tTitle] = subObj
+subPages[idx] = subObj
+
+local pillBtn = al("TextButton", {
+Size = UDim2.new(0, 0, 1, 0),
+AutomaticSize = "X",
+BackgroundTransparency = 1,
+Text = "",
+LayoutOrder = idx,
+Parent = pillListHolder,
+Name = "Pill_" .. tTitle,
+})
+
+local pillFrame = ak.NewRoundFrame(6, "Squircle", {
+Size = UDim2.new(1, 0, 1, 0),
+ThemeTag = { ImageColor3 = "TabBackgroundActive" },
+ImageColor3 = Color3.fromRGB(0, 145, 255),
+ImageTransparency = 1,
+Parent = pillBtn,
+Name = "ActiveBg",
+})
+
+local pillContent = al("Frame", {
+Size = UDim2.new(1, 0, 1, 0),
+AutomaticSize = "X",
+BackgroundTransparency = 1,
+Parent = pillBtn,
+}, {
+al("UIPadding", {
+PaddingLeft = UDim.new(0, 10),
+PaddingRight = UDim.new(0, 10),
+}),
+al("UIListLayout", {
+FillDirection = "Horizontal",
+VerticalAlignment = "Center",
+Padding = UDim.new(0, 6),
+}),
+})
+
+local iconObj = nil
+if tIcon then
+iconObj = ak.Image(tIcon, tIcon, 0, Window.Folder, "SubTab", true)
+iconObj.Size = UDim2.new(0, 14, 0, 14)
+iconObj.Parent = pillContent
+iconObj.ImageLabel.ImageTransparency = 0.3
+end
+
+local pillLabel = al("TextLabel", {
+Text = tTitle,
+FontFace = Font.new(ak.Font, Enum.FontWeight.SemiBold),
+TextSize = 13,
+ThemeTag = { TextColor3 = "Text" },
+TextTransparency = 0.4,
+BackgroundTransparency = 1,
+AutomaticSize = "XY",
+Parent = pillContent,
+})
+
+subButtons[tTitle] = {
+Button = pillBtn,
+Pill = pillFrame,
+Label = pillLabel,
+Icon = iconObj,
+}
+
+pillBtn.MouseButton1Click:Connect(function()
+selectSubPage(tTitle)
+end)
+end
+
+if firstKey then
+task.defer(function()
+selectSubPage(firstKey)
+end)
+end
+
+return subPages
+end
+ar.AddSubTabs = ar.SubTabs
 
 function ar.AddSearch(self, placeholder)
 placeholder = placeholder or "Search features..."
@@ -15468,8 +15496,28 @@ return aw.SidebarCollapsed
 end
 
 aw.SoundsEnabled = false
-function aw.EnableSounds(self, enabled)
+aw.SoundConfig = {
+Toggle = "rbxassetid://4590662766",
+Tab = "rbxassetid://6895079853",
+Notification = "rbxassetid://6895079853",
+Volume = 0.25,
+}
+
+function aw.SetSounds(self, cfg)
+if type(cfg) == "table" then
+if cfg.Toggle then aw.SoundConfig.Toggle = tostring(cfg.Toggle) end
+if cfg.Tab then aw.SoundConfig.Tab = tostring(cfg.Tab) end
+if cfg.Notification then aw.SoundConfig.Notification = tostring(cfg.Notification) end
+if cfg.Volume ~= nil then aw.SoundConfig.Volume = tonumber(cfg.Volume) or 0.25 end
+end
+return aw
+end
+
+function aw.EnableSounds(self, enabled, customConfig)
 aw.SoundsEnabled = (enabled ~= false)
+if customConfig and type(customConfig) == "table" then
+aw:SetSounds(customConfig)
+end
 return aw
 end
 
@@ -15477,17 +15525,25 @@ function aw.PlaySound(self, soundType)
 if not aw.SoundsEnabled then return end
 task.spawn(function()
 pcall(function()
-local id = (soundType == "toggle" and "rbxassetid://4590662766")
-or (soundType == "tab" and "rbxassetid://6895079853")
+local cfg = aw.SoundConfig or {}
+local id = (soundType == "toggle" and cfg.Toggle)
+or (soundType == "tab" and cfg.Tab)
+or (soundType == "notification" and cfg.Notification)
+or cfg[soundType]
+or cfg.Tab
 or "rbxassetid://6895079853"
 local s = Instance.new("Sound")
-s.SoundId = id
-s.Volume = 0.25
+s.SoundId = tostring(id)
+s.Volume = cfg.Volume or 0.25
 s.Parent = game:GetService("SoundService")
 s:Play()
 game:GetService("Debris"):AddItem(s, 1.5)
 end)
 end)
+end
+
+function aw.SetTheme(self, name)
+return av.WindUI:SetTheme(name)
 end
 
 function aw.Toast(self, opts)
@@ -17295,15 +17351,28 @@ return aA
 end
 
 function aa.SetTheme(az,aA)
-if aa.Themes[aA]then
-aa.Theme=aa.Themes[aA]
-as.SetTheme(aa.Themes[aA])
+local targetTheme = aa.Themes[aA]
+if not targetTheme and type(aA) == "string" then
+    local clean = aA:gsub("%s+", ""):lower()
+    for k, t in pairs(aa.Themes) do
+        if type(t) == "table" then
+            local tName = (t.Name or k):gsub("%s+", ""):lower()
+            if tName == clean or k:lower() == aA:lower() or (t.Name and t.Name:lower() == aA:lower()) then
+                targetTheme = t
+                break
+            end
+        end
+    end
+end
+if targetTheme then
+aa.Theme=targetTheme
+as.SetTheme(targetTheme)
 
 if aa.OnThemeChangeFunction then
-aa.OnThemeChangeFunction(aA)
+aa.OnThemeChangeFunction(targetTheme.Name or aA)
 end
 
-return aa.Themes[aA]
+return targetTheme
 end
 return nil
 end
@@ -17325,10 +17394,19 @@ return aa.LocalizationModule:New(aA,as)
 end
 
 function aa.SetLanguage(az,aA)
-if as.Localization then
+if not as.Localization then
+as.Localization = { Enabled = true, Translations = {}, Prefix = "loc:", DefaultLanguage = "en" }
+end
+as.Localization.Enabled = true
 return as.SetLanguage(aA)
 end
-return false
+
+function aa.AddTranslations(az,aA,aB)
+return as.AddTranslations(aA,aB)
+end
+
+function aa.Translate(az,aA,aB)
+return as.Translate(aA,aB)
 end
 
 function aa.ToggleAcrylic(az,aA)
@@ -17421,6 +17499,16 @@ if not aa.ScreenGui or not aa.ScreenGui.Parent or not aa.ScreenGui:FindFirstChil
             at("Folder", { Name = fName, Parent = aa.ScreenGui })
         end
     end
+end
+
+if not aa.DropdownGui or not aa.DropdownGui.Parent then
+    aa.DropdownGui = at("ScreenGui", {
+        Name = "WindUI/Dropdowns",
+        Parent = aw,
+        IgnoreGuiInset = true,
+        DisplayOrder = (aa.ScreenGui and aa.ScreenGui.DisplayOrder or -99999) + 20,
+    })
+    av(aa.DropdownGui)
 end
 
 if not am:IsStudio()and writefile then
