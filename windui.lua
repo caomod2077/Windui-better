@@ -17424,6 +17424,24 @@ aa:SetLanguage(as.Language)
 function aa.CreateWindow(az,aA)
 local aB=a.load'ae'
 
+if not aa.ScreenGui or not aa.ScreenGui.Parent or not aa.ScreenGui:FindFirstChild("Window") then
+    if not aa.ScreenGui or not aa.ScreenGui.Parent then
+        aa.ScreenGui = at("ScreenGui", {
+            Name = "WindUI",
+            Parent = aw,
+            IgnoreGuiInset = true,
+            ScreenInsets = "None",
+            DisplayOrder = -99999,
+        })
+        av(aa.ScreenGui)
+    end
+    for _, fName in ipairs({"Window", "KeySystem", "Popups", "ToolTips"}) do
+        if not aa.ScreenGui:FindFirstChild(fName) then
+            at("Folder", { Name = fName, Parent = aa.ScreenGui })
+        end
+    end
+end
+
 if not am:IsStudio()and writefile then
 if not isfolder"WindUI"then
 makefolder"WindUI"
