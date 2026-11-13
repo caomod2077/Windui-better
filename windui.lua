@@ -15764,7 +15764,12 @@ if elapsed >= 0.5 then
 local fps = math.floor(frameCount / math.max(elapsed, 0.001))
 frameCount = 0
 lastUpdate = now
-local ping = math.floor(ak.LocalPlayer and ak.LocalPlayer:GetNetworkPing and (ak.LocalPlayer:GetNetworkPing() * 1000) or 0)
+local ping = 0
+if ak.LocalPlayer and ak.LocalPlayer.GetNetworkPing then
+pcall(function()
+ping = math.floor(ak.LocalPlayer:GetNetworkPing() * 1000)
+end)
+end
 local parts = {}
 if showFPS then table.insert(parts, tostring(fps) .. " FPS") end
 if showPing and ping > 0 then table.insert(parts, tostring(ping) .. " ms") end
