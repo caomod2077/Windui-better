@@ -2,7 +2,7 @@
 
 [English](README.md) | [Tiếng Việt](README_VI.md)
 
-Phiên bản WindUI mở rộng cho Roblox, hỗ trợ giao diện 2 cột dạng Card, tìm kiếm tính năng trực tiếp trong Tab, tích hợp sẵn các theme Gradient, hiển thị Watermark (FPS / Ping), phân quyền truy cập Tab theo UserId, khung hiển thị mô hình 3D tương tác (Viewport) và tối ưu hóa hiệu năng giảm giật lag.
+Phiên bản WindUI mở rộng cho Roblox, hỗ trợ giao diện 2 cột dạng Card, tìm kiếm tính năng trực tiếp trong Tab, thanh tab con lồng nhau (Sub-Tabs), tích hợp sẵn các theme Gradient (bao gồm theme kính nước Liquid Glass), hệ thống tự động dịch đa ngôn ngữ thông minh, hiển thị Watermark (FPS / Ping), phân quyền truy cập Tab theo UserId, khung hiển thị mô hình 3D tương tác (Viewport) và tối ưu hóa hiệu năng giảm giật lag.
 
 Thư viện gốc bởi Footagesus. Bản mở rộng và duy trì bởi caomod2077.
 
@@ -29,12 +29,12 @@ local Window = WindUI:CreateWindow({
     Title = "My Script Hub",
     Author = "by Creator",
     Folder = "MyScriptHub",
-    Theme = "Dark",
+    Theme = "Liquid Glass",  -- "Liquid Glass" | "Dark" | "Obsidian" | "Light" | v.v.
     Size = UDim2.fromOffset(840, 540),
-    TwoColumns = true,      -- Bật bố cục 2 cột (mặc định: false)
-    BackgroundBlur = false,  -- Làm mờ hậu cảnh (mặc định: false)
-    Glow = Color3.fromRGB(0, 145, 255),
-    IconAnimation = "Spin", -- "Spin" | "Pulse" | "Rainbow"
+    TwoColumns = true,       -- Bật bố cục 2 cột (mặc định: false)
+    BackgroundBlur = false,   -- Làm mờ hậu cảnh (mặc định: false)
+    Glow = Color3.fromRGB(0, 229, 255),
+    IconAnimation = "Spin",  -- "Spin" | "Pulse" | "Rainbow"
     SidebarBanner = {
         Image = "rbxassetid://133610205520685",
         Height = 75,
@@ -94,7 +94,11 @@ Window:SetBackgroundBlur(false)
 - `Window:Watermark({ Title, FPS = true, Ping = true })`: Tạo khung hiển thị FPS / Ping trên topbar. Trả về đối tượng `{ SetTitle(text), SetVisible(bool), Destroy() }`.
 - `Window:SetBackgroundBlur(boolean)`: Bật hoặc tắt làm mờ hậu cảnh lúc đang chạy.
 - `Window:ToggleSidebar(forceState)`: Đổi trạng thái thu gọn Sidebar dạng icon (52px) hoặc mở rộng (175px).
+- `Window:SetTheme(name)`: Đổi theme cho cửa sổ đang chạy. Hỗ trợ tìm kiếm linh hoạt không phân biệt hoa thường.
 - `Window:SetColor({ Accent, Background, Text, Dialog, ... })`: Đổi màu trực tiếp cho theme đang chạy.
+- `Window:EnableSounds(boolean, soundConfig)`: Bật hoặc tắt âm thanh khi click nút và chuyển tab, hỗ trợ cấu hình âm thanh tùy chọn.
+- `Window:SetSounds({ Tab, Toggle, Notification, Volume })`: Tự do cài đặt ID âm thanh riêng (`rbxassetid://...`) và âm lượng thay vì bị ép dùng mặc định.
+- `Window:PlaySound(soundType)`: Phát âm thanh thủ công (`"tab"` hoặc `"toggle"`).
 - `Window:SetUIScale(number)`: Điều chỉnh tỷ lệ thu phóng toàn bộ giao diện (ví dụ `0.85` cho mobile).
 - `Window:SetToggleKey(Enum.KeyCode)`: Đổi phím tắt ẩn hiện cửa sổ.
 - `Window:SetSize(UDim2)`: Đổi kích thước cửa sổ bằng mã.
@@ -106,8 +110,6 @@ Window:SetBackgroundBlur(false)
 - `Window:SetSidebarBanner({ Image, Height, Title })`: Cập nhật banner trên Sidebar.
 - `Window:Toast({ Title, Content, Duration, Icon })`: Hiện nhanh một thông báo ngắn.
 - `Window:Dialog({ Title, Content, Buttons })`: Mở hộp thoại modal popup, có thể chứa trực tiếp các control bên trong.
-- `Window:EnableSounds(boolean)`: Bật hoặc tắt âm thanh khi click nút và chuyển tab.
-- `Window:PlaySound(soundType)`: Phát âm thanh thủ công (`"tab"` hoặc `"toggle"`).
 - `Window:EditOpenButton(table)`: Tùy chỉnh nút bấm mở GUI nổi trên màn hình cho mobile.
 - `Window:Section({ Title, Icon, Opened })`: Tạo nhóm phân mục trên Sidebar để gom các Tab.
 - `Window:Divider()`: Thêm đường kẻ phân cách trong Sidebar.
@@ -127,25 +129,38 @@ Window:SetBackgroundBlur(false)
 - `WindUI:SetNotificationUpper(boolean)`: Đặt thông báo nằm ở góc trên bên phải (`true`) hoặc góc dưới bên phải (`false`).
 - `WindUI:SetNotificationLower(boolean)`: Hạ thấp vị trí thông báo để tránh cấn các thanh GUI game.
 - `WindUI:SetDisplayOrder(number)`: Đặt thứ tự hiển thị ScreenGui lên trên các GUI khác trong game (hỗ trợ alias `SetZIndex`, `SetLayer`).
-- `WindUI:SetTheme(name)`: Áp dụng theme trên toàn bộ thư viện.
+- `WindUI:SetTheme(name)`: Áp dụng theme trên toàn bộ thư viện. Hỗ trợ tên linh hoạt (`"Liquid Glass"`, `"liquidglass"`, v.v.).
 - `WindUI:GetThemes()`: Trả về bảng danh sách tất cả theme có sẵn.
 - `WindUI:GetCurrentTheme()`: Trả về chuỗi tên theme hiện tại.
 - `WindUI:AddTheme(themeTable)`: Đăng ký một bảng theme màu sắc tùy chỉnh mới.
 - `WindUI:Gradient(keypoints, options)`: Hàm tiện ích tạo dải màu Gradient xoay góc cho theme.
 - `WindUI:SetFont(fontAssetId)`: Đổi phông chữ hiển thị toàn cục.
-- `WindUI:SetLanguage(langCode)`: Đổi ngôn ngữ bản địa hóa (localization).
+- `WindUI:SetLanguage("en" | "vi")`: Đổi ngôn ngữ và tự động chuyển toàn bộ văn bản giao diện sang ngôn ngữ đã chọn ngay lập tức.
+- `WindUI:AddTranslations(lang, dict)`: Bổ sung từ điển dịch tùy ý hoặc ghi đè từ ngữ cho bất kỳ ngôn ngữ nào.
+- `WindUI:Translate(text, lang)`: Hàm tiện ích dịch nhanh một đoạn văn bản theo từ điển.
 - `WindUI:ToggleAcrylic(boolean)`: Bật hoặc tắt hiệu ứng kính mờ Acrylic toàn cục.
 
 ---
 
-### 4. Cấu trúc Tab và Section
+### 4. Cấu trúc Tab, Tab Con (Sub-Tabs) và Section
 
-- `Window:Tab({ Title, Icon, Desc, TwoColumns, LockedTo, HiddenTo, Whitelist, ShowTabTitle, IconShape, IconColor, CustomEmptyPage })`: Tạo tab mới.
+- `Window:Tab({ Title, Icon, Desc, TwoColumns, LockedTo, HiddenTo, Whitelist, WhitelistHidden, WhitelistAction, ShowTabTitle, IconShape, IconColor, CustomEmptyPage })`: Tạo tab mới.
   - `LockedTo = { userId, ... }`: Khóa tab và hiện giao diện yêu cầu phân quyền đối với ai không có trong danh sách.
-  - `Whitelist = { userId, ... }`: Ẩn hoàn toàn tab khỏi danh sách đối với người không có quyền.
+  - `Whitelist = { userId, ... }`: Danh sách UserId được cấp quyền.
+    - `WhitelistHidden = true` (mặc định): Ẩn hoàn toàn tab khỏi sidebar đối với ai không có quyền.
+    - `WhitelistHidden = false` hoặc `WhitelistAction = "Show"`: Vẫn hiện tab trong sidebar, nhưng khóa tab và hiện màn hình yêu cầu quyền khi bấm vào.
   - `IconShape = "Circle"`: Đặt khung bo tròn bao quanh icon tab.
   - `IconColor = Color3.fromRGB(...)`: Tô màu riêng cho icon của tab.
-  - `CustomEmptyPage = { Icon, IconSize, Title, Desc }`: Giao diện hiển thị khi tab chưa có phần tử nào.
+- `Tab:SubTabs({ { Title, Icon }, ... })`: Tạo thanh tab con dạng viên thuốc (pill bar) nằm ngang ngay trên đầu tab với các trang độc lập (như Cấp Độ Farm, Tuning, Chiến Đấu):
+  ```lua
+  local sub = FarmTab:SubTabs({
+      { Title = "Level Farm", Icon = "sparkles" },
+      { Title = "Tuning", Icon = "wrench" },
+      { Title = "Combat", Icon = "swords" },
+  })
+  local LevelPage = sub["Level Farm"]
+  LevelPage:Card({ Title = "Auto Level" }):Toggle({ Title = "Enabled" })
+  ```
 - `Tab:AddSearch(placeholder)`: Nhúng thanh tìm kiếm lọc tính năng theo thời gian thực vào tab.
 - `Tab:Banner({ Image, Height, Title, Desc })`: Tạo banner hình ảnh ở đầu tab.
 - `Tab:Card({ Title, Icon, Desc, Side = "Left" | "Right", FullWidth, Badge, BadgeColor })`: Khung card chứa control (alias: `Section`, `Groupbox`).
@@ -162,14 +177,14 @@ Window:SetBackgroundBlur(false)
 
 ### 5. Danh mục các thành phần UI (Controls & Elements)
 
-Có thể tạo trên `Tab`, `Card`, `Section`, `Column` hoặc trong `Dialog`:
+Có thể tạo trên `Tab`, `SubPage`, `Card`, `Section`, `Column` hoặc trong `Dialog`:
 
 - `Button({ Title, Desc, Icon, Callback, Color, Justify, IconAlign, Locked, LockedTitle })`: Nút bấm kích hoạt hàm.
 - `Toggle({ Title, Desc, Value, Callback, Type = "Toggle" | "Checkbox", Icon, Locked })`: Công tắc bật tắt hoặc ô kiểm checkbox.
   - Hàm điều khiển: `:Set(boolean)`
 - `Slider({ Title, Desc, Value = { Min, Max, Default }, Step, Callback, IsTextbox, IsTooltip, Icons = { From, To }, Width, Locked })`: Thanh kéo chọn giá trị số, hỗ trợ ô nhập text và bong bóng tooltip.
   - Hàm điều khiển: `:Set(number)`, `:SetMin(number)`, `:SetMax(number)`
-- `Dropdown({ Title, Desc, Values, Value, Multi, AllowNone, SearchBarEnabled, MenuWidth, Callback, Locked })`: Menu thả xuống chọn 1 hoặc nhiều mục, hỗ trợ tìm kiếm mục chọn.
+- `Dropdown({ Title, Desc, Values, Value, Multi, AllowNone, SearchBarEnabled, MenuWidth, Callback, Locked })`: Menu thả xuống chọn 1 hoặc nhiều mục. Bấm vào bất kỳ đâu trên dòng đều mở menu mượt mà; chọn mục đơn tự động áp dụng và đóng menu gọn gàng.
   - Hàm điều khiển: `:Select(value)`, `:Refresh(values)`, `:Open()`, `:Close()`
 - `Input({ Title, Desc, Placeholder, Value, ClearTextOnFocus, Type = "Input" | "Textarea", InputIcon, Callback, Locked })`: Ô nhập văn bản một dòng hoặc nhiều dòng (Textarea).
   - Hàm điều khiển: `:Set(text)`, `:SetPlaceholder(text)`
@@ -192,7 +207,6 @@ Có thể tạo trên `Tab`, `Card`, `Section`, `Column` hoặc trong `Dialog`:
 - `Divider(title or nil)`: Đường kẻ ngang phân cách, hoặc đường kẻ có chữ tiêu đề ở giữa nếu truyền chuỗi.
 - `Space(columns or nil)`: Khoảng cách đệm theo chiều dọc.
 - `Group(fn)` / `HStack` / `VStack`: Khung bố cục nhóm phần tử theo chiều ngang hoặc dọc.
-- `DiscordCard({ Invite, Title, Desc, Icon, OnJoin, AutoFetch, Side })`: Widget máy chủ Discord tự động lấy số thành viên online.
 - `Embed({ Title, Desc, Color, Fields = { { Title, Value } }, Footer })`: Khung tin nhắn dạng Embed phong cách Discord.
 
 ---
@@ -235,7 +249,7 @@ local Window = WindUI:CreateWindow({
     Title = "WindUI Full API Showcase",
     Author = "by Developer",
     Folder = "WindUIFullShowcase",
-    Theme = "Dark",
+    Theme = "Liquid Glass", -- Liquid Glass, Dark, Obsidian, Light, Mid Summer, Winter Frost, Elegant Night, etc.
     Size = UDim2.fromOffset(860, 580),
     TwoColumns = true,
     BackgroundBlur = false,
@@ -248,13 +262,22 @@ local Window = WindUI:CreateWindow({
     },
 })
 
+-- Topbar Notifications & Layer Order
 WindUI:SetNotificationUpper(true)
 WindUI:SetDisplayOrder(999)
+
+-- Sound System with Custom Sound IDs
+Window:SetSounds({
+    Tab = "rbxassetid://6895079853",
+    Toggle = "rbxassetid://4590662766",
+    Volume = 0.35,
+})
 Window:EnableSounds(true)
 
+-- Topbar Tag & Stats Watermark
 Window:Tag({
     Title = "PRO",
-    Color = Color3.fromRGB(0, 145, 255),
+    Color = Color3.fromRGB(0, 229, 255),
     Radius = 8,
 })
 
@@ -267,24 +290,26 @@ local watermark = Window:Watermark({
 -- Sidebar Sections grouping Navigation Tabs
 local HomeSection = Window:Section({ Title = "Home", Icon = "star", Opened = true })
 local ControlsTab = HomeSection:Tab({ Title = "Controls", Icon = "sliders-horizontal" })
+local SubTabsTab = HomeSection:Tab({ Title = "Sub-Tabs Demo", Icon = "layers" })
 local DisplayTab = HomeSection:Tab({ Title = "3D & Display", Icon = "box" })
-local CommunityTab = HomeSection:Tab({ Title = "Community", Icon = "users" })
 
 Window:Divider()
 
 local AdvancedSection = Window:Section({ Title = "Advanced", Icon = "box", Opened = true })
 local LayoutTab = AdvancedSection:Tab({ Title = "Layout & Groups", Icon = "layout-grid" })
-local SecurityTab = AdvancedSection:Tab({
-    Title = "Locked Tab",
-    Icon = "shield-alert",
-    LockedTo = { 12345678, 87654321 },
-    Desc = "Locked tab demonstrating LockedTo ID protection.",
+local WhitelistTab = AdvancedSection:Tab({
+    Title = "VIP Member Tab",
+    Icon = "crown",
+    Whitelist = { 12345678, 87654321 },
+    WhitelistHidden = false, -- false: show in sidebar as locked | true (default): hide completely
+    Desc = "Locked tab showing Whitelist protection.",
 })
 
 Window:Divider()
 
 local SettingsTab = Window:Tab({ Title = "Settings", Icon = "settings" })
 
+-- In-tab search
 ControlsTab:AddSearch("Search controls...")
 
 local BasicCard = ControlsTab:Card({
@@ -386,6 +411,31 @@ AdvancedCard:HoldButton({
     end,
 })
 
+-- Sub-Tabs Demo (Nested tabs within a single tab)
+local subPages = SubTabsTab:SubTabs({
+    { Title = "Level Farm", Icon = "sparkles" },
+    { Title = "Tuning", Icon = "wrench" },
+    { Title = "Combat", Icon = "swords" },
+})
+
+local farmPage = subPages["Level Farm"]
+local farmCard = farmPage:Card({ Title = "Auto Level Farming", Side = "Left" })
+farmCard:Toggle({ Title = "Auto Mob Kill", Value = true })
+farmCard:Slider({ Title = "Mob Distance", Value = 30, Min = 5, Max = 100 })
+
+local tuningPage = subPages["Tuning"]
+local tuningCard = tuningPage:Card({ Title = "Vehicle & Speed Tuning", Side = "Left" })
+tuningCard:Slider({ Title = "Engine Torque Multiplier", Value = 150, Min = 100, Max = 500 })
+
+local combatPage = subPages["Combat"]
+local combatCard = combatPage:Card({ Title = "Combat Exploits", Side = "Left" })
+combatCard:Button({
+    Title = "Instant Kill Aura",
+    Callback = function()
+        WindUI:Notify({ Title = "Combat", Content = "Aura activated!", Duration = 2 })
+    end,
+})
+
 -- 3D Viewport Model Viewer
 local ViewportCard = DisplayTab:Card({
     Title = "3D Viewport Viewer",
@@ -396,7 +446,7 @@ local ViewportCard = DisplayTab:Card({
 
 local demoPart = Instance.new("Part")
 demoPart.Size = Vector3.new(2, 2, 2)
-demoPart.Color = Color3.fromRGB(0, 191, 255)
+demoPart.Color = Color3.fromRGB(0, 229, 255)
 demoPart.Material = Enum.Material.Neon
 demoPart.Anchored = true
 
@@ -447,47 +497,6 @@ MediaCard:Paragraph({
     },
 })
 
-CommunityTab:Banner({
-    Image = "rbxassetid://133610205520685",
-    Height = 90,
-    Title = "Official Community",
-    Desc = "Live announcements, updates, and releases.",
-})
-
-CommunityTab:Countdown({
-    Title = "Next Release Countdown",
-    Seconds = 7200,
-    OnEnd = function() end,
-})
-
-CommunityTab:Changelog({
-    Version = "2.1.0",
-    Items = {
-        "+ Engine performance optimizations and dead object cleanup",
-        "+ Full Viewport 3D interactive model integration",
-        "+ Zero-allocation watermark and render loop gating",
-        "- Removed redundant math recalculations",
-        "* Smoother animations across all elements",
-    },
-})
-
-CommunityTab:DiscordCard({
-    Invite = "mSrMzVuc3h",
-    Title = "Foxname Community",
-    Desc = "Join our server for script releases and support.",
-})
-
-CommunityTab:Embed({
-    Title = "System Status",
-    Desc = "All background services operating normally.",
-    Color = Color3.fromRGB(34, 197, 94),
-    Fields = {
-        { Title = "Server Version", Value = "v2.1.0-better" },
-        { Title = "Uptime", Value = "99.98%" },
-    },
-    Footer = "Status checked automatically",
-})
-
 -- Layout and Grouping
 local ColumnsDemo = LayoutTab:Card({
     Title = "Left Column Card",
@@ -522,10 +531,31 @@ local InterfaceSection = SettingsTab:Section({ Title = "Interface Options" })
 
 InterfaceSection:Dropdown({
     Title = "Theme Selector",
-    Values = { "Dark", "Obsidian", "Light", "Mid Summer", "Lunar Moon", "Winter Frost", "Elegant Night", "Lunar Abyss", "Lunar Eclipse", "Rose", "Plant", "Indigo", "Violet", "Amber", "Midnight", "MonokaiPro" },
-    Value = "Dark",
+    Values = { "Liquid Glass", "Dark", "Obsidian", "Light", "Mid Summer", "Lunar Moon", "Winter Frost", "Elegant Night", "Lunar Abyss", "Lunar Eclipse", "Rose", "Plant", "Indigo", "Violet", "Amber", "Midnight", "MonokaiPro" },
+    Value = "Liquid Glass",
     Callback = function(theme)
-        WindUI:SetTheme(theme)
+        Window:SetTheme(theme)
+    end,
+})
+
+InterfaceSection:Dropdown({
+    Title = "Language (Auto-Translation)",
+    Values = { "English", "Tiếng Việt" },
+    Value = "English",
+    Callback = function(lang)
+        if lang == "Tiếng Việt" then
+            WindUI:SetLanguage("vi")
+        else
+            WindUI:SetLanguage("en")
+        end
+    end,
+})
+
+InterfaceSection:Toggle({
+    Title = "UI Sound Effects",
+    Value = true,
+    Callback = function(enabled)
+        Window:EnableSounds(enabled)
     end,
 })
 
@@ -622,7 +652,7 @@ Window:EditOpenButton({
     OnlyMobile = false,
 })
 
--- Tu dong chon mo tab dau tien khi khoi tao
+-- Automatically display the first tab
 ControlsTab:Select()
 ```
 
@@ -632,6 +662,7 @@ ControlsTab:Select()
 
 | Tên Theme | Mô tả |
 |---|---|
+| `Liquid Glass` | Kính nước trong suốt với ánh sáng dạ quang xanh ngọc và gradient đại dương sâu |
 | `Dark` | Giao diện tối tiêu chuẩn |
 | `Obsidian` | Nền than tối kết hợp màu cam |
 | `Light` | Giao diện sáng ban ngày |

@@ -2,7 +2,7 @@
 
 [English](README.md) | [Tieng Viet](README_VI.md)
 
-An enhanced edition of WindUI for Roblox with support for two-column card layouts, in-tab search filtering, built-in gradient themes, watermark stats, tab access control, interactive 3D viewports, and performance optimizations.
+An enhanced edition of WindUI for Roblox with support for two-column card layouts, in-tab search filtering, nested sub-tabs, built-in gradient themes (including Liquid Glass), automatic multi-language translation, watermark stats, tab access control, interactive 3D viewports, and performance optimizations.
 
 Original library by Footagesus. Maintained and expanded by caomod2077.
 
@@ -29,12 +29,12 @@ local Window = WindUI:CreateWindow({
     Title = "My Script Hub",
     Author = "by Creator",
     Folder = "MyScriptHub",
-    Theme = "Dark",
+    Theme = "Liquid Glass",  -- "Liquid Glass" | "Dark" | "Obsidian" | "Light" | etc.
     Size = UDim2.fromOffset(840, 540),
-    TwoColumns = true,      -- Enable 2-column card layout (default: false)
-    BackgroundBlur = false,  -- Background blur effect (default: false)
-    Glow = Color3.fromRGB(0, 145, 255),
-    IconAnimation = "Spin", -- "Spin" | "Pulse" | "Rainbow"
+    TwoColumns = true,       -- Enable 2-column card layout (default: false)
+    BackgroundBlur = false,   -- Background blur effect (default: false)
+    Glow = Color3.fromRGB(0, 229, 255),
+    IconAnimation = "Spin",  -- "Spin" | "Pulse" | "Rainbow"
     SidebarBanner = {
         Image = "rbxassetid://133610205520685",
         Height = 75,
@@ -94,7 +94,11 @@ Window:SetBackgroundBlur(false)
 - `Window:Watermark({ Title, FPS = true, Ping = true })`: Creates topbar stats badge. Returns `{ SetTitle(text), SetVisible(bool), Destroy() }`.
 - `Window:SetBackgroundBlur(boolean)`: Toggles lighting blur at runtime.
 - `Window:ToggleSidebar(forceState)`: Toggles or sets collapsed icon mode (52px) vs expanded mode (175px).
+- `Window:SetTheme(name)`: Changes the active theme on the window.
 - `Window:SetColor({ Accent, Background, Text, Dialog, ... })`: Overrides theme colors at runtime.
+- `Window:EnableSounds(boolean, soundConfig)`: Toggles audio feedback with optional custom sound IDs and volume.
+- `Window:SetSounds({ Tab, Toggle, Notification, Volume })`: Customizes individual sound IDs (`rbxassetid://...`) and volume.
+- `Window:PlaySound(soundType)`: Plays sound (`"tab"` or `"toggle"`).
 - `Window:SetUIScale(number)`: Adjusts entire UI scale factor (e.g. `0.85` for mobile).
 - `Window:SetToggleKey(Enum.KeyCode)`: Updates keyboard toggle shortcut.
 - `Window:SetSize(UDim2)`: Resizes window programmatically.
@@ -106,8 +110,6 @@ Window:SetBackgroundBlur(false)
 - `Window:SetSidebarBanner({ Image, Height, Title })`: Updates or creates sidebar banner.
 - `Window:Toast({ Title, Content, Duration, Icon })`: Quick notification shortcut.
 - `Window:Dialog({ Title, Content, Buttons })`: Opens modal popup that can host interactive child elements.
-- `Window:EnableSounds(boolean)`: Toggles audio feedback for tab changes and buttons.
-- `Window:PlaySound(soundType)`: Plays sound (`"tab"` or `"toggle"`).
 - `Window:EditOpenButton(table)`: Customizes floating toggle button for mobile/touch devices.
 - `Window:Section({ Title, Icon, Opened })`: Creates a collapsible sidebar section for grouping tabs.
 - `Window:Divider()`: Inserts a visual divider line in the sidebar.
@@ -127,25 +129,38 @@ Window:SetBackgroundBlur(false)
 - `WindUI:SetNotificationUpper(boolean)`: Positions toast notifications at the top-right (`true`) or bottom-right (`false`).
 - `WindUI:SetNotificationLower(boolean)`: Shifts notifications slightly down to clear custom bars.
 - `WindUI:SetDisplayOrder(number)`: Adjusts ScreenGui DisplayOrder / ZIndex above game GUIs (aliases: `SetZIndex`, `SetLayer`).
-- `WindUI:SetTheme(name)`: Changes active theme across all open interfaces.
+- `WindUI:SetTheme(name)`: Changes active theme across all open interfaces. Supports flexible name matching (`"Liquid Glass"`, `"liquidglass"`, etc.).
 - `WindUI:GetThemes()`: Returns dictionary of all registered themes.
 - `WindUI:GetCurrentTheme()`: Returns name string of current theme.
 - `WindUI:AddTheme(themeTable)`: Registers a custom theme palette.
 - `WindUI:Gradient(keypoints, options)`: Creates gradient sequence table with rotation for themes.
 - `WindUI:SetFont(fontAssetId)`: Changes global font family across all elements.
-- `WindUI:SetLanguage(langCode)`: Changes active localization language.
+- `WindUI:SetLanguage("en" | "vi")`: Changes active language and automatically translates all on-screen UI text in real time.
+- `WindUI:AddTranslations(lang, dict)`: Adds custom translation overrides for any language dictionary.
+- `WindUI:Translate(text, lang)`: Utility function to translate a string directly.
 - `WindUI:ToggleAcrylic(boolean)`: Toggles acrylic blur state globally.
 
 ---
 
-### 4. Tab and Section Structure
+### 4. Tab, Sub-Tabs, and Section Structure
 
-- `Window:Tab({ Title, Icon, Desc, TwoColumns, LockedTo, HiddenTo, Whitelist, ShowTabTitle, IconShape, IconColor, CustomEmptyPage })`: Creates navigation tab.
+- `Window:Tab({ Title, Icon, Desc, TwoColumns, LockedTo, HiddenTo, Whitelist, WhitelistHidden, WhitelistAction, ShowTabTitle, IconShape, IconColor, CustomEmptyPage })`: Creates navigation tab.
   - `LockedTo = { userId, ... }`: Restricts tab with lock overlay for non-whitelisted users.
-  - `Whitelist = { userId, ... }`: Hides tab completely from non-whitelisted users.
+  - `Whitelist = { userId, ... }`: Access whitelist.
+    - `WhitelistHidden = true` (default): Hides the tab completely from non-whitelisted users.
+    - `WhitelistHidden = false` or `WhitelistAction = "Show"`: Keeps the tab visible in the sidebar, but locks it with an access restriction screen when clicked.
   - `IconShape = "Circle"`: Renders container badge around tab icon.
   - `IconColor = Color3.fromRGB(...)`: Custom tint for tab icon.
-  - `CustomEmptyPage = { Icon, IconSize, Title, Desc }`: Custom placeholder when tab has no elements.
+- `Tab:SubTabs({ { Title, Icon }, ... })`: Embeds a sleek horizontal segmented pill bar inside the tab with independent sub-pages (matching mobile/sub-tab navigation):
+  ```lua
+  local sub = FarmTab:SubTabs({
+      { Title = "Level Farm", Icon = "sparkles" },
+      { Title = "Tuning", Icon = "wrench" },
+      { Title = "Combat", Icon = "swords" },
+  })
+  local LevelPage = sub["Level Farm"]
+  LevelPage:Card({ Title = "Auto Level" }):Toggle({ Title = "Enabled" })
+  ```
 - `Tab:AddSearch(placeholder)`: Embeds real-time filter input inside tab.
 - `Tab:Banner({ Image, Height, Title, Desc })`: Adds visual header banner across the tab.
 - `Tab:Card({ Title, Icon, Desc, Side = "Left" | "Right", FullWidth, Badge, BadgeColor })`: Creates framed container for controls (aliases: `Section`, `Groupbox`).
@@ -162,14 +177,14 @@ Window:SetBackgroundBlur(false)
 
 ### 5. Controls and UI Elements
 
-All elements can be created on `Tab`, `Card`, `Section`, `Column`, or modal `Dialog`:
+All elements can be created on `Tab`, `SubPage`, `Card`, `Section`, `Column`, or modal `Dialog`:
 
 - `Button({ Title, Desc, Icon, Callback, Color, Justify, IconAlign, Locked, LockedTitle })`
 - `Toggle({ Title, Desc, Value, Callback, Type = "Toggle" | "Checkbox", Icon, Locked })`
   - Methods: `:Set(boolean)`
 - `Slider({ Title, Desc, Value = { Min, Max, Default }, Step, Callback, IsTextbox, IsTooltip, Icons = { From, To }, Width, Locked })`
   - Methods: `:Set(number)`, `:SetMin(number)`, `:SetMax(number)`
-- `Dropdown({ Title, Desc, Values, Value, Multi, AllowNone, SearchBarEnabled, MenuWidth, Callback, Locked })`
+- `Dropdown({ Title, Desc, Values, Value, Multi, AllowNone, SearchBarEnabled, MenuWidth, Callback, Locked })`: Clicking anywhere on the row opens the menu; selecting in single mode automatically selects and closes the dropdown cleanly.
   - Methods: `:Select(value)`, `:Refresh(values)`, `:Open()`, `:Close()`
 - `Input({ Title, Desc, Placeholder, Value, ClearTextOnFocus, Type = "Input" | "Textarea", InputIcon, Callback, Locked })`
   - Methods: `:Set(text)`, `:SetPlaceholder(text)`
@@ -192,7 +207,6 @@ All elements can be created on `Tab`, `Card`, `Section`, `Column`, or modal `Dia
 - `Divider(title or nil)`: Horizontal separator line or labeled section divider when text is provided.
 - `Space(columns or nil)`: Vertical spacing gap.
 - `Group(fn)` / `HStack` / `VStack`: Horizontal or vertical grouping containers.
-- `DiscordCard({ Invite, Title, Desc, Icon, OnJoin, AutoFetch, Side })`: Live Discord server widget.
 - `Embed({ Title, Desc, Color, Fields = { { Title, Value } }, Footer })`: Rich embed card.
 
 ---
@@ -210,8 +224,7 @@ local Window = WindUI:CreateWindow({
         Note = "Join our Discord to obtain your license key.",
         URL = "https://discord.gg/mSrMzVuc3h",
         SaveKey = true,
-        Key = "SECRET_ACCESS_KEY", -- Or table: { "KEY_A", "KEY_B" }
-        -- Or custom validator:
+        Key = "SECRET_ACCESS_KEY",
         KeyValidator = function(enteredKey)
             return enteredKey == "SECRET_ACCESS_KEY"
         end,
@@ -236,7 +249,7 @@ local Window = WindUI:CreateWindow({
     Title = "WindUI Full API Showcase",
     Author = "by Developer",
     Folder = "WindUIFullShowcase",
-    Theme = "Dark",
+    Theme = "Liquid Glass", -- Liquid Glass, Dark, Obsidian, Light, Mid Summer, Winter Frost, Elegant Night, etc.
     Size = UDim2.fromOffset(860, 580),
     TwoColumns = true,
     BackgroundBlur = false,
@@ -249,13 +262,22 @@ local Window = WindUI:CreateWindow({
     },
 })
 
+-- Topbar Notifications & Layer Order
 WindUI:SetNotificationUpper(true)
 WindUI:SetDisplayOrder(999)
+
+-- Sound System with Custom Sound IDs
+Window:SetSounds({
+    Tab = "rbxassetid://6895079853",
+    Toggle = "rbxassetid://4590662766",
+    Volume = 0.35,
+})
 Window:EnableSounds(true)
 
+-- Topbar Tag & Stats Watermark
 Window:Tag({
     Title = "PRO",
-    Color = Color3.fromRGB(0, 145, 255),
+    Color = Color3.fromRGB(0, 229, 255),
     Radius = 8,
 })
 
@@ -268,24 +290,26 @@ local watermark = Window:Watermark({
 -- Sidebar Sections grouping Navigation Tabs
 local HomeSection = Window:Section({ Title = "Home", Icon = "star", Opened = true })
 local ControlsTab = HomeSection:Tab({ Title = "Controls", Icon = "sliders-horizontal" })
+local SubTabsTab = HomeSection:Tab({ Title = "Sub-Tabs Demo", Icon = "layers" })
 local DisplayTab = HomeSection:Tab({ Title = "3D & Display", Icon = "box" })
-local CommunityTab = HomeSection:Tab({ Title = "Community", Icon = "users" })
 
 Window:Divider()
 
 local AdvancedSection = Window:Section({ Title = "Advanced", Icon = "box", Opened = true })
 local LayoutTab = AdvancedSection:Tab({ Title = "Layout & Groups", Icon = "layout-grid" })
-local SecurityTab = AdvancedSection:Tab({
-    Title = "Locked Tab",
-    Icon = "shield-alert",
-    LockedTo = { 12345678, 87654321 },
-    Desc = "Locked tab demonstrating LockedTo ID protection.",
+local WhitelistTab = AdvancedSection:Tab({
+    Title = "VIP Member Tab",
+    Icon = "crown",
+    Whitelist = { 12345678, 87654321 },
+    WhitelistHidden = false, -- false: show in sidebar as locked | true (default): hide completely
+    Desc = "Locked tab showing Whitelist protection.",
 })
 
 Window:Divider()
 
 local SettingsTab = Window:Tab({ Title = "Settings", Icon = "settings" })
 
+-- In-tab search
 ControlsTab:AddSearch("Search controls...")
 
 local BasicCard = ControlsTab:Card({
@@ -387,6 +411,31 @@ AdvancedCard:HoldButton({
     end,
 })
 
+-- Sub-Tabs Demo (Nested tabs within a single tab)
+local subPages = SubTabsTab:SubTabs({
+    { Title = "Level Farm", Icon = "sparkles" },
+    { Title = "Tuning", Icon = "wrench" },
+    { Title = "Combat", Icon = "swords" },
+})
+
+local farmPage = subPages["Level Farm"]
+local farmCard = farmPage:Card({ Title = "Auto Level Farming", Side = "Left" })
+farmCard:Toggle({ Title = "Auto Mob Kill", Value = true })
+farmCard:Slider({ Title = "Mob Distance", Value = 30, Min = 5, Max = 100 })
+
+local tuningPage = subPages["Tuning"]
+local tuningCard = tuningPage:Card({ Title = "Vehicle & Speed Tuning", Side = "Left" })
+tuningCard:Slider({ Title = "Engine Torque Multiplier", Value = 150, Min = 100, Max = 500 })
+
+local combatPage = subPages["Combat"]
+local combatCard = combatPage:Card({ Title = "Combat Exploits", Side = "Left" })
+combatCard:Button({
+    Title = "Instant Kill Aura",
+    Callback = function()
+        WindUI:Notify({ Title = "Combat", Content = "Aura activated!", Duration = 2 })
+    end,
+})
+
 -- 3D Viewport Model Viewer
 local ViewportCard = DisplayTab:Card({
     Title = "3D Viewport Viewer",
@@ -397,7 +446,7 @@ local ViewportCard = DisplayTab:Card({
 
 local demoPart = Instance.new("Part")
 demoPart.Size = Vector3.new(2, 2, 2)
-demoPart.Color = Color3.fromRGB(0, 191, 255)
+demoPart.Color = Color3.fromRGB(0, 229, 255)
 demoPart.Material = Enum.Material.Neon
 demoPart.Anchored = true
 
@@ -448,47 +497,6 @@ MediaCard:Paragraph({
     },
 })
 
-CommunityTab:Banner({
-    Image = "rbxassetid://133610205520685",
-    Height = 90,
-    Title = "Official Community",
-    Desc = "Live announcements, updates, and releases.",
-})
-
-CommunityTab:Countdown({
-    Title = "Next Release Countdown",
-    Seconds = 7200,
-    OnEnd = function() end,
-})
-
-CommunityTab:Changelog({
-    Version = "2.1.0",
-    Items = {
-        "+ Engine performance optimizations and dead object cleanup",
-        "+ Full Viewport 3D interactive model integration",
-        "+ Zero-allocation watermark and render loop gating",
-        "- Removed redundant math recalculations",
-        "* Smoother animations across all elements",
-    },
-})
-
-CommunityTab:DiscordCard({
-    Invite = "mSrMzVuc3h",
-    Title = "Foxname Community",
-    Desc = "Join our server for script releases and support.",
-})
-
-CommunityTab:Embed({
-    Title = "System Status",
-    Desc = "All background services operating normally.",
-    Color = Color3.fromRGB(34, 197, 94),
-    Fields = {
-        { Title = "Server Version", Value = "v2.1.0-better" },
-        { Title = "Uptime", Value = "99.98%" },
-    },
-    Footer = "Status checked automatically",
-})
-
 -- Layout and Grouping
 local ColumnsDemo = LayoutTab:Card({
     Title = "Left Column Card",
@@ -523,10 +531,31 @@ local InterfaceSection = SettingsTab:Section({ Title = "Interface Options" })
 
 InterfaceSection:Dropdown({
     Title = "Theme Selector",
-    Values = { "Dark", "Obsidian", "Light", "Mid Summer", "Lunar Moon", "Winter Frost", "Elegant Night", "Lunar Abyss", "Lunar Eclipse", "Rose", "Plant", "Indigo", "Violet", "Amber", "Midnight", "MonokaiPro" },
-    Value = "Dark",
+    Values = { "Liquid Glass", "Dark", "Obsidian", "Light", "Mid Summer", "Lunar Moon", "Winter Frost", "Elegant Night", "Lunar Abyss", "Lunar Eclipse", "Rose", "Plant", "Indigo", "Violet", "Amber", "Midnight", "MonokaiPro" },
+    Value = "Liquid Glass",
     Callback = function(theme)
-        WindUI:SetTheme(theme)
+        Window:SetTheme(theme)
+    end,
+})
+
+InterfaceSection:Dropdown({
+    Title = "Language (Auto-Translation)",
+    Values = { "English", "Tiếng Việt" },
+    Value = "English",
+    Callback = function(lang)
+        if lang == "Tiếng Việt" then
+            WindUI:SetLanguage("vi")
+        else
+            WindUI:SetLanguage("en")
+        end
+    end,
+})
+
+InterfaceSection:Toggle({
+    Title = "UI Sound Effects",
+    Value = true,
+    Callback = function(enabled)
+        Window:EnableSounds(enabled)
     end,
 })
 
@@ -623,7 +652,7 @@ Window:EditOpenButton({
     OnlyMobile = false,
 })
 
--- Select the initial tab to display
+-- Automatically display the first tab
 ControlsTab:Select()
 ```
 
@@ -633,7 +662,8 @@ ControlsTab:Select()
 
 | Theme Name | Description |
 |---|---|
-| `Dark` | Standard dark theme |
+| `Liquid Glass` | Frosted aquatic glass with cyan neon glow and oceanic gradient |
+| `Dark` | Standard clean modern dark theme |
 | `Obsidian` | Dark charcoal base with orange accents |
 | `Light` | Clean bright daytime theme |
 | `Rose` | Dark wine and rose palette |
