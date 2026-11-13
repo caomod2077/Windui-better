@@ -622,6 +622,9 @@ Window:EditOpenButton({
     Enabled = true,
     OnlyMobile = false,
 })
+
+-- Select the initial tab to display
+ControlsTab:Select()
 ```
 
 ---

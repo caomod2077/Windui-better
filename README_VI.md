@@ -621,6 +621,9 @@ Window:EditOpenButton({
     Enabled = true,
     OnlyMobile = false,
 })
+
+-- Tu dong chon mo tab dau tien khi khoi tao
+ControlsTab:Select()
 ```
 
 ---

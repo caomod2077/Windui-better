@@ -13508,6 +13508,14 @@ HideEmpty()
 end
 end)
 
+if ao.SelectedTab == nil and not ar.Locked then
+task.defer(function()
+if ao.SelectedTab == nil and not ar.Locked and ao.Tabs[as] then
+ao:SelectTab(as)
+end
+end)
+end
+
 return ar
 end
 
