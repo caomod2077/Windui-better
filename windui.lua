@@ -199,19 +199,7 @@ end
 m:SetRadius(f)
 m:SetType(g)
 
-local lastW,lastH=-1,-1
 b.AddSignal(r:GetPropertyChangedSignal"AbsoluteSize",function()
-local abs=r.AbsoluteSize
-local curW,curH=abs.X,abs.Y
-if curW==lastW and curH==lastH then
-return
-end
-lastW,lastH=curW,curH
-
-if curW<=0 or curH<=0 then
-return
-end
-
 local u=GetShape(m.Type)
 if u.AutoChange==false then
 return
@@ -221,14 +209,12 @@ if string.find(m.Type,"Squircle")then
 local v=string.find(m.Type,"Glass")and"Glass"or nil
 local x=string.find(m.Type,"Outline")and"Outline"or nil
 
-local z=math.round(curW/b.UIScale)
-local A=math.round(curH/b.UIScale)
-local minDim=math.min(z,A)
-if minDim<=0 then return end
+local z=math.round(r.AbsoluteSize.X/b.UIScale)
+local A=math.round(r.AbsoluteSize.Y/b.UIScale)
 
-local B=m.Radius~=0 and m.Radius or minDim/2
+local B=m.Radius~=0 and m.Radius or math.min(z,A)/2
 local C=d.Shapes.Squircle.Radius/1024
-local F=B/minDim
+local F=B/math.min(z,A)
 
 local G
 
@@ -946,11 +932,6 @@ r.Objects[u].Properties[z]=A
 end
 else
 r.Objects[u]={Object=u,Properties=v}
-pcall(function()
-u.Destroying:Connect(function()
-r.Objects[u]=nil
-end)
-end)
 end
 
 if not x then
@@ -974,9 +955,6 @@ end
 
 function r.UpdateTheme(u,v,x,z,A,B)
 local function ApplyTheme(C)
-if not C.Object or C.Object.Parent==nil then
-return false
-end
 for F,G in pairs(C.Properties or{})do
 local H=r.GetThemeProperty(G,r.Theme)
 if H~=nil then
@@ -1039,21 +1017,16 @@ J:Destroy()
 end
 end
 end
-return true
 end
 
 if u then
 local C=r.Objects[u]
 if C then
-if not ApplyTheme(C) then
-r.Objects[u]=nil
-end
+ApplyTheme(C)
 end
 else
 for C,F in pairs(r.Objects)do
-if not ApplyTheme(F) then
-r.Objects[C]=nil
-end
+ApplyTheme(F)
 end
 end
 end
