@@ -199,7 +199,19 @@ end
 m:SetRadius(f)
 m:SetType(g)
 
+local lastW,lastH=-1,-1
 b.AddSignal(r:GetPropertyChangedSignal"AbsoluteSize",function()
+local abs=r.AbsoluteSize
+local curW,curH=abs.X,abs.Y
+if curW==lastW and curH==lastH then
+return
+end
+lastW,lastH=curW,curH
+
+if curW<=0 or curH<=0 then
+return
+end
+
 local u=GetShape(m.Type)
 if u.AutoChange==false then
 return
@@ -209,12 +221,14 @@ if string.find(m.Type,"Squircle")then
 local v=string.find(m.Type,"Glass")and"Glass"or nil
 local x=string.find(m.Type,"Outline")and"Outline"or nil
 
-local z=math.round(r.AbsoluteSize.X/b.UIScale)
-local A=math.round(r.AbsoluteSize.Y/b.UIScale)
+local z=math.round(curW/b.UIScale)
+local A=math.round(curH/b.UIScale)
+local minDim=math.min(z,A)
+if minDim<=0 then return end
 
-local B=m.Radius~=0 and m.Radius or math.min(z,A)/2
+local B=m.Radius~=0 and m.Radius or minDim/2
 local C=d.Shapes.Squircle.Radius/1024
-local F=B/math.min(z,A)
+local F=B/minDim
 
 local G
 
@@ -932,6 +946,11 @@ r.Objects[u].Properties[z]=A
 end
 else
 r.Objects[u]={Object=u,Properties=v}
+pcall(function()
+u.Destroying:Connect(function()
+r.Objects[u]=nil
+end)
+end)
 end
 
 if not x then
@@ -955,6 +974,9 @@ end
 
 function r.UpdateTheme(u,v,x,z,A,B)
 local function ApplyTheme(C)
+if not C.Object or C.Object.Parent==nil then
+return false
+end
 for F,G in pairs(C.Properties or{})do
 local H=r.GetThemeProperty(G,r.Theme)
 if H~=nil then
@@ -1017,16 +1039,21 @@ J:Destroy()
 end
 end
 end
+return true
 end
 
 if u then
 local C=r.Objects[u]
 if C then
-ApplyTheme(C)
+if not ApplyTheme(C) then
+r.Objects[u]=nil
+end
 end
 else
 for C,F in pairs(r.Objects)do
-ApplyTheme(F)
+if not ApplyTheme(F) then
+r.Objects[C]=nil
+end
 end
 end
 end
@@ -12405,6 +12432,15 @@ cfg.ImageSize = 28
 local typeName, p = paraModule:New(cfg)
 
 local running = true
+pcall(function()
+local pf = p and (p.ElementFrame or (p.ParagraphFrame and p.ParagraphFrame.UIElements and p.ParagraphFrame.UIElements.Main))
+if pf then
+pf.Destroying:Connect(function()
+running = false
+end)
+end
+end)
+
 task.spawn(function()
 while running do
 local remaining = math.max(0, targetTime - os.time())
@@ -15516,6 +15552,7 @@ if aw.Destroyed or not iconImg or not iconImg.Parent then
 if conn then conn:Disconnect() end
 return
 end
+if aw.Closed or not iconImg.Visible then return end
 rot = (rot + dt * 120) % 360
 iconImg.Rotation = rot
 end)
@@ -15524,11 +15561,15 @@ local scaleObj = iconImg:FindFirstChildWhichIsA("UIScale") or Instance.new("UISc
 local growing = true
 task.spawn(function()
 while not aw.Destroyed and iconImg and iconImg.Parent do
+if aw.Closed or not iconImg.Visible then
+task.wait(0.5)
+else
 local target = growing and 1.18 or 0.95
 growing = not growing
 local t = ts:Create(scaleObj, TweenInfo.new(0.65, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), { Scale = target })
 t:Play()
 t.Completed:Wait()
+end
 end
 end)
 elseif animType == "Rainbow" then
@@ -15538,6 +15579,7 @@ if aw.Destroyed or not iconImg or not iconImg.Parent then
 if conn then conn:Disconnect() end
 return
 end
+if aw.Closed or not iconImg.Visible then return end
 h = (h + dt * 0.25) % 1
 iconImg.ImageColor3 = Color3.fromHSV(h, 0.8, 1)
 end)
@@ -15559,8 +15601,13 @@ ColorSequenceKeypoint.new(0.5, Color3.fromRGB(245, 158, 11)),
 ColorSequenceKeypoint.new(1, Color3.fromRGB(236, 72, 153)),
 }
 local offset = -1
-game:GetService("RunService").RenderStepped:Connect(function(dt)
-if aw.Destroyed or not grad or not grad.Parent then return end
+local conn
+conn = game:GetService("RunService").RenderStepped:Connect(function(dt)
+if aw.Destroyed or not grad or not grad.Parent then
+if conn then conn:Disconnect() end
+return
+end
+if aw.Closed or not titleLabel.Visible then return end
 offset = offset + dt * 0.75
 if offset > 1 then offset = -1 end
 grad.Offset = Vector2.new(offset, 0)
@@ -15701,23 +15748,23 @@ LayoutOrder = 3,
 Parent = badgeFrame.Outline,
 })
 
-local lastUpdate = 0
-local fpsHistory = {}
+local lastUpdate = os.clock()
+local frameCount = 0
 local conn
 conn = game:GetService("RunService").RenderStepped:Connect(function(dt)
 if aw.Destroyed or not badgeFrame or not badgeFrame.Parent then
 if conn then conn:Disconnect() end
 return
 end
+if aw.Closed or not badgeFrame.Visible then return end
+frameCount = frameCount + 1
 local now = os.clock()
-table.insert(fpsHistory, dt)
-if #fpsHistory > 25 then table.remove(fpsHistory, 1) end
-if now - lastUpdate >= 0.4 then
+local elapsed = now - lastUpdate
+if elapsed >= 0.5 then
+local fps = math.floor(frameCount / math.max(elapsed, 0.001))
+frameCount = 0
 lastUpdate = now
-local totalDt = 0
-for _, v in ipairs(fpsHistory) do totalDt = totalDt + v end
-local fps = math.floor(#fpsHistory / math.max(totalDt, 0.001))
-local ping = math.floor(ak.LocalPlayer and ak.LocalPlayer:GetNetworkPing() and (ak.LocalPlayer:GetNetworkPing() * 1000) or 0)
+local ping = math.floor(ak.LocalPlayer and ak.LocalPlayer:GetNetworkPing and (ak.LocalPlayer:GetNetworkPing() * 1000) or 0)
 local parts = {}
 if showFPS then table.insert(parts, tostring(fps) .. " FPS") end
 if showPing and ping > 0 then table.insert(parts, tostring(ping) .. " ms") end
