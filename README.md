@@ -52,7 +52,7 @@ Window:SetBackgroundBlur(false)
 
 ---
 
-## API Reference
+## Complete Feature & API Reference
 
 ### 1. Window Creation Options (WindUI:CreateWindow)
 
@@ -77,9 +77,14 @@ Window:SetBackgroundBlur(false)
 | `ScrollBarEnabled` | boolean | `false` | Enables visual custom scroll sliders |
 | `Resizable` | boolean | `true` | Allows dragging the bottom-right corner to resize |
 | `Transparent` | boolean | `false` | Window body transparency |
+| `Acrylic` | boolean | `false` | Enables frosted acrylic glass blur effect |
+| `AutoScale` | boolean | `true` | Automatically scales interface for mobile / small displays |
 | `ToggleKey` | Enum.KeyCode | `nil` | Keycode to hide or reveal the window |
 | `User` | table | `nil` | User card on bottom of sidebar: `{ Enabled, Anonymous, Subtitle, Callback }` |
 | `Topbar` | table | `{ Height = 52 }` | Topbar options: `{ Height = 52, ButtonsType = "Default" / "Mac" }` |
+| `Background` | string | `nil` | Custom background image (`rbxassetid://`, `https://`) or video (`video:https://...webm`) |
+| `BackgroundImageTransparency` | number | `0` | Opacity of the background image (0 to 1) |
+| `KeySystem` | table | `nil` | Built-in key gate system before opening window |
 
 ---
 
@@ -104,6 +109,8 @@ Window:SetBackgroundBlur(false)
 - `Window:EnableSounds(boolean)`: Toggles audio feedback for tab changes and buttons.
 - `Window:PlaySound(soundType)`: Plays sound (`"tab"` or `"toggle"`).
 - `Window:EditOpenButton(table)`: Customizes floating toggle button for mobile/touch devices.
+- `Window:Section({ Title, Icon, Opened })`: Creates a collapsible sidebar section for grouping tabs.
+- `Window:Divider()`: Inserts a visual divider line in the sidebar.
 - `Window:OnOpen(fn)`, `Window:OnClose(fn)`, `Window:OnDestroy(fn)`: Window lifecycle event listeners.
 - `Window.ConfigManager`:
   - `ConfigManager:CreateConfig(name)`: Returns config object with `:Save()`, `:Load()`, `:Delete()`, `:Set(k, v)`, `:Get(k)`.
@@ -118,20 +125,27 @@ Window:SetBackgroundBlur(false)
 - `WindUI:Notify({ Title, Content, Icon, Duration, Progress, Buttons })`: Displays a notification toast with optional action buttons and progress bar.
 - `WindUI:Popup({ Title, Content, Icon, Thumbnail, Buttons })`: Displays modal alert with actions.
 - `WindUI:SetNotificationUpper(boolean)`: Positions toast notifications at the top-right (`true`) or bottom-right (`false`).
+- `WindUI:SetNotificationLower(boolean)`: Shifts notifications slightly down to clear custom bars.
 - `WindUI:SetDisplayOrder(number)`: Adjusts ScreenGui DisplayOrder / ZIndex above game GUIs (aliases: `SetZIndex`, `SetLayer`).
 - `WindUI:SetTheme(name)`: Changes active theme across all open interfaces.
 - `WindUI:GetThemes()`: Returns dictionary of all registered themes.
 - `WindUI:GetCurrentTheme()`: Returns name string of current theme.
 - `WindUI:AddTheme(themeTable)`: Registers a custom theme palette.
 - `WindUI:Gradient(keypoints, options)`: Creates gradient sequence table with rotation for themes.
+- `WindUI:SetFont(fontAssetId)`: Changes global font family across all elements.
+- `WindUI:SetLanguage(langCode)`: Changes active localization language.
+- `WindUI:ToggleAcrylic(boolean)`: Toggles acrylic blur state globally.
 
 ---
 
 ### 4. Tab and Section Structure
 
-- `Window:Tab({ Title, Icon, Desc, TwoColumns, LockedTo, HiddenTo, Whitelist, ShowTabTitle })`: Creates navigation tab.
+- `Window:Tab({ Title, Icon, Desc, TwoColumns, LockedTo, HiddenTo, Whitelist, ShowTabTitle, IconShape, IconColor, CustomEmptyPage })`: Creates navigation tab.
   - `LockedTo = { userId, ... }`: Restricts tab with lock overlay for non-whitelisted users.
   - `Whitelist = { userId, ... }`: Hides tab completely from non-whitelisted users.
+  - `IconShape = "Circle"`: Renders container badge around tab icon.
+  - `IconColor = Color3.fromRGB(...)`: Custom tint for tab icon.
+  - `CustomEmptyPage = { Icon, IconSize, Title, Desc }`: Custom placeholder when tab has no elements.
 - `Tab:AddSearch(placeholder)`: Embeds real-time filter input inside tab.
 - `Tab:Banner({ Image, Height, Title, Desc })`: Adds visual header banner across the tab.
 - `Tab:Card({ Title, Icon, Desc, Side = "Left" | "Right", FullWidth, Badge, BadgeColor })`: Creates framed container for controls (aliases: `Section`, `Groupbox`).
@@ -142,6 +156,7 @@ Window:SetBackgroundBlur(false)
 - `Tab:Column("Left" | "Right")`: Returns column container to place cards directly.
 - `Tab:AddPage(title, icon)` / `Tab:SubPage`: Creates nested sub-page view within tab.
 - `Tab:CollapseAll()`, `Tab:ExpandAll()`: Toggles all collapsible cards inside tab.
+- `Tab:LockAll()`, `Tab:UnlockAll()`: Toggles lock state across all child elements.
 
 ---
 
@@ -179,6 +194,34 @@ All elements can be created on `Tab`, `Card`, `Section`, `Column`, or modal `Dia
 - `Group(fn)` / `HStack` / `VStack`: Horizontal or vertical grouping containers.
 - `DiscordCard({ Invite, Title, Desc, Icon, OnJoin, AutoFetch, Side })`: Live Discord server widget.
 - `Embed({ Title, Desc, Color, Fields = { { Title, Value } }, Footer })`: Rich embed card.
+
+---
+
+### 6. Key System Configuration
+
+WindUI includes a full key system modal with validation providers:
+
+```lua
+local Window = WindUI:CreateWindow({
+    Title = "Secured Hub",
+    Folder = "SecuredHub",
+    KeySystem = {
+        Title = "Key System",
+        Note = "Join our Discord to obtain your license key.",
+        URL = "https://discord.gg/mSrMzVuc3h",
+        SaveKey = true,
+        Key = "SECRET_ACCESS_KEY", -- Or table: { "KEY_A", "KEY_B" }
+        -- Or custom validator:
+        KeyValidator = function(enteredKey)
+            return enteredKey == "SECRET_ACCESS_KEY"
+        end,
+        Thumbnail = {
+            Image = "rbxassetid://133610205520685",
+            Title = "Premium Access",
+        },
+    },
+})
+```
 
 ---
 
@@ -222,10 +265,25 @@ local watermark = Window:Watermark({
     Ping = true,
 })
 
-local ControlsTab = Window:Tab({ Title = "Controls", Icon = "sliders-horizontal" })
-local DisplayTab = Window:Tab({ Title = "3D & Display", Icon = "box" })
-local CommunityTab = Window:Tab({ Title = "Community", Icon = "users" })
-local LayoutTab = Window:Tab({ Title = "Layout", Icon = "layout-grid" })
+-- Sidebar Sections grouping Navigation Tabs
+local HomeSection = Window:Section({ Title = "Home", Icon = "star", Opened = true })
+local ControlsTab = HomeSection:Tab({ Title = "Controls", Icon = "sliders-horizontal" })
+local DisplayTab = HomeSection:Tab({ Title = "3D & Display", Icon = "box" })
+local CommunityTab = HomeSection:Tab({ Title = "Community", Icon = "users" })
+
+Window:Divider()
+
+local AdvancedSection = Window:Section({ Title = "Advanced", Icon = "box", Opened = true })
+local LayoutTab = AdvancedSection:Tab({ Title = "Layout & Groups", Icon = "layout-grid" })
+local SecurityTab = AdvancedSection:Tab({
+    Title = "Locked Tab",
+    Icon = "shield-alert",
+    LockedTo = { 12345678, 87654321 },
+    Desc = "Locked tab demonstrating LockedTo ID protection.",
+})
+
+Window:Divider()
+
 local SettingsTab = Window:Tab({ Title = "Settings", Icon = "settings" })
 
 ControlsTab:AddSearch("Search controls...")
@@ -251,18 +309,14 @@ BasicCard:Toggle({
     Title = "Feature Toggle",
     Desc = "Standard toggle control",
     Value = false,
-    Callback = function(state)
-        print("Toggle state:", state)
-    end,
+    Callback = function(state) end,
 })
 
 BasicCard:Toggle({
     Title = "Checkbox Mode",
     Type = "Checkbox",
     Value = true,
-    Callback = function(state)
-        print("Checkbox state:", state)
-    end,
+    Callback = function(state) end,
 })
 
 BasicCard:Slider({
@@ -271,18 +325,15 @@ BasicCard:Slider({
     Step = 1,
     IsTextbox = true,
     IsTooltip = true,
-    Callback = function(val)
-        print("Slider value:", val)
-    end,
+    Callback = function(val) end,
 })
 
 BasicCard:Dropdown({
-    Title = "Single Dropdown",
-    Values = { "Apple", "Banana", "Cherry", "Dragonfruit" },
+    Title = "Dropdown (Search Enabled)",
+    Values = { "Apple", "Banana", "Cherry", "Dragonfruit", "Elderberry" },
     Value = "Banana",
-    Callback = function(choice)
-        print("Selected fruit:", choice)
-    end,
+    SearchBarEnabled = true,
+    Callback = function(choice) end,
 })
 
 BasicCard:Dropdown({
@@ -290,9 +341,7 @@ BasicCard:Dropdown({
     Values = { "Speed Boost", "Jump Power", "Invisibility", "Godmode" },
     Value = { "Speed Boost" },
     Multi = true,
-    Callback = function(selected)
-        print("Selected count:", type(selected) == "table" and #selected or 0)
-    end,
+    Callback = function(selected) end,
 })
 
 local AdvancedCard = ControlsTab:Card({
@@ -304,35 +353,27 @@ local AdvancedCard = ControlsTab:Card({
 AdvancedCard:Input({
     Title = "Text Input",
     Placeholder = "Type your text here...",
-    Callback = function(text)
-        print("Input submitted:", text)
-    end,
+    Callback = function(text) end,
 })
 
 AdvancedCard:Input({
     Title = "Multi-line Textarea",
     Type = "Textarea",
     Placeholder = "Enter multiple lines of text...",
-    Callback = function(text)
-        print("Textarea:", text)
-    end,
+    Callback = function(text) end,
 })
 
 AdvancedCard:Keybind({
     Title = "Action Keybind",
     Value = "E",
-    Callback = function(key)
-        WindUI:Notify({ Title = "Keybind Fired", Content = "Key " .. tostring(key) .. " pressed!", Duration = 2 })
-    end,
+    Callback = function(key) end,
 })
 
 AdvancedCard:Colorpicker({
     Title = "Color with Transparency",
     Default = Color3.fromRGB(0, 191, 255),
     Transparency = 0.2,
-    Callback = function(color, trans)
-        print("Color selected:", color, "Transparency:", trans)
-    end,
+    Callback = function(color, trans) end,
 })
 
 AdvancedCard:HoldButton({
@@ -346,6 +387,7 @@ AdvancedCard:HoldButton({
     end,
 })
 
+-- 3D Viewport Model Viewer
 local ViewportCard = DisplayTab:Card({
     Title = "3D Viewport Viewer",
     Icon = "box",
@@ -362,7 +404,7 @@ demoPart.Anchored = true
 local viewport = ViewportCard:Viewport({
     Height = 180,
     Object = demoPart,
-    Interactive = true, -- Drag with mouse/touch to rotate, scroll/pinch to zoom
+    Interactive = true, -- Drag with mouse/touch to rotate 360, scroll/pinch to zoom
     Focused = true,     -- Automatically centers camera on object
 })
 
@@ -387,10 +429,10 @@ MediaCard:ProgressBar({
 
 MediaCard:Code({
     Title = "Lua Code Snippet",
-    Code = "local function greet(name)
-    print('Hello, ' .. name)
+    Code = [[local function greet(name)
+    print("Hello, " .. name)
 end
-greet('WindUI')",
+greet("WindUI")]],
     CanCopied = true,
 })
 
@@ -401,9 +443,7 @@ MediaCard:Paragraph({
         {
             Title = "Documentation",
             Icon = "external-link",
-            Callback = function()
-                print("Opening documentation")
-            end,
+            Callback = function() end,
         },
     },
 })
@@ -418,9 +458,7 @@ CommunityTab:Banner({
 CommunityTab:Countdown({
     Title = "Next Release Countdown",
     Seconds = 7200,
-    OnEnd = function()
-        WindUI:Notify({ Title = "Countdown", Content = "Event is now live!", Duration = 5 })
-    end,
+    OnEnd = function() end,
 })
 
 CommunityTab:Changelog({
@@ -451,6 +489,7 @@ CommunityTab:Embed({
     Footer = "Status checked automatically",
 })
 
+-- Layout and Grouping
 local ColumnsDemo = LayoutTab:Card({
     Title = "Left Column Card",
     Side = "Left",
@@ -469,6 +508,17 @@ local FullWidthDemo = LayoutTab:Card({
 })
 FullWidthDemo:Button({ Title = "Spans across both columns" })
 
+-- Horizontal group of buttons (HStack)
+local HStackDemo = LayoutTab:Card({
+    Title = "HStack Horizontal Group",
+    Side = "Left",
+})
+local hstack = HStackDemo:HStack()
+hstack:Button({ Title = "Btn 1" })
+hstack:Button({ Title = "Btn 2" })
+hstack:Button({ Title = "Btn 3" })
+
+-- Settings Tab
 local InterfaceSection = SettingsTab:Section({ Title = "Interface Options" })
 
 InterfaceSection:Dropdown({
@@ -539,22 +589,38 @@ InterfaceSection:Button({
 
 local ConfigSection = SettingsTab:Section({ Title = "Config Management" })
 local ConfigManager = Window.ConfigManager
-local DemoConfig = ConfigManager:CreateConfig("demo")
+local DemoConfig = ConfigManager and ConfigManager:CreateConfig("demo") or nil
 
-ConfigSection:Button({
-    Title = "Save Config",
-    Callback = function()
-        DemoConfig:Save()
-        WindUI:Notify({ Title = "Config", Content = "Configuration saved successfully!", Duration = 2 })
-    end,
-})
+if DemoConfig then
+    ConfigSection:Button({
+        Title = "Save Config",
+        Callback = function()
+            DemoConfig:Save()
+            WindUI:Notify({ Title = "Config", Content = "Configuration saved successfully!", Duration = 2 })
+        end,
+    })
 
-ConfigSection:Button({
-    Title = "Load Config",
-    Callback = function()
-        DemoConfig:Load()
-        WindUI:Notify({ Title = "Config", Content = "Configuration loaded!", Duration = 2 })
-    end,
+    ConfigSection:Button({
+        Title = "Load Config",
+        Callback = function()
+            DemoConfig:Load()
+            WindUI:Notify({ Title = "Config", Content = "Configuration loaded!", Duration = 2 })
+        end,
+    })
+end
+
+-- Custom floating open button for mobile
+Window:EditOpenButton({
+    Title = "Open UI",
+    CornerRadius = UDim.new(0, 16),
+    StrokeThickness = 2,
+    Draggable = true,
+    Color = ColorSequence.new(
+        Color3.fromRGB(0, 191, 255),
+        Color3.fromRGB(255, 105, 180)
+    ),
+    Enabled = true,
+    OnlyMobile = false,
 })
 ```
 

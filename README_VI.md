@@ -14,7 +14,7 @@ Nhiều người dùng gặp hiện tượng tụt FPS hoặc đơ giao diện k
 
 1. Tự động dọn dẹp đối tượng rác (Dead Object Pruning): Toàn bộ đối tượng theme và tín hiệu kết nối gắn với phần tử UI bị xóa (destroy) sẽ được tự động giải phóng khỏi bảng lưu trữ toàn cục, chấm dứt tình trạng rò rỉ bộ nhớ (memory leak).
 2. Tối ưu tính toán kích thước (Memoized Shape Calculations): Khung Squircle và viền Glass chỉ tính toán lại ma trận bo góc khi kích thước pixel thực sự thay đổi, loại bỏ hàng nghìn phép toán vector dư thừa mỗi khung hình.
-3. Đo FPS / Ping không phân mảnh bộ nhớ (Zero-Allocation Watermark): Bỏ việc chèn và xóa mảng (`table.insert`/`table.remove`) liên tục mỗi frame, thay bằng bộ đếm tích lũy nhẹ nhàng, giúp bộ dọn rác (GC) của Lua không bị quá tải.
+3. Đo FPS / Ping không phân mảnh bộ nhớ (Zero-Allocation Watermark): Bỏ việc chèn và xóa mảng (`table.insert`/`table.remove`) liên tục mỗi frame, thay bằng bộ đếm tích lũy thời gian đơn giản không cấp phát mảng, giúp bộ dọn rác (GC) của Lua không bị quá tải.
 4. Tự ngắt vòng lặp khi ẩn giao diện: Hoạt ảnh xoay icon, chuyển màu cầu vồng và vòng lặp watermark sẽ tạm dừng hoàn toàn khi đóng cửa sổ hoặc ẩn phần tử, nhường 100% tài nguyên CPU cho game.
 5. Kiểm soát vòng đời vòng lặp nền: Các tác vụ đếm ngược (Countdown) tự động ngắt kết nối khi component cha bị gỡ bỏ.
 
@@ -77,9 +77,14 @@ Window:SetBackgroundBlur(false)
 | `ScrollBarEnabled` | boolean | `false` | Hiển thị thanh cuộn tùy chỉnh |
 | `Resizable` | boolean | `true` | Cho phép kéo góc dưới bên phải để thay đổi kích thước |
 | `Transparent` | boolean | `false` | Độ trong suốt của thân cửa sổ |
+| `Acrylic` | boolean | `false` | Bật hiệu ứng kính mờ Acrylic |
+| `AutoScale` | boolean | `true` | Tự động co giãn kích thước phù hợp với màn hình mobile |
 | `ToggleKey` | Enum.KeyCode | `nil` | Phím tắt bàn phím để ẩn hoặc hiện cửa sổ |
 | `User` | table | `nil` | Khung thông tin người chơi ở góc dưới Sidebar |
 | `Topbar` | table | `{ Height = 52 }` | Tùy chọn topbar: `{ Height = 52, ButtonsType = "Default" / "Mac" }` |
+| `Background` | string | `nil` | Hình nền cửa sổ (assetid, link ảnh URL hoặc `video:link.webm`) |
+| `BackgroundImageTransparency` | number | `0` | Độ trong suốt ảnh nền (0 đến 1) |
+| `KeySystem` | table | `nil` | Hệ thống kiểm tra Key bản quyền trước khi mở UI |
 
 ---
 
@@ -104,6 +109,8 @@ Window:SetBackgroundBlur(false)
 - `Window:EnableSounds(boolean)`: Bật hoặc tắt âm thanh khi click nút và chuyển tab.
 - `Window:PlaySound(soundType)`: Phát âm thanh thủ công (`"tab"` hoặc `"toggle"`).
 - `Window:EditOpenButton(table)`: Tùy chỉnh nút bấm mở GUI nổi trên màn hình cho mobile.
+- `Window:Section({ Title, Icon, Opened })`: Tạo nhóm phân mục trên Sidebar để gom các Tab.
+- `Window:Divider()`: Thêm đường kẻ phân cách trong Sidebar.
 - `Window:OnOpen(fn)`, `Window:OnClose(fn)`, `Window:OnDestroy(fn)`: Bắt sự kiện khi cửa sổ đóng, mở hoặc bị xóa.
 - `Window.ConfigManager`:
   - `ConfigManager:CreateConfig(name)`: Tạo file config. Đối tượng trả về có: `:Save()`, `:Load()`, `:Delete()`, `:Set(k, v)`, `:Get(k)`.
@@ -118,20 +125,27 @@ Window:SetBackgroundBlur(false)
 - `WindUI:Notify({ Title, Content, Icon, Duration, Progress, Buttons })`: Hiển thị thông báo góc màn hình có nút bấm và thanh tiến trình.
 - `WindUI:Popup({ Title, Content, Icon, Thumbnail, Buttons })`: Hiển thị popup xác nhận chính giữa màn hình.
 - `WindUI:SetNotificationUpper(boolean)`: Đặt thông báo nằm ở góc trên bên phải (`true`) hoặc góc dưới bên phải (`false`).
+- `WindUI:SetNotificationLower(boolean)`: Hạ thấp vị trí thông báo để tránh cấn các thanh GUI game.
 - `WindUI:SetDisplayOrder(number)`: Đặt thứ tự hiển thị ScreenGui lên trên các GUI khác trong game (hỗ trợ alias `SetZIndex`, `SetLayer`).
 - `WindUI:SetTheme(name)`: Áp dụng theme trên toàn bộ thư viện.
 - `WindUI:GetThemes()`: Trả về bảng danh sách tất cả theme có sẵn.
 - `WindUI:GetCurrentTheme()`: Trả về chuỗi tên theme hiện tại.
 - `WindUI:AddTheme(themeTable)`: Đăng ký một bảng theme màu sắc tùy chỉnh mới.
 - `WindUI:Gradient(keypoints, options)`: Hàm tiện ích tạo dải màu Gradient xoay góc cho theme.
+- `WindUI:SetFont(fontAssetId)`: Đổi phông chữ hiển thị toàn cục.
+- `WindUI:SetLanguage(langCode)`: Đổi ngôn ngữ bản địa hóa (localization).
+- `WindUI:ToggleAcrylic(boolean)`: Bật hoặc tắt hiệu ứng kính mờ Acrylic toàn cục.
 
 ---
 
 ### 4. Cấu trúc Tab và Section
 
-- `Window:Tab({ Title, Icon, Desc, TwoColumns, LockedTo, HiddenTo, Whitelist, ShowTabTitle })`: Tạo tab mới.
+- `Window:Tab({ Title, Icon, Desc, TwoColumns, LockedTo, HiddenTo, Whitelist, ShowTabTitle, IconShape, IconColor, CustomEmptyPage })`: Tạo tab mới.
   - `LockedTo = { userId, ... }`: Khóa tab và hiện giao diện yêu cầu phân quyền đối với ai không có trong danh sách.
   - `Whitelist = { userId, ... }`: Ẩn hoàn toàn tab khỏi danh sách đối với người không có quyền.
+  - `IconShape = "Circle"`: Đặt khung bo tròn bao quanh icon tab.
+  - `IconColor = Color3.fromRGB(...)`: Tô màu riêng cho icon của tab.
+  - `CustomEmptyPage = { Icon, IconSize, Title, Desc }`: Giao diện hiển thị khi tab chưa có phần tử nào.
 - `Tab:AddSearch(placeholder)`: Nhúng thanh tìm kiếm lọc tính năng theo thời gian thực vào tab.
 - `Tab:Banner({ Image, Height, Title, Desc })`: Tạo banner hình ảnh ở đầu tab.
 - `Tab:Card({ Title, Icon, Desc, Side = "Left" | "Right", FullWidth, Badge, BadgeColor })`: Khung card chứa control (alias: `Section`, `Groupbox`).
@@ -142,6 +156,7 @@ Window:SetBackgroundBlur(false)
 - `Tab:Column("Left" | "Right")`: Lấy đối tượng cột để đặt card cố định vào bên trái hoặc phải.
 - `Tab:AddPage(title, icon)` / `Tab:SubPage`: Tạo trang con lồng bên trong tab.
 - `Tab:CollapseAll()`, `Tab:ExpandAll()`: Thu gọn hoặc mở rộng toàn bộ các card trong tab.
+- `Tab:LockAll()`, `Tab:UnlockAll()`: Khóa hoặc mở khóa tất cả phần tử trong tab.
 
 ---
 
@@ -179,6 +194,33 @@ Có thể tạo trên `Tab`, `Card`, `Section`, `Column` hoặc trong `Dialog`:
 - `Group(fn)` / `HStack` / `VStack`: Khung bố cục nhóm phần tử theo chiều ngang hoặc dọc.
 - `DiscordCard({ Invite, Title, Desc, Icon, OnJoin, AutoFetch, Side })`: Widget máy chủ Discord tự động lấy số thành viên online.
 - `Embed({ Title, Desc, Color, Fields = { { Title, Value } }, Footer })`: Khung tin nhắn dạng Embed phong cách Discord.
+
+---
+
+### 6. Cấu hình hệ thống xác thực Key (KeySystem)
+
+WindUI tích hợp sẵn hộp thoại nhập Key bản quyền trước khi mở cửa sổ chính:
+
+```lua
+local Window = WindUI:CreateWindow({
+    Title = "Secured Hub",
+    Folder = "SecuredHub",
+    KeySystem = {
+        Title = "Key System",
+        Note = "Tham gia server Discord de lay key mien phi.",
+        URL = "https://discord.gg/mSrMzVuc3h",
+        SaveKey = true,
+        Key = "SECRET_ACCESS_KEY",
+        KeyValidator = function(enteredKey)
+            return enteredKey == "SECRET_ACCESS_KEY"
+        end,
+        Thumbnail = {
+            Image = "rbxassetid://133610205520685",
+            Title = "Xac Thuc Ban Quyen",
+        },
+    },
+})
+```
 
 ---
 
@@ -222,16 +264,31 @@ local watermark = Window:Watermark({
     Ping = true,
 })
 
-local ControlsTab = Window:Tab({ Title = "Dieu Khien", Icon = "sliders-horizontal" })
-local DisplayTab = Window:Tab({ Title = "3D & Hien Thi", Icon = "box" })
-local CommunityTab = Window:Tab({ Title = "Cong Dong", Icon = "users" })
-local LayoutTab = Window:Tab({ Title = "Bo Cuc", Icon = "layout-grid" })
-local SettingsTab = Window:Tab({ Title = "Cai Dat", Icon = "settings" })
+-- Sidebar Sections grouping Navigation Tabs
+local HomeSection = Window:Section({ Title = "Home", Icon = "star", Opened = true })
+local ControlsTab = HomeSection:Tab({ Title = "Controls", Icon = "sliders-horizontal" })
+local DisplayTab = HomeSection:Tab({ Title = "3D & Display", Icon = "box" })
+local CommunityTab = HomeSection:Tab({ Title = "Community", Icon = "users" })
 
-ControlsTab:AddSearch("Tim kiem tinh nang...")
+Window:Divider()
+
+local AdvancedSection = Window:Section({ Title = "Advanced", Icon = "box", Opened = true })
+local LayoutTab = AdvancedSection:Tab({ Title = "Layout & Groups", Icon = "layout-grid" })
+local SecurityTab = AdvancedSection:Tab({
+    Title = "Locked Tab",
+    Icon = "shield-alert",
+    LockedTo = { 12345678, 87654321 },
+    Desc = "Locked tab demonstrating LockedTo ID protection.",
+})
+
+Window:Divider()
+
+local SettingsTab = Window:Tab({ Title = "Settings", Icon = "settings" })
+
+ControlsTab:AddSearch("Search controls...")
 
 local BasicCard = ControlsTab:Card({
-    Title = "Dieu Khien Co Ban",
+    Title = "Basic Controls",
     Icon = "mouse-pointer-click",
     Side = "Left",
     Badge = "CORE",
@@ -239,115 +296,99 @@ local BasicCard = ControlsTab:Card({
 })
 
 BasicCard:Button({
-    Title = "Nut Bam Thuong",
-    Desc = "Kich hoat callback khi nhan",
+    Title = "Standard Button",
+    Desc = "Triggers callback when clicked",
     Icon = "play",
     Callback = function()
-        WindUI:Notify({ Title = "Button", Content = "Ban da nhan nut!", Duration = 3 })
+        WindUI:Notify({ Title = "Button", Content = "Button was clicked!", Duration = 3 })
     end,
 })
 
 BasicCard:Toggle({
-    Title = "Cong Tac Bat Tat",
-    Desc = "Dieu khien dang Toggle",
+    Title = "Feature Toggle",
+    Desc = "Standard toggle control",
     Value = false,
-    Callback = function(state)
-        print("Trang thai Toggle:", state)
-    end,
+    Callback = function(state) end,
 })
 
 BasicCard:Toggle({
-    Title = "O Kiem Checkbox",
+    Title = "Checkbox Mode",
     Type = "Checkbox",
     Value = true,
-    Callback = function(state)
-        print("Trang thai Checkbox:", state)
-    end,
+    Callback = function(state) end,
 })
 
 BasicCard:Slider({
-    Title = "Thanh Keo Nhap So",
+    Title = "Slider with Textbox",
     Value = { Min = 0, Max = 100, Default = 50 },
     Step = 1,
     IsTextbox = true,
     IsTooltip = true,
-    Callback = function(val)
-        print("Gia tri Slider:", val)
-    end,
+    Callback = function(val) end,
 })
 
 BasicCard:Dropdown({
-    Title = "Menu Chon Don",
-    Values = { "Tao", "Chuoi", "Dua Hau", "Thanh Long" },
-    Value = "Chuoi",
-    Callback = function(choice)
-        print("Da chon:", choice)
-    end,
+    Title = "Dropdown (Search Enabled)",
+    Values = { "Apple", "Banana", "Cherry", "Dragonfruit", "Elderberry" },
+    Value = "Banana",
+    SearchBarEnabled = true,
+    Callback = function(choice) end,
 })
 
 BasicCard:Dropdown({
-    Title = "Menu Chon Nhieu Muc",
-    Values = { "Tang Toc", "Nhay Cao", "Tang Hinh", "Bat Tu" },
-    Value = { "Tang Toc" },
+    Title = "Multi-Select Dropdown",
+    Values = { "Speed Boost", "Jump Power", "Invisibility", "Godmode" },
+    Value = { "Speed Boost" },
     Multi = true,
-    Callback = function(selected)
-        print("So luong muc da chon:", type(selected) == "table" and #selected or 0)
-    end,
+    Callback = function(selected) end,
 })
 
 local AdvancedCard = ControlsTab:Card({
-    Title = "Dieu Khien Nang Cao",
+    Title = "Advanced Inputs",
     Icon = "keyboard",
     Side = "Right",
 })
 
 AdvancedCard:Input({
-    Title = "Nhap Van Ban",
-    Placeholder = "Nhap noi dung vao day...",
-    Callback = function(text)
-        print("Noi dung da nhap:", text)
-    end,
+    Title = "Text Input",
+    Placeholder = "Type your text here...",
+    Callback = function(text) end,
 })
 
 AdvancedCard:Input({
-    Title = "Van Ban Nhieu Dong",
+    Title = "Multi-line Textarea",
     Type = "Textarea",
-    Placeholder = "Nhap nhieu dong van ban...",
-    Callback = function(text)
-        print("Textarea:", text)
-    end,
+    Placeholder = "Enter multiple lines of text...",
+    Callback = function(text) end,
 })
 
 AdvancedCard:Keybind({
-    Title = "Gan Phim Tat",
+    Title = "Action Keybind",
     Value = "E",
-    Callback = function(key)
-        WindUI:Notify({ Title = "Keybind", Content = "Phim " .. tostring(key) .. " da duoc bam!", Duration = 2 })
-    end,
+    Callback = function(key) end,
 })
 
 AdvancedCard:Colorpicker({
-    Title = "Chon Mau Va Do Mo",
+    Title = "Color with Transparency",
     Default = Color3.fromRGB(0, 191, 255),
     Transparency = 0.2,
-    Callback = function(color, trans)
-        print("Mau:", color, "Do mo:", trans)
-    end,
+    Callback = function(color, trans) end,
 })
 
 AdvancedCard:HoldButton({
-    Title = "Giu De Xac Nhan",
-    Desc = "Can de chuot hoac cam ung 1.5 giay",
+    Title = "Hold to Confirm Action",
+    Desc = "Must hold for 1.5 seconds",
     HoldTime = 1.5,
     Tag = "SAFETY",
     TagColor = Color3.fromRGB(239, 68, 68),
     Callback = function()
-        WindUI:Notify({ Title = "Hold Success", Content = "Thao tac an toan da duoc xac nhan!", Duration = 3 })
+        WindUI:Notify({ Title = "Hold Success", Content = "Action executed safely!", Duration = 3 })
     end,
 })
 
+-- 3D Viewport Model Viewer
 local ViewportCard = DisplayTab:Card({
-    Title = "Mo Hinh 3D Viewport",
+    Title = "3D Viewport Viewer",
     Icon = "box",
     Side = "Left",
     FullWidth = true,
@@ -362,48 +403,46 @@ demoPart.Anchored = true
 local viewport = ViewportCard:Viewport({
     Height = 180,
     Object = demoPart,
-    Interactive = true, -- Keo chuot/cam ung de xoay 360 do, cuon chuot de zoom
-    Focused = true,     -- Tu dong can camera vao giua mo hinh
+    Interactive = true, -- Drag with mouse/touch to rotate 360, scroll/pinch to zoom
+    Focused = true,     -- Automatically centers camera on object
 })
 
 local MediaCard = DisplayTab:Card({
-    Title = "Tien Do & Hien Thi Code",
+    Title = "Progress & Code Display",
     Icon = "file-code",
     Side = "Left",
 })
 
 local progress = MediaCard:ProgressBar({
-    Title = "Tien Do Xu Ly",
+    Title = "Task Progress",
     Value = { Min = 0, Max = 100, Default = 45 },
     ShowValue = true,
     DisplayMode = "Percent",
 })
 
 MediaCard:ProgressBar({
-    Title = "Vong Xoay Vo Han",
+    Title = "Indeterminate Spinner",
     Indeterminate = true,
     Speed = 1,
 })
 
 MediaCard:Code({
-    Title = "Doan Code Mau",
-    Code = "local function greet(name)
-    print('Hello, ' .. name)
+    Title = "Lua Code Snippet",
+    Code = [[local function greet(name)
+    print("Hello, " .. name)
 end
-greet('WindUI')",
+greet("WindUI")]],
     CanCopied = true,
 })
 
 MediaCard:Paragraph({
-    Title = "Doan Van Thong Tin",
-    Desc = "Phan tu nay ho tro van ban nhieu dong kem nut bam thao tac nhanh.",
+    Title = "Information Paragraph",
+    Desc = "This element supports multi-line text with action buttons.",
     Buttons = {
         {
-            Title = "Tai Lieu",
+            Title = "Documentation",
             Icon = "external-link",
-            Callback = function()
-                print("Mo tai lieu")
-            end,
+            Callback = function() end,
         },
     },
 })
@@ -411,68 +450,78 @@ MediaCard:Paragraph({
 CommunityTab:Banner({
     Image = "rbxassetid://133610205520685",
     Height = 90,
-    Title = "Cong Dong Chinh Thuc",
-    Desc = "Thong bao, cap nhat va phat hanh script moi nhat.",
+    Title = "Official Community",
+    Desc = "Live announcements, updates, and releases.",
 })
 
 CommunityTab:Countdown({
-    Title = "Dem Nguoc Phat Hanh",
+    Title = "Next Release Countdown",
     Seconds = 7200,
-    OnEnd = function()
-        WindUI:Notify({ Title = "Countdown", Content = "Su kien da bat dau!", Duration = 5 })
-    end,
+    OnEnd = function() end,
 })
 
 CommunityTab:Changelog({
     Version = "2.1.0",
     Items = {
-        "+ Toi uu hoa hieu nang va don dep doi tuong bo nho",
-        "+ Tich hop day du khung Viewport 3D tuong tac",
-        "+ Do FPS/Ping zero-allocation khong gay lag",
-        "- Loai bo tinh toan vector va layout lap lai",
-        "* Chuyen dong muot ma tren moi thanh phan",
+        "+ Engine performance optimizations and dead object cleanup",
+        "+ Full Viewport 3D interactive model integration",
+        "+ Zero-allocation watermark and render loop gating",
+        "- Removed redundant math recalculations",
+        "* Smoother animations across all elements",
     },
 })
 
 CommunityTab:DiscordCard({
     Invite = "mSrMzVuc3h",
     Title = "Foxname Community",
-    Desc = "Tham gia server de nhan script va ho tro.",
+    Desc = "Join our server for script releases and support.",
 })
 
 CommunityTab:Embed({
-    Title = "Trang Thai He Thong",
-    Desc = "Moi dich vu ngam dang hoat dong binh thuong.",
+    Title = "System Status",
+    Desc = "All background services operating normally.",
     Color = Color3.fromRGB(34, 197, 94),
     Fields = {
-        { Title = "Phien Ban", Value = "v2.1.0-better" },
-        { Title = "Do On Dinh", Value = "99.98%" },
+        { Title = "Server Version", Value = "v2.1.0-better" },
+        { Title = "Uptime", Value = "99.98%" },
     },
-    Footer = "Kiem tra tu dong boi he thong",
+    Footer = "Status checked automatically",
 })
 
+-- Layout and Grouping
 local ColumnsDemo = LayoutTab:Card({
-    Title = "Card Cot Ben Trai",
+    Title = "Left Column Card",
     Side = "Left",
 })
-ColumnsDemo:Button({ Title = "Thao Tac Cot Trai" })
+ColumnsDemo:Button({ Title = "Left Column Action" })
 
 local RightDemo = LayoutTab:Card({
-    Title = "Card Cot Ben Phai",
+    Title = "Right Column Card",
     Side = "Right",
 })
-RightDemo:Button({ Title = "Thao Tac Cot Phai" })
+RightDemo:Button({ Title = "Right Column Action" })
 
 local FullWidthDemo = LayoutTab:Card({
-    Title = "Card Chiếm Tron 2 Cot",
+    Title = "Full Width Spanning Card",
     FullWidth = true,
 })
-FullWidthDemo:Button({ Title = "Trai rong ca 2 ben cot" })
+FullWidthDemo:Button({ Title = "Spans across both columns" })
 
-local InterfaceSection = SettingsTab:Section({ Title = "Tuy Chon Giao Dien" })
+-- Horizontal group of buttons (HStack)
+local HStackDemo = LayoutTab:Card({
+    Title = "HStack Horizontal Group",
+    Side = "Left",
+})
+local hstack = HStackDemo:HStack()
+hstack:Button({ Title = "Btn 1" })
+hstack:Button({ Title = "Btn 2" })
+hstack:Button({ Title = "Btn 3" })
+
+-- Settings Tab
+local InterfaceSection = SettingsTab:Section({ Title = "Interface Options" })
 
 InterfaceSection:Dropdown({
-    Title = "Chon Theme",
+    Title = "Theme Selector",
     Values = { "Dark", "Obsidian", "Light", "Mid Summer", "Lunar Moon", "Winter Frost", "Elegant Night", "Lunar Abyss", "Lunar Eclipse", "Rose", "Plant", "Indigo", "Violet", "Amber", "Midnight", "MonokaiPro" },
     Value = "Dark",
     Callback = function(theme)
@@ -481,7 +530,7 @@ InterfaceSection:Dropdown({
 })
 
 InterfaceSection:Toggle({
-    Title = "Lam Mo Hau Canh",
+    Title = "Background Blur",
     Value = false,
     Callback = function(enabled)
         Window:SetBackgroundBlur(enabled)
@@ -489,7 +538,7 @@ InterfaceSection:Toggle({
 })
 
 InterfaceSection:Toggle({
-    Title = "Thong Bao O Goc Tren",
+    Title = "Top-Right Notifications",
     Value = true,
     Callback = function(upper)
         WindUI:SetNotificationUpper(upper)
@@ -497,7 +546,7 @@ InterfaceSection:Toggle({
 })
 
 InterfaceSection:Toggle({
-    Title = "Hien Thi Watermark",
+    Title = "Watermark Visibility",
     Value = true,
     Callback = function(visible)
         watermark:SetVisible(visible)
@@ -505,7 +554,7 @@ InterfaceSection:Toggle({
 })
 
 InterfaceSection:Toggle({
-    Title = "Thu Gon Sidebar",
+    Title = "Compact Sidebar Mode",
     Value = false,
     Callback = function(collapsed)
         Window:ToggleSidebar(collapsed)
@@ -513,7 +562,7 @@ InterfaceSection:Toggle({
 })
 
 InterfaceSection:Slider({
-    Title = "Ty Le Thu Phong (UI Scale)",
+    Title = "UI Scale",
     Value = { Min = 0.65, Max = 1.25, Default = 1.0 },
     Step = 0.05,
     Callback = function(scale)
@@ -522,39 +571,55 @@ InterfaceSection:Slider({
 })
 
 InterfaceSection:Button({
-    Title = "Mo Hop Thoai Dialog Mau",
+    Title = "Interactive Dialog Modal",
     Callback = function()
         local dlg = Window:Dialog({
-            Title = "Cai Dat Nhanh",
-            Content = "Tuy chinh thong so truc tiep trong hop thoai:",
+            Title = "Dialog Controls",
+            Content = "Adjust settings inside popup modal:",
             Buttons = {
-                { Title = "Ap Dung", Variant = "Primary" },
-                { Title = "Huy", Variant = "Secondary" },
+                { Title = "Apply", Variant = "Primary" },
+                { Title = "Cancel", Variant = "Secondary" },
             },
         })
-        dlg:Toggle({ Title = "Che Do Turbo", Value = true })
-        dlg:Slider({ Title = "Toc Do Xu Ly", Value = 75, Min = 10, Max = 100 })
+        dlg:Toggle({ Title = "Turbo Mode", Value = true })
+        dlg:Slider({ Title = "Speed Factor", Value = 75, Min = 10, Max = 100 })
     end,
 })
 
-local ConfigSection = SettingsTab:Section({ Title = "Quan Ly Cau Hinh" })
+local ConfigSection = SettingsTab:Section({ Title = "Config Management" })
 local ConfigManager = Window.ConfigManager
-local DemoConfig = ConfigManager:CreateConfig("demo")
+local DemoConfig = ConfigManager and ConfigManager:CreateConfig("demo") or nil
 
-ConfigSection:Button({
-    Title = "Luu Cau Hinh",
-    Callback = function()
-        DemoConfig:Save()
-        WindUI:Notify({ Title = "Config", Content = "Da luu cau hinh thanh cong!", Duration = 2 })
-    end,
-})
+if DemoConfig then
+    ConfigSection:Button({
+        Title = "Save Config",
+        Callback = function()
+            DemoConfig:Save()
+            WindUI:Notify({ Title = "Config", Content = "Configuration saved successfully!", Duration = 2 })
+        end,
+    })
 
-ConfigSection:Button({
-    Title = "Tai Cau Hinh",
-    Callback = function()
-        DemoConfig:Load()
-        WindUI:Notify({ Title = "Config", Content = "Da tai cau hinh thanh cong!", Duration = 2 })
-    end,
+    ConfigSection:Button({
+        Title = "Load Config",
+        Callback = function()
+            DemoConfig:Load()
+            WindUI:Notify({ Title = "Config", Content = "Configuration loaded!", Duration = 2 })
+        end,
+    })
+end
+
+-- Custom floating open button for mobile
+Window:EditOpenButton({
+    Title = "Open UI",
+    CornerRadius = UDim.new(0, 16),
+    StrokeThickness = 2,
+    Draggable = true,
+    Color = ColorSequence.new(
+        Color3.fromRGB(0, 191, 255),
+        Color3.fromRGB(255, 105, 180)
+    ),
+    Enabled = true,
+    OnlyMobile = false,
 })
 ```
 
