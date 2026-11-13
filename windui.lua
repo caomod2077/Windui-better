@@ -1641,8 +1641,8 @@ end
 
 return r end function a.e()
 
-local b={
-AutoDictionary = {
+local b={}
+b.AutoDictionary = {
 vi = {
 ["Home"] = "Trang Chủ",
 ["Settings"] = "Cài Đặt",
