@@ -1643,159 +1643,33 @@ end
 
 return r end function a.e()
 
-local b={}
-b.AutoDictionary = {
-vi = {
-["Home"] = "Trang Chủ",
-["Settings"] = "Cài Đặt",
-["Controls"] = "Điều Khiển",
-["Main"] = "Chính",
-["Features"] = "Tính Năng",
-["Updates"] = "Cập Nhật",
-["Community"] = "Cộng Đồng",
-["Status"] = "Trạng Thái",
-["Layout"] = "Bố Cục",
-["Advanced"] = "Nâng Cao",
-["Display"] = "Hiển Thị",
-["Basic Controls"] = "Điều Khiển Cơ Bản",
-["Advanced Inputs"] = "Nhập Liệu Nâng Cao",
-["Enabled"] = "Bật",
-["Disabled"] = "Tắt",
-["Enable"] = "Bật",
-["Disable"] = "Tắt",
-["On"] = "Bật",
-["Off"] = "Tắt",
-["Save"] = "Lưu",
-["Load"] = "Tải",
-["Save Config"] = "Lưu Cấu Hình",
-["Load Config"] = "Tải Cấu Hình",
-["Create Config"] = "Tạo Cấu Hình",
-["Delete Config"] = "Xóa Cấu Hình",
-["Config"] = "Cấu Hình",
-["Configuration"] = "Cấu Hình",
-["Config Management"] = "Quản Lý Cấu Hình",
-["Theme"] = "Giao Diện",
-["Themes"] = "Giao Diện",
-["Select Theme"] = "Chọn Giao Diện",
-["Theme Selector"] = "Chọn Giao Diện",
-["Interface"] = "Giao Diện",
-["Interface Options"] = "Tùy Chọn Giao Diện",
-["Language"] = "Ngôn Ngữ",
-["Watermark"] = "Watermark",
-["Watermark Visibility"] = "Hiển Thị Watermark",
-["Sound"] = "Âm Thanh",
-["Sounds"] = "Âm Thanh",
-["UI Sound Effects"] = "Hiệu Ứng Âm Thanh",
-["Speed"] = "Tốc Độ",
-["Close"] = "Đóng",
-["Cancel"] = "Hủy",
-["Apply"] = "Áp Dụng",
-["Reset"] = "Khôi Phục",
-["Confirm"] = "Xác Nhận",
-["Search..."] = "Tìm kiếm...",
-["Search features..."] = "Tìm kiếm tính năng...",
-["Search controls..."] = "Tìm kiếm điều khiển...",
-["Copy"] = "Sao Chép",
-["Copied"] = "Đã Sao Chép",
-["Keybind"] = "Phím Tắt",
-["Color"] = "Màu Sắc",
-["Transparency"] = "Độ Mờ",
-["Background"] = "Hình Nền",
-["Background Blur"] = "Làm Mờ Hậu Cảnh",
-["Toggle"] = "Công Tắc",
-["Button"] = "Nút Bấm",
-["Slider"] = "Thanh Kéo",
-["Dropdown"] = "Menu Thả Xuống",
-["Input"] = "Nhập Liệu",
-["Text Input"] = "Nhập Văn Bản",
-["Progress"] = "Tiến Độ",
-["Task Progress"] = "Tiến Độ Nhiệm Vụ",
-["Documentation"] = "Tài Liệu",
-["Locked"] = "Đã Khóa",
-["Unlocked"] = "Đã Mở Khóa",
-["Locked Tab"] = "Tab Đã Khóa",
-["Auto Farm"] = "Tự Động Farm",
-["Combat"] = "Chiến Đấu",
-["Tuning"] = "Tùy Chỉnh",
-["Level Farm"] = "Cấp Độ Farm",
-["Hold to confirm"] = "Giữ để xác nhận",
-["Hold to Confirm Action"] = "Giữ Để Xác Nhận Thao Tác",
-["Emergency Reset"] = "Khôi Phục Khẩn Cấp",
-["Compact Sidebar Mode"] = "Thu Gọn Sidebar",
-["Top-Right Notifications"] = "Thông Báo Góc Trên Phải",
-["UI Scale"] = "Tỷ Lệ Thu Phóng",
-["Interactive Dialog Modal"] = "Mở Hộp Thoại Dialog",
-["Standard Button"] = "Nút Bấm Tiêu Chuẩn",
-["Feature Toggle"] = "Công Tắc Tính Năng",
-["Checkbox Mode"] = "Chế Độ Checkbox",
-["Slider with Textbox"] = "Thanh Kéo Kèm Nhập Số",
-["Multi-Select Dropdown"] = "Menu Chọn Nhiều Mục",
-["Multi-line Textarea"] = "Văn Bản Nhiều Dòng",
-["Action Keybind"] = "Phím Tắt Kích Hoạt",
-["Color with Transparency"] = "Chọn Màu Và Độ Mờ",
-["3D Viewport Viewer"] = "Xem Mô Hình 3D Viewport",
-["Indeterminate Spinner"] = "Vòng Xoay Vô Hạn",
-["Lua Code Snippet"] = "Đoạn Code Mẫu",
-["Information Paragraph"] = "Đoạn Văn Thông Tin",
-["Official Community"] = "Cộng Đồng Chính Thức",
-["Next Release Countdown"] = "Đếm Ngược Bản Phát Hành",
-["Left Column Card"] = "Card Cột Trái",
-["Right Column Card"] = "Card Cột Phải",
-["Full Width Spanning Card"] = "Card Trải Rộng 2 Cột",
-["HStack Horizontal Group"] = "Nhóm Hàng Ngang HStack",
-},
-en = {
-["Trang Chủ"] = "Home",
-["Cài Đặt"] = "Settings",
-["Điều Khiển"] = "Controls",
-["Chính"] = "Main",
-["Tính Năng"] = "Features",
-["Cập Nhật"] = "Updates",
-["Cộng Đồng"] = "Community",
-["Trạng Thái"] = "Status",
-["Bố Cục"] = "Layout",
-["Nâng Cao"] = "Advanced",
-["Hiển Thị"] = "Display",
-["Bật"] = "Enabled",
-["Tắt"] = "Disabled",
-["Lưu Cấu Hình"] = "Save Config",
-["Tải Cấu Hình"] = "Load Config",
-["Tạo Cấu Hình"] = "Create Config",
-["Xóa Cấu Hình"] = "Delete Config",
-["Giao Diện"] = "Theme",
-["Chọn Giao Diện"] = "Select Theme",
-["Ngôn Ngữ"] = "Language",
-["Phím Tắt"] = "Keybind",
-["Màu Sắc"] = "Color",
-["Độ Mờ"] = "Transparency",
-["Hình Nền"] = "Background",
-["Làm Mờ Hậu Cảnh"] = "Background Blur",
-["Tự Động Farm"] = "Auto Farm",
-["Chiến Đấu"] = "Combat",
-["Tùy Chỉnh"] = "Tuning",
-["Cấp Độ Farm"] = "Level Farm",
-["Giữ để xác nhận"] = "Hold to confirm",
-["Khôi Phục Khẩn Cấp"] = "Emergency Reset",
+local b={
+Cache={},
+Pending={},
 }
-}
-b.Cache = {}
 
 function b.TranslateOnline(text, targetLang, callback)
 if not text or text == "" or targetLang == "en" then
 if callback then callback(text) end
 return text
 end
+
 b.Cache[targetLang] = b.Cache[targetLang] or {}
 if b.Cache[targetLang][text] then
 if callback then callback(b.Cache[targetLang][text]) end
 return b.Cache[targetLang][text]
 end
-local dict = b.AutoDictionary and b.AutoDictionary[targetLang]
-if dict and dict[text] then
-b.Cache[targetLang][text] = dict[text]
-if callback then callback(dict[text]) end
-return dict[text]
+
+b.Pending[targetLang] = b.Pending[targetLang] or {}
+if b.Pending[targetLang][text] then
+if callback then
+table.insert(b.Pending[targetLang][text], callback)
 end
+return text
+end
+
+b.Pending[targetLang][text] = callback and { callback } or {}
+
 task.spawn(function()
 local req = (syn and syn.request) or (http and http.request) or http_request or request
 local HttpService = game:GetService("HttpService")
@@ -1808,18 +1682,35 @@ elseif game.HttpGet then
 return game:HttpGet(url)
 end
 end)
+
+local translated = nil
 if success and res and #res > 0 then
 local decodeOk, data = pcall(function() return HttpService:JSONDecode(res) end)
 if decodeOk and data and data.responseData and data.responseData.translatedText then
 local trans = data.responseData.translatedText
 trans = trans:gsub("&quot;", '"'):gsub("&#39;", "'"):gsub("&amp;", "&")
-b.Cache[targetLang][text] = trans
-if callback then callback(trans) end
-return
+if trans and trans ~= "" and not trans:find("MYMEMORY WARNING") then
+translated = trans
 end
 end
-if callback then callback(text) end
+end
+
+local finalResult = translated or text
+b.Cache[targetLang] = b.Cache[targetLang] or {}
+b.Cache[targetLang][text] = finalResult
+
+local cbs = b.Pending[targetLang] and b.Pending[targetLang][text]
+if b.Pending[targetLang] then
+b.Pending[targetLang][text] = nil
+end
+
+if cbs then
+for _, cb in ipairs(cbs) do
+task.spawn(cb, finalResult)
+end
+end
 end)
+
 return text
 end
 
@@ -13334,16 +13225,16 @@ pageData.Container.Visible = isTarget
 local btn = subButtons[k]
 if btn then
 if isTarget then
-ak.Tween(btn.Pill, 0.12, { ImageTransparency = 0 }):Play()
+ak.Tween(btn.Pill, 0.12, { ImageTransparency = 0.88 }):Play()
 ak.Tween(btn.Label, 0.12, { TextTransparency = 0 }):Play()
 if btn.Icon then
 ak.Tween(btn.Icon.ImageLabel, 0.12, { ImageTransparency = 0 }):Play()
 end
 else
 ak.Tween(btn.Pill, 0.12, { ImageTransparency = 1 }):Play()
-ak.Tween(btn.Label, 0.12, { TextTransparency = 0.4 }):Play()
+ak.Tween(btn.Label, 0.12, { TextTransparency = 0.45 }):Play()
 if btn.Icon then
-ak.Tween(btn.Icon.ImageLabel, 0.12, { ImageTransparency = 0.3 }):Play()
+ak.Tween(btn.Icon.ImageLabel, 0.12, { ImageTransparency = 0.35 }):Play()
 end
 end
 end
@@ -13492,8 +13383,11 @@ Name = "Pill_" .. tTitle,
 
 local pillFrame = ak.NewRoundFrame(6, "Squircle", {
 Size = UDim2.new(1, 0, 1, 0),
-ThemeTag = { ImageColor3 = "TabBackgroundActive" },
-ImageColor3 = Color3.fromRGB(0, 145, 255),
+ThemeTag = {
+ImageColor3 = "Text",
+ImageTransparency = "TabBackgroundActiveTransparency",
+},
+ImageColor3 = Color3.fromRGB(255, 255, 255),
 ImageTransparency = 1,
 Parent = pillBtn,
 Name = "ActiveBg",
@@ -15033,7 +14927,13 @@ end
 aw.User.Anonymous=g
 d.UserIcon.ImageLabel.Image=GetUserThumb()
 d.UserIcon.Frame.DisplayName.Text=g and"Anonymous"or ak.LocalPlayer.DisplayName
-d.UserIcon.Frame.UserName.Text=g and"anonymous"or ak.LocalPlayer.Name
+d.UserIcon.Frame.UserName.Text=g and"anonymous"or (aw.User.Subtitle or aw.User.Status or "Expires: lifetime")
+end
+function aw.User.SetSubtitle(f,text)
+aw.User.Subtitle=tostring(text or "")
+if d and d.UserIcon and d.UserIcon.Frame and d.UserIcon.Frame.UserName then
+d.UserIcon.Frame.UserName.Text=tostring(text or "")
+end
 end
 
 if aw.User.Enabled then
