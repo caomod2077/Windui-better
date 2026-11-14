@@ -2,7 +2,7 @@
 
 [English](README.md) | [Tieng Viet](README_VI.md)
 
-An enhanced edition of WindUI for Roblox with support for two-column card layouts, in-tab search filtering, nested sub-tabs, built-in gradient themes (including Liquid Glass), automatic multi-language translation, watermark stats, tab access control, interactive 3D viewports, and performance optimizations.
+An enhanced edition of WindUI for Roblox with support for two-column card layouts, in-tab search filtering, nested sub-tabs, built-in gradient themes (including Liquid Glass and Ocean Blue), universal dynamic auto-translation supporting any language, watermark stats, tab access control, interactive 3D viewports, and performance optimizations.
 
 Original library by Footagesus. Maintained and expanded by caomod2077.
 
@@ -29,7 +29,7 @@ local Window = WindUI:CreateWindow({
     Title = "My Script Hub",
     Author = "by Creator",
     Folder = "MyScriptHub",
-    Theme = "Liquid Glass",  -- "Liquid Glass" | "Dark" | "Obsidian" | "Light" | etc.
+    Theme = "Liquid Glass",  -- "Liquid Glass" (Transparent) | "Ocean Blue" | "Dark" | etc.
     Size = UDim2.fromOffset(840, 540),
     TwoColumns = true,       -- Enable 2-column card layout (default: false)
     BackgroundBlur = false,   -- Background blur effect (default: false)
@@ -129,15 +129,15 @@ Window:SetBackgroundBlur(false)
 - `WindUI:SetNotificationUpper(boolean)`: Positions toast notifications at the top-right (`true`) or bottom-right (`false`).
 - `WindUI:SetNotificationLower(boolean)`: Shifts notifications slightly down to clear custom bars.
 - `WindUI:SetDisplayOrder(number)`: Adjusts ScreenGui DisplayOrder / ZIndex above game GUIs (aliases: `SetZIndex`, `SetLayer`).
-- `WindUI:SetTheme(name)`: Changes active theme across all open interfaces. Supports flexible name matching (`"Liquid Glass"`, `"liquidglass"`, etc.).
+- `WindUI:SetTheme(name)`: Changes active theme across all open interfaces. Supports flexible name matching (`"Liquid Glass"`, `"Ocean Blue"`, `"liquidglass"`, etc.).
 - `WindUI:GetThemes()`: Returns dictionary of all registered themes.
 - `WindUI:GetCurrentTheme()`: Returns name string of current theme.
 - `WindUI:AddTheme(themeTable)`: Registers a custom theme palette.
 - `WindUI:Gradient(keypoints, options)`: Creates gradient sequence table with rotation for themes.
 - `WindUI:SetFont(fontAssetId)`: Changes global font family across all elements.
-- `WindUI:SetLanguage("en" | "vi")`: Changes active language and automatically translates all on-screen UI text in real time.
-- `WindUI:AddTranslations(lang, dict)`: Adds custom translation overrides for any language dictionary.
-- `WindUI:Translate(text, lang)`: Utility function to translate a string directly.
+- `WindUI:SetLanguage("en" | "vi" | "es" | "fr" | "ru" | "ja" | ...)`: Universal dynamic auto-translation. Automatically translates all UI text into ANY chosen language on the fly.
+- `WindUI:AddTranslations(langCode, customDict)`: Adds custom manual translation overrides for any language.
+- `WindUI:Translate(text, langCode, callback)`: Translates any string dynamically with caching.
 - `WindUI:ToggleAcrylic(boolean)`: Toggles acrylic blur state globally.
 
 ---
@@ -151,7 +151,7 @@ Window:SetBackgroundBlur(false)
     - `WhitelistHidden = false` or `WhitelistAction = "Show"`: Keeps the tab visible in the sidebar, but locks it with an access restriction screen when clicked.
   - `IconShape = "Circle"`: Renders container badge around tab icon.
   - `IconColor = Color3.fromRGB(...)`: Custom tint for tab icon.
-- `Tab:SubTabs({ { Title, Icon }, ... })`: Embeds a sleek horizontal segmented pill bar inside the tab with independent sub-pages (matching mobile/sub-tab navigation):
+- `Tab:SubTabs({ { Title, Icon }, ... })`: Embeds a sleek horizontal segmented pill bar inside the tab with independent sub-pages:
   ```lua
   local sub = FarmTab:SubTabs({
       { Title = "Level Farm", Icon = "sparkles" },
@@ -224,7 +224,8 @@ local Window = WindUI:CreateWindow({
         Note = "Join our Discord to obtain your license key.",
         URL = "https://discord.gg/mSrMzVuc3h",
         SaveKey = true,
-        Key = "SECRET_ACCESS_KEY",
+        Key = "SECRET_ACCESS_KEY", -- Or table: { "KEY_A", "KEY_B" }
+        -- Or custom validator:
         KeyValidator = function(enteredKey)
             return enteredKey == "SECRET_ACCESS_KEY"
         end,
@@ -249,7 +250,7 @@ local Window = WindUI:CreateWindow({
     Title = "WindUI Full API Showcase",
     Author = "by Developer",
     Folder = "WindUIFullShowcase",
-    Theme = "Liquid Glass", -- Liquid Glass, Dark, Obsidian, Light, Mid Summer, Winter Frost, Elegant Night, etc.
+    Theme = "Liquid Glass", -- Liquid Glass (Transparent), Ocean Blue, Dark, Obsidian, Light, Mid Summer, etc.
     Size = UDim2.fromOffset(860, 580),
     TwoColumns = true,
     BackgroundBlur = false,
@@ -302,7 +303,7 @@ local WhitelistTab = AdvancedSection:Tab({
     Icon = "crown",
     Whitelist = { 12345678, 87654321 },
     WhitelistHidden = false, -- false: show in sidebar as locked | true (default): hide completely
-    Desc = "Locked tab showing Whitelist protection.",
+    Desc = "Locked tab demonstrating Whitelist protection.",
 })
 
 Window:Divider()
@@ -531,7 +532,7 @@ local InterfaceSection = SettingsTab:Section({ Title = "Interface Options" })
 
 InterfaceSection:Dropdown({
     Title = "Theme Selector",
-    Values = { "Liquid Glass", "Dark", "Obsidian", "Light", "Mid Summer", "Lunar Moon", "Winter Frost", "Elegant Night", "Lunar Abyss", "Lunar Eclipse", "Rose", "Plant", "Indigo", "Violet", "Amber", "Midnight", "MonokaiPro" },
+    Values = { "Liquid Glass", "Ocean Blue", "Dark", "Obsidian", "Light", "Mid Summer", "Lunar Moon", "Winter Frost", "Elegant Night", "Lunar Abyss", "Lunar Eclipse", "Rose", "Plant", "Indigo", "Violet", "Amber", "Midnight", "MonokaiPro" },
     Value = "Liquid Glass",
     Callback = function(theme)
         Window:SetTheme(theme)
@@ -540,14 +541,18 @@ InterfaceSection:Dropdown({
 
 InterfaceSection:Dropdown({
     Title = "Language (Auto-Translation)",
-    Values = { "English", "Tiếng Việt" },
+    Values = { "English", "Tiếng Việt", "Español", "Français", "Русский", "日本語" },
     Value = "English",
     Callback = function(lang)
-        if lang == "Tiếng Việt" then
-            WindUI:SetLanguage("vi")
-        else
-            WindUI:SetLanguage("en")
-        end
+        local map = {
+            ["English"] = "en",
+            ["Tiếng Việt"] = "vi",
+            ["Español"] = "es",
+            ["Français"] = "fr",
+            ["Русский"] = "ru",
+            ["日本語"] = "ja",
+        }
+        WindUI:SetLanguage(map[lang] or "en")
     end,
 })
 
@@ -662,7 +667,8 @@ ControlsTab:Select()
 
 | Theme Name | Description |
 |---|---|
-| `Liquid Glass` | Frosted aquatic glass with cyan neon glow and oceanic gradient |
+| `Liquid Glass` | Transparent frosted glass with cyan neon glow and see-through background |
+| `Ocean Blue` | Deep oceanic navy and cyan gradient palette (formerly Blue Something) |
 | `Dark` | Standard clean modern dark theme |
 | `Obsidian` | Dark charcoal base with orange accents |
 | `Light` | Clean bright daytime theme |

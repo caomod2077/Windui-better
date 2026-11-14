@@ -2,7 +2,7 @@
 
 [English](README.md) | [Tiếng Việt](README_VI.md)
 
-Phiên bản WindUI mở rộng cho Roblox, hỗ trợ giao diện 2 cột dạng Card, tìm kiếm tính năng trực tiếp trong Tab, thanh tab con lồng nhau (Sub-Tabs), tích hợp sẵn các theme Gradient (bao gồm theme kính nước Liquid Glass), hệ thống tự động dịch đa ngôn ngữ thông minh, hiển thị Watermark (FPS / Ping), phân quyền truy cập Tab theo UserId, khung hiển thị mô hình 3D tương tác (Viewport) và tối ưu hóa hiệu năng giảm giật lag.
+Phiên bản WindUI mở rộng cho Roblox, hỗ trợ giao diện 2 cột dạng Card, tìm kiếm tính năng trực tiếp trong Tab, thanh tab con lồng nhau (Sub-Tabs), tích hợp sẵn các theme Gradient (bao gồm theme kính trong suốt Liquid Glass và Ocean Blue), hệ thống tự động dịch đa ngôn ngữ cho mọi thứ tiếng, hiển thị Watermark (FPS / Ping), phân quyền truy cập Tab theo UserId, khung hiển thị mô hình 3D tương tác (Viewport) và tối ưu hóa hiệu năng giảm giật lag.
 
 Thư viện gốc bởi Footagesus. Bản mở rộng và duy trì bởi caomod2077.
 
@@ -29,7 +29,7 @@ local Window = WindUI:CreateWindow({
     Title = "My Script Hub",
     Author = "by Creator",
     Folder = "MyScriptHub",
-    Theme = "Liquid Glass",  -- "Liquid Glass" | "Dark" | "Obsidian" | "Light" | v.v.
+    Theme = "Liquid Glass",  -- "Liquid Glass" (Trong suốt) | "Ocean Blue" | "Dark" | v.v.
     Size = UDim2.fromOffset(840, 540),
     TwoColumns = true,       -- Bật bố cục 2 cột (mặc định: false)
     BackgroundBlur = false,   -- Làm mờ hậu cảnh (mặc định: false)
@@ -129,15 +129,15 @@ Window:SetBackgroundBlur(false)
 - `WindUI:SetNotificationUpper(boolean)`: Đặt thông báo nằm ở góc trên bên phải (`true`) hoặc góc dưới bên phải (`false`).
 - `WindUI:SetNotificationLower(boolean)`: Hạ thấp vị trí thông báo để tránh cấn các thanh GUI game.
 - `WindUI:SetDisplayOrder(number)`: Đặt thứ tự hiển thị ScreenGui lên trên các GUI khác trong game (hỗ trợ alias `SetZIndex`, `SetLayer`).
-- `WindUI:SetTheme(name)`: Áp dụng theme trên toàn bộ thư viện. Hỗ trợ tên linh hoạt (`"Liquid Glass"`, `"liquidglass"`, v.v.).
+- `WindUI:SetTheme(name)`: Áp dụng theme trên toàn bộ thư viện. Hỗ trợ tên linh hoạt (`"Liquid Glass"`, `"Ocean Blue"`, `"liquidglass"`, v.v.).
 - `WindUI:GetThemes()`: Trả về bảng danh sách tất cả theme có sẵn.
 - `WindUI:GetCurrentTheme()`: Trả về chuỗi tên theme hiện tại.
 - `WindUI:AddTheme(themeTable)`: Đăng ký một bảng theme màu sắc tùy chỉnh mới.
 - `WindUI:Gradient(keypoints, options)`: Hàm tiện ích tạo dải màu Gradient xoay góc cho theme.
 - `WindUI:SetFont(fontAssetId)`: Đổi phông chữ hiển thị toàn cục.
-- `WindUI:SetLanguage("en" | "vi")`: Đổi ngôn ngữ và tự động chuyển toàn bộ văn bản giao diện sang ngôn ngữ đã chọn ngay lập tức.
+- `WindUI:SetLanguage("en" | "vi" | "es" | "fr" | "ru" | "ja" | ...)`: Tự động dịch động toàn diện mọi ngôn ngữ theo thời gian thực (hỗ trợ tra cứu online và lưu cache mượt mà).
 - `WindUI:AddTranslations(lang, dict)`: Bổ sung từ điển dịch tùy ý hoặc ghi đè từ ngữ cho bất kỳ ngôn ngữ nào.
-- `WindUI:Translate(text, lang)`: Hàm tiện ích dịch nhanh một đoạn văn bản theo từ điển.
+- `WindUI:Translate(text, lang, callback)`: Hàm tiện ích dịch nhanh một đoạn văn bản theo từ điển hoặc online API.
 - `WindUI:ToggleAcrylic(boolean)`: Bật hoặc tắt hiệu ứng kính mờ Acrylic toàn cục.
 
 ---
@@ -249,7 +249,7 @@ local Window = WindUI:CreateWindow({
     Title = "WindUI Full API Showcase",
     Author = "by Developer",
     Folder = "WindUIFullShowcase",
-    Theme = "Liquid Glass", -- Liquid Glass, Dark, Obsidian, Light, Mid Summer, Winter Frost, Elegant Night, etc.
+    Theme = "Liquid Glass", -- Liquid Glass (Transparent), Ocean Blue, Dark, Obsidian, Light, Mid Summer, etc.
     Size = UDim2.fromOffset(860, 580),
     TwoColumns = true,
     BackgroundBlur = false,
@@ -302,7 +302,7 @@ local WhitelistTab = AdvancedSection:Tab({
     Icon = "crown",
     Whitelist = { 12345678, 87654321 },
     WhitelistHidden = false, -- false: show in sidebar as locked | true (default): hide completely
-    Desc = "Locked tab showing Whitelist protection.",
+    Desc = "Locked tab demonstrating Whitelist protection.",
 })
 
 Window:Divider()
@@ -531,7 +531,7 @@ local InterfaceSection = SettingsTab:Section({ Title = "Interface Options" })
 
 InterfaceSection:Dropdown({
     Title = "Theme Selector",
-    Values = { "Liquid Glass", "Dark", "Obsidian", "Light", "Mid Summer", "Lunar Moon", "Winter Frost", "Elegant Night", "Lunar Abyss", "Lunar Eclipse", "Rose", "Plant", "Indigo", "Violet", "Amber", "Midnight", "MonokaiPro" },
+    Values = { "Liquid Glass", "Ocean Blue", "Dark", "Obsidian", "Light", "Mid Summer", "Lunar Moon", "Winter Frost", "Elegant Night", "Lunar Abyss", "Lunar Eclipse", "Rose", "Plant", "Indigo", "Violet", "Amber", "Midnight", "MonokaiPro" },
     Value = "Liquid Glass",
     Callback = function(theme)
         Window:SetTheme(theme)
@@ -540,14 +540,18 @@ InterfaceSection:Dropdown({
 
 InterfaceSection:Dropdown({
     Title = "Language (Auto-Translation)",
-    Values = { "English", "Tiếng Việt" },
+    Values = { "English", "Tiếng Việt", "Español", "Français", "Русский", "日本語" },
     Value = "English",
     Callback = function(lang)
-        if lang == "Tiếng Việt" then
-            WindUI:SetLanguage("vi")
-        else
-            WindUI:SetLanguage("en")
-        end
+        local map = {
+            ["English"] = "en",
+            ["Tiếng Việt"] = "vi",
+            ["Español"] = "es",
+            ["Français"] = "fr",
+            ["Русский"] = "ru",
+            ["日本語"] = "ja",
+        }
+        WindUI:SetLanguage(map[lang] or "en")
     end,
 })
 
@@ -662,7 +666,8 @@ ControlsTab:Select()
 
 | Tên Theme | Mô tả |
 |---|---|
-| `Liquid Glass` | Kính nước trong suốt với ánh sáng dạ quang xanh ngọc và gradient đại dương sâu |
+| `Liquid Glass` | Kính trong suốt nhìn xuyên thấu thế giới game, viền dạ quang xanh ngọc và khung mờ |
+| `Ocean Blue` | Tông màu đại dương xanh thẳm và dải gradient cyan (tên cũ Blue Something) |
 | `Dark` | Giao diện tối tiêu chuẩn |
 | `Obsidian` | Nền than tối kết hợp màu cam |
 | `Light` | Giao diện sáng ban ngày |
