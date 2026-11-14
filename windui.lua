@@ -13728,19 +13728,7 @@ ImageTransparency=.7,
 })
 })
 
-local au=ai("Frame",{
-Size=UDim2.new(1,0,0,ar.HeaderSize),
-BackgroundTransparency=1,
-Parent=an,
-ClipsDescendants=true,
-},{
-ai("TextButton",{
-Size=UDim2.new(1,0,0,ar.HeaderSize),
-BackgroundTransparency=1,
-Text="",
-},{
-as,
-ai("TextLabel",{
+local titleLabel = ai("TextLabel",{
 Text=ar.Title,
 TextXAlignment="Left",
 Size=UDim2.new(
@@ -13758,9 +13746,18 @@ FontFace=Font.new(af.Font,Enum.FontWeight.SemiBold),
 TextSize=14,
 BackgroundTransparency=1,
 TextTransparency=.7,
-
+Name="SectionTitle",
 TextWrapped=true
-}),
+})
+
+local headerBtn = ai("TextButton",{
+Size=UDim2.new(1,0,0,ar.HeaderSize),
+BackgroundTransparency=1,
+Text="",
+Name="TextButton",
+},{
+as,
+titleLabel,
 ai("UIListLayout",{
 FillDirection="Horizontal",
 VerticalAlignment="Center",
@@ -13771,7 +13768,16 @@ ai("UIPadding",{
 PaddingLeft=UDim.new(0,11),
 PaddingRight=UDim.new(0,11),
 })
-}),
+})
+
+local au=ai("Frame",{
+Size=UDim2.new(1,0,0,ar.HeaderSize),
+BackgroundTransparency=1,
+Parent=an,
+ClipsDescendants=true,
+Name="SectionFrame",
+},{
+headerBtn,
 ai("Frame",{
 BackgroundTransparency=1,
 Size=UDim2.new(1,0,0,0),
@@ -13787,6 +13793,33 @@ VerticalAlignment="Bottom",
 }),
 })
 })
+
+ar.TitleLabel = titleLabel
+ar.Chevron = at
+ar.HeaderButton = headerBtn
+ar.Frame = au
+ar.IconObj = as
+
+function ar.SetCollapsed(self, isCollapsed)
+if titleLabel then
+titleLabel.Visible = not isCollapsed
+end
+if at then
+at.Visible = (not isCollapsed) and ar.Expandable
+end
+if not as then
+if headerBtn then
+headerBtn.Visible = not isCollapsed
+end
+if isCollapsed then
+au.Size = UDim2.new(1, 0, 0, (au.Content and au.Content.AbsoluteSize.Y or 0) / ap)
+au.Content.Position = UDim2.new(0, 0, 0, 0)
+else
+au.Size = UDim2.new(1, 0, 0, ar.HeaderSize + ((au.Content and au.Content.AbsoluteSize.Y or 0) / ap))
+au.Content.Position = UDim2.new(0, 0, 0, ar.HeaderSize)
+end
+end
+end
 
 
 function ar.Tab(av,aw)
@@ -14851,6 +14884,7 @@ CornerRadius=UDim.new(1,0),
 ao("Frame",{
 AutomaticSize="XY",
 BackgroundTransparency=1,
+Name="TextContainer",
 },{
 ao("TextLabel",{
 Text=aw.User.Anonymous and"Anonymous"or ak.LocalPlayer.DisplayName,
@@ -14898,12 +14932,16 @@ PaddingRight=UDim.new(0,aw.UIPadding/2),
 }),
 })
 
+aw.UIElements.UserButton = d
+aw.User.Button = d
+
 function aw.User.Enable(f)
 aw.User.Enabled=true
+local curW = aw.SidebarCollapsed and 52 or aw.SideBarWidth
 ap(
 aw.UIElements.SideBarContainer,
 0.25,
-{Size=UDim2.new(0,aw.SideBarWidth,1,-aw.Topbar.Height-42-(aw.UIPadding*2))},
+{Size=UDim2.new(0,curW,1,-aw.Topbar.Height-42-(aw.UIPadding*2))},
 Enum.EasingStyle.Quint,
 Enum.EasingDirection.Out
 ):Play()
@@ -14911,10 +14949,11 @@ d.Visible=true
 end
 function aw.User.Disable(f)
 aw.User.Enabled=false
+local curW = aw.SidebarCollapsed and 52 or aw.SideBarWidth
 ap(
 aw.UIElements.SideBarContainer,
 0.25,
-{Size=UDim2.new(0,aw.SideBarWidth,1,-aw.Topbar.Height)},
+{Size=UDim2.new(0,curW,1,-aw.Topbar.Height)},
 Enum.EasingStyle.Quint,
 Enum.EasingDirection.Out
 ):Play()
@@ -15564,8 +15603,9 @@ if sidebarBanner then
 sidebarBanner.Visible = not collapsed
 end
 
+local userHeightOffset = (aw.User and aw.User.Enabled) and (42 + (aw.UIPadding * 2)) or 0
 ts:Create(aw.UIElements.SideBarContainer, ti, {
-Size = UDim2.new(0, sideW, 1, -aw.Topbar.Height)
+Size = UDim2.new(0, sideW, 1, -aw.Topbar.Height - userHeightOffset)
 }):Play()
 
 ts:Create(aw.UIElements.MainBar, ti, {
@@ -15585,6 +15625,64 @@ end
 end
 end
 end
+
+if aw.Sections then
+for _, sec in ipairs(aw.Sections) do
+if sec and sec.SetCollapsed then
+sec:SetCollapsed(collapsed)
+end
+end
+end
+
+if sidebarFrame then
+for _, child in ipairs(sidebarFrame:GetChildren()) do
+if child:IsA("GuiObject") then
+local hBtn = child:FindFirstChild("HeaderButton") or (child:FindFirstChildOfClass("TextButton") and not child:FindFirstChild("Content") and child:FindFirstChildOfClass("TextButton"))
+if hBtn then
+for _, dChild in ipairs(hBtn:GetChildren()) do
+if dChild:IsA("TextLabel") then
+dChild.Visible = not collapsed
+end
+if dChild.Name == "Chevron" or (dChild:FindFirstChildOfClass("ImageLabel") and dChild:FindFirstChildOfClass("ImageLabel").Image:find("chevron")) then
+dChild.Visible = not collapsed
+end
+end
+end
+end
+end
+end
+
+if aw.Dividers then
+for _, div in ipairs(aw.Dividers) do
+if div and div.Parent then
+local dTitle = div:FindFirstChild("Title")
+local rLine = div:FindFirstChild("RightLine")
+local lLine = div:FindFirstChild("LeftLine")
+if dTitle then
+dTitle.Visible = not collapsed
+end
+if rLine then
+rLine.Visible = not collapsed
+end
+if lLine then
+lLine.Size = collapsed and UDim2.new(1, 0, 0, 1) or UDim2.new(0.5, -35, 0, 1)
+end
+end
+end
+end
+
+local userBtn = d or (aw.User and aw.User.Button) or (aw.UIElements and aw.UIElements.UserButton)
+if userBtn and aw.User and aw.User.Enabled ~= false then
+local textContainer = userBtn.UserIcon and (userBtn.UserIcon:FindFirstChild("TextContainer") or userBtn.UserIcon:FindFirstChildOfClass("Frame"))
+if textContainer then
+textContainer.Visible = not collapsed
+end
+local targetUserWidth = collapsed and (sideW - aw.UIPadding) or (aw.SideBarWidth - (aw.UIPadding/2))
+ts:Create(userBtn, ti, {
+Size = UDim2.new(0, targetUserWidth, 0, 42 + aw.UIPadding)
+}):Play()
+end
+
 return aw.SidebarCollapsed
 end
 
@@ -16828,13 +16926,19 @@ G:SelectTab(J)
 end
 
 function aw.Section(H,J)
-return F.New(
+local sec = F.New(
 J,
 aw.UIElements.SideBar.Frame,
 aw.Folder,
 av.WindUI.UIScale,
 aw
 )
+if not aw.Sections then aw.Sections = {} end
+table.insert(aw.Sections, sec)
+if aw.SidebarCollapsed and sec.SetCollapsed then
+sec:SetCollapsed(true)
+end
+return sec
 end
 
 function aw.IsResizable(H,J)
@@ -16865,10 +16969,34 @@ end
 function aw.Divider(H, titleText)
 local tText = (type(H) == "string" and H) or (type(titleText) == "string" and titleText) or nil
 if tText and tText ~= "" then
+local leftLine = ao("Frame", {
+Size = UDim2.new(0.5, -35, 0, 1),
+BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+BackgroundTransparency = 0.88,
+BorderSizePixel = 0,
+Name = "LeftLine",
+})
+local divTitle = ao("TextLabel", {
+Text = tText,
+FontFace = Font.new(an.Font, Enum.FontWeight.SemiBold),
+TextSize = 10,
+TextColor3 = Color3.fromRGB(150, 140, 135),
+BackgroundTransparency = 1,
+AutomaticSize = "XY",
+Name = "Title",
+})
+local rightLine = ao("Frame", {
+Size = UDim2.new(0.5, -35, 0, 1),
+BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+BackgroundTransparency = 0.88,
+BorderSizePixel = 0,
+Name = "RightLine",
+})
 local L = ao("Frame", {
 Parent = aw.UIElements.SideBar.Frame,
 Size = UDim2.new(1, -7, 0, 20),
 BackgroundTransparency = 1,
+Name = "DividerWithTitle",
 }, {
 ao("UIListLayout", {
 FillDirection = "Horizontal",
@@ -16876,27 +17004,17 @@ VerticalAlignment = "Center",
 HorizontalAlignment = "Center",
 Padding = UDim.new(0, 6),
 }),
-ao("Frame", {
-Size = UDim2.new(0.5, -35, 0, 1),
-BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-BackgroundTransparency = 0.88,
-BorderSizePixel = 0,
-}),
-ao("TextLabel", {
-Text = tText,
-FontFace = Font.new(an.Font, Enum.FontWeight.SemiBold),
-TextSize = 10,
-TextColor3 = Color3.fromRGB(150, 140, 135),
-BackgroundTransparency = 1,
-AutomaticSize = "XY",
-}),
-ao("Frame", {
-Size = UDim2.new(0.5, -35, 0, 1),
-BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-BackgroundTransparency = 0.88,
-BorderSizePixel = 0,
-}),
+leftLine,
+divTitle,
+rightLine,
 })
+if not aw.Dividers then aw.Dividers = {} end
+table.insert(aw.Dividers, L)
+if aw.SidebarCollapsed then
+divTitle.Visible = false
+rightLine.Visible = false
+leftLine.Size = UDim2.new(1, 0, 0, 1)
+end
 return L
 else
 local J=ao("Frame",{
@@ -16910,13 +17028,14 @@ BackgroundColor3="Text",
 })
 local L=ao("Frame",{
 Parent=aw.UIElements.SideBar.Frame,
-
 Size=UDim2.new(1,-7,0,5),
 BackgroundTransparency=1,
+Name="Divider",
 },{
 J,
 })
-
+if not aw.Dividers then aw.Dividers = {} end
+table.insert(aw.Dividers, L)
 return L
 end
 end
