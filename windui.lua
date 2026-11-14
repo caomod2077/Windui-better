@@ -11032,7 +11032,12 @@ else
 useTwoColumns = false
 end
 
-if not am.Parent then
+local isDefaultParent = (not am.Parent)
+or (tab and tab.UIElements and am.Parent == tab.UIElements.ContainerFrame)
+or (tab and am.Parent == tab.Container)
+or (tab and tab.ColumnsHolder and am.Parent == tab.ColumnsHolder)
+
+if isDefaultParent then
 if useTwoColumns and tab and tab.LeftColumn and tab.RightColumn then
 if tab.ColumnsHolder then tab.ColumnsHolder.Visible = true end
 local side = am.Side or am.Column
@@ -11041,7 +11046,7 @@ am.Parent = tab.RightColumn
 elseif side == "Left" or side == 1 or side == "left" or side == "LeftColumn" then
 am.Parent = tab.LeftColumn
 elseif am.FullWidth == true or am.Span == "Full" then
-am.Parent = tab.UIElements and tab.UIElements.ContainerFrame
+am.Parent = (tab.UIElements and tab.UIElements.ContainerFrame) or tab.Container or am.Parent
 else
 tab.__secCount = (tab.__secCount or 0) + 1
 if tab.__secCount % 2 == 0 then
@@ -11051,7 +11056,7 @@ am.Parent = tab.LeftColumn
 end
 end
 else
-am.Parent = tab and tab.UIElements and tab.UIElements.ContainerFrame
+am.Parent = (tab and tab.UIElements and tab.UIElements.ContainerFrame) or (tab and tab.Container) or am.Parent
 end
 end
 if am.Tab and am.Tab.HideEmpty then
@@ -13365,7 +13370,19 @@ Visible = false,
 LayoutOrder = idx,
 })
 
-local subCols = al("Frame", {
+local isSubTwoCol
+if type(tConf) == "table" and tConf.TwoColumns ~= nil then
+isSubTwoCol = (tConf.TwoColumns == true)
+elseif type(tConf) == "table" and tConf.Columns == 2 then
+isSubTwoCol = true
+else
+isSubTwoCol = (self.TwoColumns == true)
+end
+
+local subCols, sLeft, sRight = nil, nil, nil
+
+if isSubTwoCol then
+subCols = al("Frame", {
 Size = UDim2.new(1, 0, 0, 0),
 AutomaticSize = "Y",
 BackgroundTransparency = 1,
@@ -13381,7 +13398,7 @@ VerticalAlignment = "Top",
 }),
 })
 
-local sLeft = al("Frame", {
+sLeft = al("Frame", {
 Size = UDim2.new(0.5, -5, 0, 0),
 AutomaticSize = "Y",
 BackgroundTransparency = 1,
@@ -13392,7 +13409,7 @@ LayoutOrder = 1,
 al("UIListLayout", { FillDirection = "Vertical", SortOrder = "LayoutOrder", Padding = UDim.new(0, 10) }),
 })
 
-local sRight = al("Frame", {
+sRight = al("Frame", {
 Size = UDim2.new(0.5, -5, 0, 0),
 AutomaticSize = "Y",
 BackgroundTransparency = 1,
@@ -13402,6 +13419,14 @@ LayoutOrder = 2,
 }, {
 al("UIListLayout", { FillDirection = "Vertical", SortOrder = "LayoutOrder", Padding = UDim.new(0, 10) }),
 })
+else
+al("UIListLayout", {
+FillDirection = "Vertical",
+SortOrder = "LayoutOrder",
+Padding = UDim.new(0, 10),
+Parent = pageContainer,
+})
+end
 
 local secModule = a.load'T'
 
@@ -13409,9 +13434,10 @@ local subObj = {
 Title = tTitle,
 Parent = pageContainer,
 Container = pageContainer,
-LeftColumn = sLeft,
-RightColumn = sRight,
-TwoColumns = true,
+LeftColumn = isSubTwoCol and sLeft or nil,
+RightColumn = isSubTwoCol and sRight or nil,
+ColumnsHolder = isSubTwoCol and subCols or nil,
+TwoColumns = isSubTwoCol,
 Tab = self,
 UIElements = { ContainerFrame = sf },
 Elements = {},
@@ -13430,6 +13456,7 @@ copts.Window = Window
 copts.WindUI = WindUI
 copts.ElementsModule = aA
 copts.UIScale = aq
+if isSubTwoCol then
 local side = copts.Side or copts.Column
 if copts.FullWidth then
 copts.Parent = pageContainer
@@ -13437,6 +13464,9 @@ elseif side == "Right" or side == 2 or side == "right" then
 copts.Parent = sRight
 else
 copts.Parent = sLeft
+end
+else
+copts.Parent = pageContainer
 end
 local _, sec = secModule.New(nil, copts)
 table.insert(subObj.Elements, sec)
