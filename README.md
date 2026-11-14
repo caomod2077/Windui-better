@@ -45,6 +45,8 @@ local Window = WindUI:CreateWindow({
         Enabled = true,               -- Display player profile card on sidebar bottom
         Anonymous = false,            -- Hide player name/avatar when true
         Subtitle = "Premium Lifetime", -- Subtitle or badge text
+        Profile = true,               -- Enable dedicated player profile tab on click (default cards)
+        -- Profile = { Enabled = true, Custom = true }, -- Or enable empty custom tab
         Callback = function() end,    -- Click callback
     },
 })
@@ -87,7 +89,7 @@ Window:SetBackgroundBlur(false)
 | `Acrylic` | boolean | `false` | Enables frosted acrylic glass blur effect |
 | `AutoScale` | boolean | `true` | Automatically scales interface for mobile / small displays |
 | `ToggleKey` | Enum.KeyCode | `nil` | Keycode to hide or reveal the window |
-| `User` | table | `nil` | Player profile card on bottom of sidebar: `{ Enabled, Anonymous, Subtitle, Callback }` |
+| `User` | table | `nil` | Player profile card on bottom of sidebar: `{ Enabled, Anonymous, Subtitle, Callback, Profile }` |
 | `Topbar` | table | `{ Height = 52 }` | Topbar options: `{ Height = 52, ButtonsType = "Default" / "Mac" }` |
 | `Background` | string | `nil` | Custom background image (`rbxassetid://`, `https://`) or video (`video:https://...webm`) |
 | `BackgroundImageTransparency` | number | `0` | Opacity of the background image (0 to 1) |
@@ -135,6 +137,9 @@ Window:SetBackgroundBlur(false)
   - `Window.User:Disable()`: Hides player profile card.
   - `Window.User:SetAnonymous(boolean)`: Hides player identity.
   - `Window.User:SetSubtitle(string)`: Updates subtitle text beneath display name.
+  - `Window.User:GetTab()`: Retrieves the Profile Tab object. If not yet initialized, creates an empty custom tab on demand.
+  - `Window.User:OpenProfile()`: Switches to the Profile Tab and highlights the profile card.
+  - `Window.User.ProfileTab` / `Window.User.Tab`: Direct reference to the Profile Tab.
 - `Window.ConfigManager`:
   - `ConfigManager:CreateConfig(name)`: Returns config object with `:Save()`, `:Load()`, `:Delete()`, `:Set(k, v)`, `:Get(k)`.
   - `ConfigManager:AllConfigs()`: Returns table of existing config names.
@@ -293,12 +298,10 @@ local Window = WindUI:CreateWindow({
         Enabled = true,               -- Display player thumbnail, display name, and subtitle
         Anonymous = false,            -- When true, displays as Anonymous and hides avatar
         Subtitle = "Premium Lifetime", -- Subtitle or status badge text
-        Callback = function()         -- Click callback when player profile card is clicked
-            WindUI:Notify({
-                Title = "Profile",
-                Content = "Logged in as " .. game:GetService("Players").LocalPlayer.DisplayName,
-                Duration = 3,
-            })
+        Profile = true,               -- By default disabled; set true for automatic live profile cards
+        -- Profile = { Enabled = true, Custom = true, Title = "My Profile" }, -- Or use Custom mode for custom items
+        Callback = function()         -- Optional click callback
+            print("Player profile card clicked")
         end,
     },
 })
@@ -674,6 +677,13 @@ UserSection:Input({
     Value = "Premium Lifetime",
     Callback = function(text)
         Window.User:SetSubtitle(text)
+    end,
+})
+
+UserSection:Button({
+    Title = "Open Player Profile Tab",
+    Callback = function()
+        Window.User:OpenProfile()
     end,
 })
 

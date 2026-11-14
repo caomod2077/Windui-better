@@ -14942,19 +14942,47 @@ else
 aw.User:Disable()
 end
 
+local userSelected = false
+function aw.User._UpdateHighlight(state)
+userSelected = (state == true)
+aw.User.IsSelected = userSelected
+if d and d.UserIcon and d.Outline then
+if userSelected then
+ap(d.UserIcon, 0.12, { ImageTransparency = 0.9 }):Play()
+ap(d.Outline, 0.12, { ImageTransparency = 0.6 }):Play()
+else
+ap(d.UserIcon, 0.12, { ImageTransparency = 1 }):Play()
+ap(d.Outline, 0.12, { ImageTransparency = 1 }):Play()
+end
+end
+end
+
+an.AddSignal(d.MouseButton1Click, function()
+if (aw.User.ProfileEnabled or aw.User.ProfileTab) and aw.User.OpenProfileOnClick ~= false then
+if aw.User.OpenProfile then
+aw.User:OpenProfile()
+end
+end
 if aw.User.Callback then
-an.AddSignal(d.MouseButton1Click,function()
-aw.User.Callback()
-end)
-an.AddSignal(d.MouseEnter,function()
-ap(d.UserIcon,0.04,{ImageTransparency=0.95}):Play()
-ap(d.Outline,0.04,{ImageTransparency=0.85}):Play()
-end)
-an.AddSignal(d.InputEnded,function()
-ap(d.UserIcon,0.04,{ImageTransparency=1}):Play()
-ap(d.Outline,0.04,{ImageTransparency=1}):Play()
+task.spawn(function()
+pcall(aw.User.Callback)
 end)
 end
+end)
+
+an.AddSignal(d.MouseEnter, function()
+if not userSelected and d and d.UserIcon and d.Outline then
+ap(d.UserIcon, 0.04, { ImageTransparency = 0.95 }):Play()
+ap(d.Outline, 0.04, { ImageTransparency = 0.85 }):Play()
+end
+end)
+
+an.AddSignal(d.InputEnded, function()
+if not userSelected and d and d.UserIcon and d.Outline then
+ap(d.UserIcon, 0.04, { ImageTransparency = 1 }):Play()
+ap(d.Outline, 0.04, { ImageTransparency = 1 }):Play()
+end
+end)
 end
 
 local f
@@ -16600,9 +16628,195 @@ local F=a.load'ab'
 local G=C.Init(aw,av.WindUI,av.WindUI.TooltipGui)
 G:OnChange(function(H)
 aw.CurrentTab=H
+if aw.User and aw.User._UpdateHighlight then
+if aw.User.ProfileTab and H == aw.User.ProfileTab.Index then
+aw.User._UpdateHighlight(true)
+else
+aw.User._UpdateHighlight(false)
+end
+end
 end)
 
 aw.TabModule=G
+
+if aw.User then
+local profileConfig = aw.User.Profile or aw.User.ProfileTab
+local profileEnabled = false
+local isCustom = false
+
+if typeof(profileConfig) == "table" then
+profileEnabled = (profileConfig.Enabled == true)
+isCustom = (profileConfig.Custom == true) or (aw.User.Custom == true) or (aw.User.CustomContent == true) or (aw.User.CustomProfile == true)
+elseif profileConfig == true or aw.User.Profile == true then
+profileEnabled = true
+isCustom = (aw.User.Custom == true) or (aw.User.CustomContent == true) or (aw.User.CustomProfile == true)
+elseif typeof(profileConfig) == "string" and profileConfig:lower() == "custom" then
+profileEnabled = true
+isCustom = true
+elseif aw.User.CustomProfile == true then
+profileEnabled = true
+isCustom = true
+end
+
+aw.User.ProfileEnabled = profileEnabled
+aw.User.IsCustomProfile = isCustom
+
+local function populateDefaultProfileCards(targetTab)
+task.spawn(function()
+local p = ak.LocalPlayer
+local MarketplaceService = game:GetService("MarketplaceService")
+local Players = game:GetService("Players")
+local TeleportService = game:GetService("TeleportService")
+
+local gameName = "Unknown Game"
+pcall(function()
+local info = MarketplaceService:GetProductInfo(game.PlaceId)
+if info and info.Name then gameName = info.Name end
+end)
+
+local playerCard = targetTab:Card({
+Title = "Player Information",
+Icon = "user",
+Side = "Left",
+Badge = p and p.MembershipType == Enum.MembershipType.Premium and "PREMIUM" or "MEMBER",
+BadgeColor = p and p.MembershipType == Enum.MembershipType.Premium and Color3.fromRGB(255, 185, 0) or Color3.fromRGB(0, 145, 255),
+})
+
+playerCard:Paragraph({
+Title = p and p.DisplayName or "Player",
+Desc = "@" .. (p and p.Name or "Player") .. "\nUser ID: " .. tostring(p and p.UserId or 0) .. "\nAccount Age: " .. tostring(p and p.AccountAge or 0) .. " days\nMembership: " .. tostring(p and p.MembershipType and p.MembershipType.Name or "None"),
+Thumbnail = d and d.UserIcon and d.UserIcon.ImageLabel and d.UserIcon.ImageLabel.Image or nil,
+ThumbnailSize = 64,
+Buttons = {
+{
+Title = "Copy User ID",
+Icon = "copy",
+Variant = "Secondary",
+Callback = function()
+local idStr = tostring(p and p.UserId or 0)
+if setclipboard then setclipboard(idStr) elseif toclipboard then toclipboard(idStr) end
+aw.WindUI:Notify({ Title = "Copied", Content = "User ID copied to clipboard!", Duration = 2 })
+end,
+},
+},
+})
+
+local gameCard = targetTab:Card({
+Title = "Current Game & Server",
+Icon = "gamepad-2",
+Side = "Right",
+Badge = "LIVE",
+BadgeColor = Color3.fromRGB(34, 197, 94),
+})
+
+local playerCount = tostring(#Players:GetPlayers()) .. " / " .. tostring(Players.MaxPlayers > 0 and Players.MaxPlayers or 1)
+local jobDisplay = game.JobId ~= "" and (game.JobId:sub(1, 16) .. "...") or "Local Session"
+
+gameCard:Paragraph({
+Title = gameName,
+Desc = "Place ID: " .. tostring(game.PlaceId) .. "\nPlace Version: v" .. tostring(game.PlaceVersion) .. "\nPlayers: " .. playerCount .. "\nJob ID: " .. jobDisplay,
+Buttons = {
+{
+Title = "Copy Job ID",
+Icon = "copy",
+Variant = "Secondary",
+Callback = function()
+if game.JobId ~= "" then
+if setclipboard then setclipboard(game.JobId) elseif toclipboard then toclipboard(game.JobId) end
+aw.WindUI:Notify({ Title = "Copied", Content = "Server Job ID copied to clipboard!", Duration = 2 })
+else
+aw.WindUI:Notify({ Title = "Notice", Content = "No Job ID in studio/local session.", Duration = 2 })
+end
+end,
+},
+{
+Title = "Rejoin Server",
+Icon = "refresh-cw",
+Variant = "Primary",
+Callback = function()
+pcall(function()
+if game.JobId ~= "" then
+TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, p)
+else
+TeleportService:Teleport(game.PlaceId, p)
+end
+end)
+end,
+},
+},
+})
+
+local clientCard = targetTab:Card({
+Title = "Client & Session",
+Icon = "cpu",
+Side = "Left",
+})
+
+local executorName = (identifyexecutor and identifyexecutor()) or "Standard Client"
+local platformStr = (aw.IsMobile and "Mobile (Touch)") or "PC / Desktop"
+
+clientCard:Paragraph({
+Title = executorName,
+Desc = "Platform: " .. platformStr .. "\nStatus: Connected & Authenticated\nSession: Active",
+})
+end)
+end
+
+local function initProfileTab(customMode)
+if aw.User.ProfileTab then
+return aw.User.ProfileTab
+end
+
+local title = "Player Profile"
+local twoCols = true
+local showTitle = true
+
+if typeof(profileConfig) == "table" then
+if profileConfig.Title then title = profileConfig.Title end
+if profileConfig.TwoColumns ~= nil then twoCols = profileConfig.TwoColumns end
+if profileConfig.ShowTabTitle ~= nil then showTitle = profileConfig.ShowTabTitle end
+end
+if aw.User.ProfileTitle then title = aw.User.ProfileTitle end
+
+local pTab = G.New({
+Title = title,
+Parent = nil,
+ShowTabTitle = showTitle,
+TwoColumns = twoCols,
+}, av.WindUI.UIScale)
+
+aw.User.ProfileTab = pTab
+aw.User.Tab = pTab
+aw.User.ProfileEnabled = true
+
+if not customMode then
+populateDefaultProfileCards(pTab)
+end
+
+return pTab
+end
+
+function aw.User.GetTab(self)
+if not aw.User.ProfileTab then
+return initProfileTab(true)
+end
+return aw.User.ProfileTab
+end
+
+function aw.User.OpenProfile(self)
+if not aw.User.ProfileTab and aw.User.ProfileEnabled then
+initProfileTab(isCustom)
+end
+if aw.User.ProfileTab and aw.User.ProfileTab.Select then
+aw.User.ProfileTab:Select()
+end
+end
+aw.User.Open = aw.User.OpenProfile
+
+if profileEnabled then
+initProfileTab(isCustom)
+end
+end
 
 function aw.Tab(H,J)
 J.Parent=aw.UIElements.SideBar.Frame

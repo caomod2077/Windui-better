@@ -45,6 +45,8 @@ local Window = WindUI:CreateWindow({
         Enabled = true,               -- Hiện khung hồ sơ người chơi ở góc dưới Sidebar
         Anonymous = false,            -- Ẩn avatar và tên khi bật true
         Subtitle = "Premium Lifetime", -- Dòng chữ phụ đề / trạng thái
+        Profile = true,               -- Mặc định tắt; bật true để hiển thị tab thông tin chi tiết (Player, Game & Server, Client)
+        -- Profile = { Enabled = true, Custom = true, Title = "Hồ sơ của tôi" }, -- Hoặc bật Custom để tự do thêm nội dung
         Callback = function() end,    -- Bắt sự kiện khi click vào khung hồ sơ
     },
 })
@@ -87,7 +89,7 @@ Window:SetBackgroundBlur(false)
 | `Acrylic` | boolean | `false` | Bật hiệu ứng kính mờ Acrylic |
 | `AutoScale` | boolean | `true` | Tự động co giãn kích thước phù hợp với màn hình mobile |
 | `ToggleKey` | Enum.KeyCode | `nil` | Phím tắt bàn phím để ẩn hoặc hiện cửa sổ |
-| `User` | table | `nil` | Khung thông tin người chơi ở góc dưới Sidebar: `{ Enabled, Anonymous, Subtitle, Callback }` |
+| `User` | table | `nil` | Khung thông tin người chơi ở góc dưới Sidebar: `{ Enabled, Anonymous, Subtitle, Callback, Profile }` |
 | `Topbar` | table | `{ Height = 52 }` | Tùy chọn topbar: `{ Height = 52, ButtonsType = "Default" / "Mac" }` |
 | `Background` | string | `nil` | Hình nền cửa sổ (assetid, link ảnh URL hoặc `video:link.webm`) |
 | `BackgroundImageTransparency` | number | `0` | Độ trong suốt ảnh nền (0 đến 1) |
@@ -135,6 +137,9 @@ Window:SetBackgroundBlur(false)
   - `Window.User:Disable()`: Ẩn khung hồ sơ người chơi.
   - `Window.User:SetAnonymous(boolean)`: Bật hoặc tắt chế độ ẩn danh.
   - `Window.User:SetSubtitle(string)`: Đổi dòng chữ phụ đề bên dưới tên hiển thị.
+  - `Window.User:GetTab()`: Lấy đối tượng Profile Tab. Nếu chưa khởi tạo, hàm sẽ tự động tạo một tab Custom trống để bạn thêm button, card, section tùy ý.
+  - `Window.User:OpenProfile()`: Chuyển màn hình sang xem Profile Tab và highlight khung hồ sơ.
+  - `Window.User.ProfileTab` / `Window.User.Tab`: Tham chiếu trực tiếp đến Profile Tab.
 - `Window.ConfigManager`:
   - `ConfigManager:CreateConfig(name)`: Tạo file config. Đối tượng trả về có: `:Save()`, `:Load()`, `:Delete()`, `:Set(k, v)`, `:Get(k)`.
   - `ConfigManager:AllConfigs()`: Lấy danh sách tên các config đã lưu.
@@ -292,12 +297,10 @@ local Window = WindUI:CreateWindow({
         Enabled = true,               -- Display player thumbnail, display name, and subtitle
         Anonymous = false,            -- When true, displays as Anonymous and hides avatar
         Subtitle = "Premium Lifetime", -- Subtitle or status badge text
-        Callback = function()         -- Click callback when player profile card is clicked
-            WindUI:Notify({
-                Title = "Profile",
-                Content = "Logged in as " .. game:GetService("Players").LocalPlayer.DisplayName,
-                Duration = 3,
-            })
+        Profile = true,               -- Mặc định tắt; bật true để hiển thị tab thông tin người chơi, game & server
+        -- Profile = { Enabled = true, Custom = true, Title = "Hồ sơ của tôi" }, -- Hoặc bật Custom để tự do thêm nút/nội dung
+        Callback = function()         -- Bắt sự kiện phụ khi click vào khung hồ sơ
+            print("Đã click vào profile card")
         end,
     },
 })
@@ -673,6 +676,13 @@ UserSection:Input({
     Value = "Premium Lifetime",
     Callback = function(text)
         Window.User:SetSubtitle(text)
+    end,
+})
+
+UserSection:Button({
+    Title = "Mở Tab Profile Người Chơi",
+    Callback = function()
+        Window.User:OpenProfile()
     end,
 })
 
