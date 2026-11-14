@@ -7870,7 +7870,7 @@ al:Lock()
 end
 
 
-local ay=ak.Tab.UIElements.ContainerFrame
+local ay=(ak.Tab and ak.Tab.UIElements and ak.Tab.UIElements.ContainerFrame) or (ak.Tab and ak.Tab.Container) or (ak.Window and ak.Window.UIElements and ak.Window.UIElements.SideBar)
 
 function al.Set(az,aA,aB)
 if as then
@@ -11859,7 +11859,7 @@ end
 local au=an.WindUI.GenerateGUID()
 
 ai.AddSignal(at.CanvasGroup.Viewport.MouseEnter,function()
-if ao.Interactive then
+if ao.Interactive and an.Tab and an.Tab.UIElements and an.Tab.UIElements.ContainerFrame then
 an.Tab.UIElements.ContainerFrame.ScrollingEnabled=false
 end
 end)
@@ -11869,7 +11869,9 @@ if
 av.UserInputType==Enum.UserInputType.MouseMovement
 or av.UserInputType==Enum.UserInputType.Touch
 then
+if an.Tab and an.Tab.UIElements and an.Tab.UIElements.ContainerFrame then
 an.Tab.UIElements.ContainerFrame.ScrollingEnabled=true
+end
 end
 end)
 
@@ -13411,6 +13413,7 @@ LeftColumn = sLeft,
 RightColumn = sRight,
 TwoColumns = true,
 Tab = self,
+UIElements = { ContainerFrame = sf },
 Elements = {},
 }
 
