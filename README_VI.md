@@ -2,7 +2,7 @@
 
 [English](README.md) | [Tiếng Việt](README_VI.md)
 
-Phiên bản WindUI mở rộng cho Roblox, hỗ trợ giao diện 2 cột dạng Card, tìm kiếm tính năng trực tiếp trong Tab, thanh tab con lồng nhau (Sub-Tabs), tích hợp sẵn các theme Gradient (bao gồm theme kính trong suốt Liquid Glass và Ocean Blue), hệ thống tự động dịch đa ngôn ngữ cho mọi thứ tiếng, hiển thị Watermark (FPS / Ping), phân quyền truy cập Tab theo UserId, khung hiển thị mô hình 3D tương tác (Viewport) và tối ưu hóa hiệu năng giảm giật lag.
+Phiên bản WindUI mở rộng cho Roblox, hỗ trợ giao diện 2 cột dạng Card, tìm kiếm tính năng trực tiếp trong Tab, thanh tab con lồng nhau (Sub-Tabs) cho phép tùy chỉnh 2 cột hoặc 1 cột cho từng trang riêng biệt, tích hợp sẵn các theme Gradient (bao gồm theme kính trong suốt Liquid Glass và Ocean Blue), hệ thống tự động dịch đa ngôn ngữ cho mọi thứ tiếng, hiển thị Watermark (FPS / Ping), phân quyền truy cập Tab theo UserId, khung hiển thị mô hình 3D tương tác (Viewport) và tối ưu hóa hiệu năng giảm giật lag.
 
 Thư viện gốc bởi Footagesus. Bản mở rộng và duy trì bởi caomod2077.
 
@@ -145,21 +145,27 @@ Window:SetBackgroundBlur(false)
 ### 4. Cấu trúc Tab, Tab Con (Sub-Tabs) và Section
 
 - `Window:Tab({ Title, Icon, Desc, TwoColumns, LockedTo, HiddenTo, Whitelist, WhitelistHidden, WhitelistAction, ShowTabTitle, IconShape, IconColor, CustomEmptyPage })`: Tạo tab mới.
+  - `TwoColumns = true`: Chia tab thành 2 cột độc lập. Các Card có thể đặt `Side = "Left"` hoặc `Side = "Right"`, hoặc `FullWidth = true`.
+  - `TwoColumns = false`: Giữ tab ở dạng 1 cột duy nhất.
   - `LockedTo = { userId, ... }`: Khóa tab và hiện giao diện yêu cầu phân quyền đối với ai không có trong danh sách.
   - `Whitelist = { userId, ... }`: Danh sách UserId được cấp quyền.
     - `WhitelistHidden = true` (mặc định): Ẩn hoàn toàn tab khỏi sidebar đối với ai không có quyền.
     - `WhitelistHidden = false` hoặc `WhitelistAction = "Show"`: Vẫn hiện tab trong sidebar, nhưng khóa tab và hiện màn hình yêu cầu quyền khi bấm vào.
   - `IconShape = "Circle"`: Đặt khung bo tròn bao quanh icon tab.
   - `IconColor = Color3.fromRGB(...)`: Tô màu riêng cho icon của tab.
-- `Tab:SubTabs({ { Title, Icon }, ... })`: Tạo thanh tab con dạng viên thuốc (pill bar) nằm ngang ngay trên đầu tab với các trang độc lập (như Cấp Độ Farm, Tuning, Chiến Đấu):
+- `Tab:SubTabs({ { Title, Icon, TwoColumns }, ... })`: Tạo thanh tab con dạng viên thuốc (pill bar) nằm ngang ngay trên đầu tab với các trang độc lập. Mỗi tab con có thể tự do tùy chỉnh số cột riêng biệt:
+  - `TwoColumns = true`: Chia trang con thành 2 cột trái và phải (Card có thể đặt `Side = "Left"` hoặc `Side = "Right"`, hoặc `FullWidth = true`).
+  - `TwoColumns = false`: Giữ trang con ở dạng 1 cột duy nhất trải rộng toàn chiều ngang.
+  - `TwoColumns = nil` (mặc định): Kế thừa thiết lập `TwoColumns` của tab cha.
   ```lua
   local sub = FarmTab:SubTabs({
-      { Title = "Level Farm", Icon = "sparkles" },
-      { Title = "Tuning", Icon = "wrench" },
-      { Title = "Combat", Icon = "swords" },
+      { Title = "Level Farm", Icon = "sparkles", TwoColumns = true },   -- 2 cột
+      { Title = "Tuning", Icon = "wrench", TwoColumns = true },         -- 2 cột
+      { Title = "Combat", Icon = "swords", TwoColumns = false },        -- 1 cột
   })
   local LevelPage = sub["Level Farm"]
-  LevelPage:Card({ Title = "Auto Level" }):Toggle({ Title = "Enabled" })
+  LevelPage:Card({ Title = "Auto Level", Side = "Left" }):Toggle({ Title = "Enabled" })
+  LevelPage:Card({ Title = "Rewards", Side = "Right" }):Slider({ Title = "Multiplier", Value = 2 })
   ```
 - `Tab:AddSearch(placeholder)`: Nhúng thanh tìm kiếm lọc tính năng theo thời gian thực vào tab.
 - `Tab:Banner({ Image, Height, Title, Desc })`: Tạo banner hình ảnh ở đầu tab.
@@ -411,24 +417,34 @@ AdvancedCard:HoldButton({
     end,
 })
 
--- Sub-Tabs Demo (Nested tabs within a single tab)
+-- Sub-Tabs Demo (Nested tabs with customizable column layout per sub-page)
 local subPages = SubTabsTab:SubTabs({
-    { Title = "Level Farm", Icon = "sparkles" },
-    { Title = "Tuning", Icon = "wrench" },
-    { Title = "Combat", Icon = "swords" },
+    { Title = "Level Farm", Icon = "sparkles", TwoColumns = true },   -- 2 columns
+    { Title = "Tuning", Icon = "wrench", TwoColumns = true },         -- 2 columns
+    { Title = "Combat", Icon = "swords", TwoColumns = false },        -- 1 column
 })
 
+-- 1. Level Farm (2-column layout)
 local farmPage = subPages["Level Farm"]
 local farmCard = farmPage:Card({ Title = "Auto Level Farming", Side = "Left" })
 farmCard:Toggle({ Title = "Auto Mob Kill", Value = true })
 farmCard:Slider({ Title = "Mob Distance", Value = 30, Min = 5, Max = 100 })
 
+local farmRewardCard = farmPage:Card({ Title = "Reward Multipliers", Side = "Right" })
+farmRewardCard:Toggle({ Title = "Double EXP", Value = true })
+farmRewardCard:Slider({ Title = "Loot Magnet Range", Value = 50, Min = 10, Max = 100 })
+
+-- 2. Tuning (2-column layout)
 local tuningPage = subPages["Tuning"]
 local tuningCard = tuningPage:Card({ Title = "Vehicle & Speed Tuning", Side = "Left" })
 tuningCard:Slider({ Title = "Engine Torque Multiplier", Value = 150, Min = 100, Max = 500 })
 
+local tuningHandlingCard = tuningPage:Card({ Title = "Handling & Physics", Side = "Right" })
+tuningHandlingCard:Toggle({ Title = "Drift Assist", Value = false })
+
+-- 3. Combat (1-column layout)
 local combatPage = subPages["Combat"]
-local combatCard = combatPage:Card({ Title = "Combat Exploits", Side = "Left" })
+local combatCard = combatPage:Card({ Title = "Combat Exploits (Single Column)" })
 combatCard:Button({
     Title = "Instant Kill Aura",
     Callback = function()
@@ -496,35 +512,6 @@ MediaCard:Paragraph({
         },
     },
 })
-
--- Layout and Grouping
-local ColumnsDemo = LayoutTab:Card({
-    Title = "Left Column Card",
-    Side = "Left",
-})
-ColumnsDemo:Button({ Title = "Left Column Action" })
-
-local RightDemo = LayoutTab:Card({
-    Title = "Right Column Card",
-    Side = "Right",
-})
-RightDemo:Button({ Title = "Right Column Action" })
-
-local FullWidthDemo = LayoutTab:Card({
-    Title = "Full Width Spanning Card",
-    FullWidth = true,
-})
-FullWidthDemo:Button({ Title = "Spans across both columns" })
-
--- Horizontal group of buttons (HStack)
-local HStackDemo = LayoutTab:Card({
-    Title = "HStack Horizontal Group",
-    Side = "Left",
-})
-local hstack = HStackDemo:HStack()
-hstack:Button({ Title = "Btn 1" })
-hstack:Button({ Title = "Btn 2" })
-hstack:Button({ Title = "Btn 3" })
 
 -- Settings Tab
 local InterfaceSection = SettingsTab:Section({ Title = "Interface Options" })

@@ -2,7 +2,7 @@
 
 [English](README.md) | [Tieng Viet](README_VI.md)
 
-An enhanced edition of WindUI for Roblox with support for two-column card layouts, in-tab search filtering, nested sub-tabs, built-in gradient themes (including Liquid Glass and Ocean Blue), universal dynamic auto-translation supporting any language, watermark stats, tab access control, interactive 3D viewports, and performance optimizations.
+An enhanced edition of WindUI for Roblox with support for two-column card layouts, in-tab search filtering, nested sub-tabs with per-subtab column customization, built-in gradient themes (including Liquid Glass and Ocean Blue), universal dynamic auto-translation supporting any language, watermark stats, tab access control, interactive 3D viewports, and performance optimizations.
 
 Original library by Footagesus. Maintained and expanded by caomod2077.
 
@@ -145,21 +145,26 @@ Window:SetBackgroundBlur(false)
 ### 4. Tab, Sub-Tabs, and Section Structure
 
 - `Window:Tab({ Title, Icon, Desc, TwoColumns, LockedTo, HiddenTo, Whitelist, WhitelistHidden, WhitelistAction, ShowTabTitle, IconShape, IconColor, CustomEmptyPage })`: Creates navigation tab.
+  - `TwoColumns = true`: Splits the tab into two responsive columns. Cards can specify `Side = "Left"` or `Side = "Right"`, or `FullWidth = true`.
+  - `TwoColumns = false`: Keeps the tab in a single clean column.
   - `LockedTo = { userId, ... }`: Restricts tab with lock overlay for non-whitelisted users.
   - `Whitelist = { userId, ... }`: Access whitelist.
     - `WhitelistHidden = true` (default): Hides the tab completely from non-whitelisted users.
     - `WhitelistHidden = false` or `WhitelistAction = "Show"`: Keeps the tab visible in the sidebar, but locks it with an access restriction screen when clicked.
   - `IconShape = "Circle"`: Renders container badge around tab icon.
   - `IconColor = Color3.fromRGB(...)`: Custom tint for tab icon.
-- `Tab:SubTabs({ { Title, Icon }, ... })`: Embeds a sleek horizontal segmented pill bar inside the tab with independent sub-pages:
+- `Tab:SubTabs({ { Title, Icon, TwoColumns }, ... })`: Embeds a segmented pill bar inside the tab with independent sub-pages. Each sub-page can individually customize its column layout:
+  - `TwoColumns = true`: Splits the sub-page into two columns (Cards can use `Side = "Left"` or `Side = "Right"`, or `FullWidth = true`).
+  - `TwoColumns = false`: Keeps the sub-page in a single full-width column.
+  - `TwoColumns = nil` (default): Inherits the parent tab's `TwoColumns` setting.
   ```lua
   local sub = FarmTab:SubTabs({
-      { Title = "Level Farm", Icon = "sparkles" },
-      { Title = "Tuning", Icon = "wrench" },
-      { Title = "Combat", Icon = "swords" },
+      { Title = "Level Farm", Icon = "sparkles", TwoColumns = true },   -- 2 columns
+      { Title = "Tuning", Icon = "wrench", TwoColumns = true },         -- 2 columns
+      { Title = "Combat", Icon = "swords", TwoColumns = false },        -- 1 column
   })
   local LevelPage = sub["Level Farm"]
-  LevelPage:Card({ Title = "Auto Level" }):Toggle({ Title = "Enabled" })
+  LevelPage:Card({ Title = "Auto Level", Side = "Left" }):Toggle({ Title = "Enabled" })
   ```
 - `Tab:AddSearch(placeholder)`: Embeds real-time filter input inside tab.
 - `Tab:Banner({ Image, Height, Title, Desc })`: Adds visual header banner across the tab.
@@ -412,24 +417,34 @@ AdvancedCard:HoldButton({
     end,
 })
 
--- Sub-Tabs Demo (Nested tabs within a single tab)
+-- Sub-Tabs Demo (Nested tabs with customizable column layout per sub-page)
 local subPages = SubTabsTab:SubTabs({
-    { Title = "Level Farm", Icon = "sparkles" },
-    { Title = "Tuning", Icon = "wrench" },
-    { Title = "Combat", Icon = "swords" },
+    { Title = "Level Farm", Icon = "sparkles", TwoColumns = true },   -- 2 columns
+    { Title = "Tuning", Icon = "wrench", TwoColumns = true },         -- 2 columns
+    { Title = "Combat", Icon = "swords", TwoColumns = false },        -- 1 column
 })
 
+-- 1. Level Farm (2-column layout)
 local farmPage = subPages["Level Farm"]
 local farmCard = farmPage:Card({ Title = "Auto Level Farming", Side = "Left" })
 farmCard:Toggle({ Title = "Auto Mob Kill", Value = true })
 farmCard:Slider({ Title = "Mob Distance", Value = 30, Min = 5, Max = 100 })
 
+local farmRewardCard = farmPage:Card({ Title = "Reward Multipliers", Side = "Right" })
+farmRewardCard:Toggle({ Title = "Double EXP", Value = true })
+farmRewardCard:Slider({ Title = "Loot Magnet Range", Value = 50, Min = 10, Max = 100 })
+
+-- 2. Tuning (2-column layout)
 local tuningPage = subPages["Tuning"]
 local tuningCard = tuningPage:Card({ Title = "Vehicle & Speed Tuning", Side = "Left" })
 tuningCard:Slider({ Title = "Engine Torque Multiplier", Value = 150, Min = 100, Max = 500 })
 
+local tuningHandlingCard = tuningPage:Card({ Title = "Handling & Physics", Side = "Right" })
+tuningHandlingCard:Toggle({ Title = "Drift Assist", Value = false })
+
+-- 3. Combat (1-column layout)
 local combatPage = subPages["Combat"]
-local combatCard = combatPage:Card({ Title = "Combat Exploits", Side = "Left" })
+local combatCard = combatPage:Card({ Title = "Combat Exploits (Single Column)" })
 combatCard:Button({
     Title = "Instant Kill Aura",
     Callback = function()
@@ -497,35 +512,6 @@ MediaCard:Paragraph({
         },
     },
 })
-
--- Layout and Grouping
-local ColumnsDemo = LayoutTab:Card({
-    Title = "Left Column Card",
-    Side = "Left",
-})
-ColumnsDemo:Button({ Title = "Left Column Action" })
-
-local RightDemo = LayoutTab:Card({
-    Title = "Right Column Card",
-    Side = "Right",
-})
-RightDemo:Button({ Title = "Right Column Action" })
-
-local FullWidthDemo = LayoutTab:Card({
-    Title = "Full Width Spanning Card",
-    FullWidth = true,
-})
-FullWidthDemo:Button({ Title = "Spans across both columns" })
-
--- Horizontal group of buttons (HStack)
-local HStackDemo = LayoutTab:Card({
-    Title = "HStack Horizontal Group",
-    Side = "Left",
-})
-local hstack = HStackDemo:HStack()
-hstack:Button({ Title = "Btn 1" })
-hstack:Button({ Title = "Btn 2" })
-hstack:Button({ Title = "Btn 3" })
 
 -- Settings Tab
 local InterfaceSection = SettingsTab:Section({ Title = "Interface Options" })
