@@ -44,9 +44,8 @@ local Window = WindUI:CreateWindow({
     User = {
         Enabled = true,               -- Display player profile card on sidebar bottom
         Anonymous = false,            -- Hide player name/avatar when true
-        Subtitle = "Premium Lifetime", -- Subtitle or badge text
-        Profile = true,               -- Enable dedicated player profile tab on click (default cards)
-        -- Profile = { Enabled = true, Custom = true }, -- Or enable empty custom tab
+        Subtitle = "Developer",        -- Subtitle or status text
+        Profile = { Enabled = true, Custom = true, Title = "Local Player" }, -- Custom mode for player utilities
         Callback = function() end,    -- Click callback
     },
 })
@@ -263,7 +262,7 @@ local Window = WindUI:CreateWindow({
         end,
         Thumbnail = {
             Image = "rbxassetid://133610205520685",
-            Title = "Premium Access",
+            Title = "Key Verification",
         },
     },
 })
@@ -297,9 +296,12 @@ local Window = WindUI:CreateWindow({
     User = {
         Enabled = true,               -- Display player thumbnail, display name, and subtitle
         Anonymous = false,            -- When true, displays as Anonymous and hides avatar
-        Subtitle = "Premium Lifetime", -- Subtitle or status badge text
-        Profile = true,               -- By default disabled; set true for automatic live profile cards
-        -- Profile = { Enabled = true, Custom = true, Title = "My Profile" }, -- Or use Custom mode for custom items
+        Subtitle = "Developer",        -- Subtitle or status badge text
+        Profile = {
+            Enabled = true,
+            Custom = true,            -- Custom mode: create an empty profile tab for custom utilities
+            Title = "Local Player",
+        },
         Callback = function()         -- Optional click callback
             print("Player profile card clicked")
         end,
@@ -342,8 +344,8 @@ Window:Divider()
 local AdvancedSection = Window:Section({ Title = "Advanced", Icon = "box", Opened = true })
 local LayoutTab = AdvancedSection:Tab({ Title = "Layout & Groups", Icon = "layout-grid" })
 local WhitelistTab = AdvancedSection:Tab({
-    Title = "VIP Member Tab",
-    Icon = "crown",
+    Title = "Staff Only Tab",
+    Icon = "shield-alert",
     Whitelist = { 12345678, 87654321 },
     WhitelistHidden = false, -- false: show in sidebar as locked | true (default): hide completely
     Desc = "Locked tab demonstrating Whitelist protection.",
@@ -674,7 +676,7 @@ UserSection:Toggle({
 
 UserSection:Input({
     Title = "Custom Subtitle",
-    Value = "Premium Lifetime",
+    Value = "Developer",
     Callback = function(text)
         Window.User:SetSubtitle(text)
     end,
@@ -684,6 +686,145 @@ UserSection:Button({
     Title = "Open Player Profile Tab",
     Callback = function()
         Window.User:OpenProfile()
+    end,
+})
+
+-- ========================================================
+-- Custom Player Profile Tab (Universal Local Player Utilities)
+-- Click the profile card at the bottom of the sidebar to view!
+-- ========================================================
+local ProfileTab = Window.User:GetTab()
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local LocalPlayer = Players.LocalPlayer
+
+local function getHumanoid()
+    local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+    return char:FindFirstChildOfClass("Humanoid")
+end
+
+local MovementCard = ProfileTab:Card({
+    Title = "Character Movement",
+    Icon = "zap",
+    Side = "Left",
+    Badge = "LOCAL",
+    BadgeColor = Color3.fromRGB(0, 145, 255),
+})
+
+MovementCard:Slider({
+    Title = "WalkSpeed",
+    Desc = "Adjust local player movement speed",
+    Value = { Min = 16, Max = 250, Default = 16 },
+    Step = 1,
+    IsTextbox = true,
+    Callback = function(speed)
+        local hum = getHumanoid()
+        if hum then hum.WalkSpeed = speed end
+    end,
+})
+
+MovementCard:Slider({
+    Title = "JumpPower",
+    Desc = "Adjust jump height and power",
+    Value = { Min = 50, Max = 300, Default = 50 },
+    Step = 1,
+    IsTextbox = true,
+    Callback = function(power)
+        local hum = getHumanoid()
+        if hum then
+            hum.UseJumpPower = true
+            hum.JumpPower = power
+        end
+    end,
+})
+
+local infJumpConn
+MovementCard:Toggle({
+    Title = "Infinite Jump",
+    Desc = "Jump continuously in midair",
+    Value = false,
+    Callback = function(enabled)
+        if enabled then
+            infJumpConn = UserInputService.JumpRequest:Connect(function()
+                local hum = getHumanoid()
+                if hum then
+                    hum:ChangeState(Enum.HumanoidStateType.Jumping)
+                end
+            end)
+        elseif infJumpConn then
+            infJumpConn:Disconnect()
+            infJumpConn = nil
+        end
+    end,
+})
+
+local noclipConn
+MovementCard:Toggle({
+    Title = "Noclip",
+    Desc = "Pass through walls and solid objects",
+    Value = false,
+    Callback = function(enabled)
+        if enabled then
+            noclipConn = RunService.Stepped:Connect(function()
+                local char = LocalPlayer.Character
+                if char then
+                    for _, part in ipairs(char:GetDescendants()) do
+                        if part:IsA("BasePart") and part.CanCollide then
+                            part.CanCollide = false
+                        end
+                    end
+                end
+            end)
+        elseif noclipConn then
+            noclipConn:Disconnect()
+            noclipConn = nil
+        end
+    end,
+})
+
+local UtilityCard = ProfileTab:Card({
+    Title = "Player Utilities & Camera",
+    Icon = "user-cog",
+    Side = "Right",
+})
+
+UtilityCard:Slider({
+    Title = "Field of View (FOV)",
+    Desc = "Adjust camera field of view",
+    Value = { Min = 70, Max = 120, Default = 70 },
+    Step = 1,
+    IsTextbox = true,
+    Callback = function(fov)
+        workspace.CurrentCamera.FieldOfView = fov
+    end,
+})
+
+UtilityCard:Button({
+    Title = "Reset Character",
+    Desc = "Instantly respawn local character",
+    Icon = "skull",
+    Variant = "Destructive",
+    Callback = function()
+        local hum = getHumanoid()
+        if hum then hum.Health = 0 end
+    end,
+})
+
+UtilityCard:Button({
+    Title = "Copy Coordinates",
+    Desc = "Copy your current Vector3 coordinates",
+    Icon = "copy",
+    Variant = "Secondary",
+    Callback = function()
+        local char = LocalPlayer.Character
+        local root = char and char:FindFirstChild("HumanoidRootPart")
+        if root then
+            local posStr = string.format("%.2f, %.2f, %.2f", root.Position.X, root.Position.Y, root.Position.Z)
+            if setclipboard then setclipboard(posStr) elseif toclipboard then toclipboard(posStr) end
+            WindUI:Notify({ Title = "Copied", Content = "Position copied: " .. posStr, Duration = 2 })
+        end
     end,
 })
 

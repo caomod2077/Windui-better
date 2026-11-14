@@ -44,9 +44,8 @@ local Window = WindUI:CreateWindow({
     User = {
         Enabled = true,               -- Hiện khung hồ sơ người chơi ở góc dưới Sidebar
         Anonymous = false,            -- Ẩn avatar và tên khi bật true
-        Subtitle = "Premium Lifetime", -- Dòng chữ phụ đề / trạng thái
-        Profile = true,               -- Mặc định tắt; bật true để hiển thị tab thông tin chi tiết (Player, Game & Server, Client)
-        -- Profile = { Enabled = true, Custom = true, Title = "Hồ sơ của tôi" }, -- Hoặc bật Custom để tự do thêm nội dung
+        Subtitle = "Developer",        -- Dòng chữ phụ đề / trạng thái
+        Profile = { Enabled = true, Custom = true, Title = "Người chơi" }, -- Bật Custom để tự do thêm tính năng người chơi
         Callback = function() end,    -- Bắt sự kiện khi click vào khung hồ sơ
     },
 })
@@ -296,9 +295,12 @@ local Window = WindUI:CreateWindow({
     User = {
         Enabled = true,               -- Display player thumbnail, display name, and subtitle
         Anonymous = false,            -- When true, displays as Anonymous and hides avatar
-        Subtitle = "Premium Lifetime", -- Subtitle or status badge text
-        Profile = true,               -- Mặc định tắt; bật true để hiển thị tab thông tin người chơi, game & server
-        -- Profile = { Enabled = true, Custom = true, Title = "Hồ sơ của tôi" }, -- Hoặc bật Custom để tự do thêm nút/nội dung
+        Subtitle = "Developer",        -- Subtitle or status badge text
+        Profile = {
+            Enabled = true,
+            Custom = true,            -- Chế độ Custom: tạo tab hồ sơ tùy biến cho các tính năng người chơi
+            Title = "Người chơi",
+        },
         Callback = function()         -- Bắt sự kiện phụ khi click vào khung hồ sơ
             print("Đã click vào profile card")
         end,
@@ -341,11 +343,11 @@ Window:Divider()
 local AdvancedSection = Window:Section({ Title = "Advanced", Icon = "box", Opened = true })
 local LayoutTab = AdvancedSection:Tab({ Title = "Layout & Groups", Icon = "layout-grid" })
 local WhitelistTab = AdvancedSection:Tab({
-    Title = "VIP Member Tab",
-    Icon = "crown",
+    Title = "Tab Giới Hạn",
+    Icon = "shield-alert",
     Whitelist = { 12345678, 87654321 },
     WhitelistHidden = false, -- false: show in sidebar as locked | true (default): hide completely
-    Desc = "Locked tab demonstrating Whitelist protection.",
+    Desc = "Tab bị khóa nhằm minh họa tính năng bảo vệ Whitelist theo UserId.",
 })
 
 Window:Divider()
@@ -673,7 +675,7 @@ UserSection:Toggle({
 
 UserSection:Input({
     Title = "Custom Subtitle",
-    Value = "Premium Lifetime",
+    Value = "Developer",
     Callback = function(text)
         Window.User:SetSubtitle(text)
     end,
@@ -683,6 +685,145 @@ UserSection:Button({
     Title = "Mở Tab Profile Người Chơi",
     Callback = function()
         Window.User:OpenProfile()
+    end,
+})
+
+-- ========================================================
+-- Custom Player Profile Tab (Tính năng Local Player cho mọi game)
+-- Nhấn vào khung Profile dưới góc Sidebar để mở tab này!
+-- ========================================================
+local ProfileTab = Window.User:GetTab()
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local LocalPlayer = Players.LocalPlayer
+
+local function getHumanoid()
+    local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+    return char:FindFirstChildOfClass("Humanoid")
+end
+
+local MovementCard = ProfileTab:Card({
+    Title = "Di chuyển nhân vật",
+    Icon = "zap",
+    Side = "Left",
+    Badge = "LOCAL",
+    BadgeColor = Color3.fromRGB(0, 145, 255),
+})
+
+MovementCard:Slider({
+    Title = "Tốc độ chạy (WalkSpeed)",
+    Desc = "Chỉnh tốc độ di chuyển của nhân vật",
+    Value = { Min = 16, Max = 250, Default = 16 },
+    Step = 1,
+    IsTextbox = true,
+    Callback = function(speed)
+        local hum = getHumanoid()
+        if hum then hum.WalkSpeed = speed end
+    end,
+})
+
+MovementCard:Slider({
+    Title = "Độ cao nhảy (JumpPower)",
+    Desc = "Chỉnh lực nhảy của nhân vật",
+    Value = { Min = 50, Max = 300, Default = 50 },
+    Step = 1,
+    IsTextbox = true,
+    Callback = function(power)
+        local hum = getHumanoid()
+        if hum then
+            hum.UseJumpPower = true
+            hum.JumpPower = power
+        end
+    end,
+})
+
+local infJumpConn
+MovementCard:Toggle({
+    Title = "Nhảy vô hạn (Infinite Jump)",
+    Desc = "Nhảy liên tục trên không trung",
+    Value = false,
+    Callback = function(enabled)
+        if enabled then
+            infJumpConn = UserInputService.JumpRequest:Connect(function()
+                local hum = getHumanoid()
+                if hum then
+                    hum:ChangeState(Enum.HumanoidStateType.Jumping)
+                end
+            end)
+        elseif infJumpConn then
+            infJumpConn:Disconnect()
+            infJumpConn = nil
+        end
+    end,
+})
+
+local noclipConn
+MovementCard:Toggle({
+    Title = "Đi xuyên tường (Noclip)",
+    Desc = "Đi xuyên qua mọi vật thể và bức tường",
+    Value = false,
+    Callback = function(enabled)
+        if enabled then
+            noclipConn = RunService.Stepped:Connect(function()
+                local char = LocalPlayer.Character
+                if char then
+                    for _, part in ipairs(char:GetDescendants()) do
+                        if part:IsA("BasePart") and part.CanCollide then
+                            part.CanCollide = false
+                        end
+                    end
+                end
+            end)
+        elseif noclipConn then
+            noclipConn:Disconnect()
+            noclipConn = nil
+        end
+    end,
+})
+
+local UtilityCard = ProfileTab:Card({
+    Title = "Tiện ích & Camera",
+    Icon = "user-cog",
+    Side = "Right",
+})
+
+UtilityCard:Slider({
+    Title = "Góc nhìn Camera (FOV)",
+    Desc = "Mở rộng tầm nhìn của camera",
+    Value = { Min = 70, Max = 120, Default = 70 },
+    Step = 1,
+    IsTextbox = true,
+    Callback = function(fov)
+        workspace.CurrentCamera.FieldOfView = fov
+    end,
+})
+
+UtilityCard:Button({
+    Title = "Reset nhân vật",
+    Desc = "Hồi sinh lại nhân vật ngay lập tức",
+    Icon = "skull",
+    Variant = "Destructive",
+    Callback = function()
+        local hum = getHumanoid()
+        if hum then hum.Health = 0 end
+    end,
+})
+
+UtilityCard:Button({
+    Title = "Sao chép tọa độ",
+    Desc = "Copy tọa độ Vector3 vị trí hiện tại",
+    Icon = "copy",
+    Variant = "Secondary",
+    Callback = function()
+        local char = LocalPlayer.Character
+        local root = char and char:FindFirstChild("HumanoidRootPart")
+        if root then
+            local posStr = string.format("%.2f, %.2f, %.2f", root.Position.X, root.Position.Y, root.Position.Z)
+            if setclipboard then setclipboard(posStr) elseif toclipboard then toclipboard(posStr) end
+            WindUI:Notify({ Title = "Đã sao chép", Content = "Tọa độ: " .. posStr, Duration = 2 })
+        end
     end,
 })
 

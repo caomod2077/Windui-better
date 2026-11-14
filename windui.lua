@@ -14867,7 +14867,7 @@ TextXAlignment="Left",
 Name="DisplayName",
 }),
 ao("TextLabel",{
-Text=aw.User.Subtitle or aw.User.Status or (aw.User.Anonymous and "anonymous" or "Expires: lifetime"),
+Text=aw.User.Subtitle or aw.User.Status or (aw.User.Anonymous and "anonymous" or "User"),
 TextSize=13,
 TextTransparency=0.5,
 ThemeTag={
@@ -14927,7 +14927,7 @@ end
 aw.User.Anonymous=g
 d.UserIcon.ImageLabel.Image=GetUserThumb()
 d.UserIcon.Frame.DisplayName.Text=g and"Anonymous"or ak.LocalPlayer.DisplayName
-d.UserIcon.Frame.UserName.Text=g and"anonymous"or (aw.User.Subtitle or aw.User.Status or "Expires: lifetime")
+d.UserIcon.Frame.UserName.Text=g and"anonymous"or (aw.User.Subtitle or aw.User.Status or "User")
 end
 function aw.User.SetSubtitle(f,text)
 aw.User.Subtitle=tostring(text or "")
@@ -16678,13 +16678,13 @@ local playerCard = targetTab:Card({
 Title = "Player Information",
 Icon = "user",
 Side = "Left",
-Badge = p and p.MembershipType == Enum.MembershipType.Premium and "PREMIUM" or "MEMBER",
-BadgeColor = p and p.MembershipType == Enum.MembershipType.Premium and Color3.fromRGB(255, 185, 0) or Color3.fromRGB(0, 145, 255),
+Badge = "ONLINE",
+BadgeColor = Color3.fromRGB(34, 197, 94),
 })
 
 playerCard:Paragraph({
 Title = p and p.DisplayName or "Player",
-Desc = "@" .. (p and p.Name or "Player") .. "\nUser ID: " .. tostring(p and p.UserId or 0) .. "\nAccount Age: " .. tostring(p and p.AccountAge or 0) .. " days\nMembership: " .. tostring(p and p.MembershipType and p.MembershipType.Name or "None"),
+Desc = "@" .. (p and p.Name or "Player") .. "\nUser ID: " .. tostring(p and p.UserId or 0) .. "\nAccount Age: " .. tostring(p and p.AccountAge or 0) .. " days\nPlatform: " .. ((aw.IsMobile and "Mobile") or "Desktop / PC"),
 Thumbnail = d and d.UserIcon and d.UserIcon.ImageLabel and d.UserIcon.ImageLabel.Image or nil,
 ThumbnailSize = 64,
 Buttons = {
