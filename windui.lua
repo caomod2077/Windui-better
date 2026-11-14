@@ -1166,8 +1166,10 @@ z[A]=B
 end
 
 for A,B in next,v or{}do
-if A~="ThemeTag"then
+if A~="ThemeTag" and A~="NoTranslate" and A~="NoTranslation" then
+pcall(function()
 z[A]=B
+end)
 end
 if typeof(B)=="string" and B~="" and A=="Text" and not (v and (v.NoTranslate or v.NoTranslation)) then
 local C=string.match(B,"^"..(r.Localization and r.Localization.Prefix or "loc:").."(.+)")
