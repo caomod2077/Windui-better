@@ -646,7 +646,14 @@ Objects={},
 LocalizationObjects={},
 UIScale=1,
 FontObjects={},
-Language=string.match(g.SystemLocaleId,"^[a-z]+"),
+Language=(function()
+local ok, loc = pcall(function() return g.SystemLocaleId or g.RobloxLocaleId end)
+if ok and type(loc) == "string" then
+local m = loc:lower():gsub("_", "-"):match("^([a-z]+)")
+if m and m ~= "" then return m end
+end
+return "en"
+end)(),
 Request=http_request or(syn and syn.request)or request,
 DefaultProperties={
 ScreenGui={
@@ -1038,7 +1045,7 @@ end
 
 function r.SetLangForObject(u)
 local v=r.LocalizationObjects[u]
-if not v or not v.Object or v.Object.Parent==nil then
+if not v or not v.Object then
 return
 end
 
@@ -1047,24 +1054,26 @@ local orig=v.OriginalText or x.Text
 local z=v.TranslationId or orig
 local curLang=r.Language or "en"
 
-if curLang=="en" then
-x.Text=orig
+if curLang=="en" or curLang:sub(1, 2)=="en" then
+pcall(function() x.Text=orig end)
 return
 end
 
 local customDict=r.Localization and r.Localization.Translations and r.Localization.Translations[curLang]
 if customDict and customDict[z] then
-x.Text=customDict[z]
+pcall(function() x.Text=customDict[z] end)
 return
 elseif customDict and customDict[orig] then
-x.Text=customDict[orig]
+pcall(function() x.Text=customDict[orig] end)
 return
 end
 
 local autoModule=a.load'e'
 autoModule.TranslateOnline(orig, curLang, function(translated)
-if x and x.Parent and (r.Language or "en")==curLang then
+if x and (r.Language or "en")==curLang then
+pcall(function()
 x.Text=translated
+end)
 end
 end)
 end
@@ -1083,8 +1092,12 @@ r.UpdateLang()
 end
 
 function r.Translate(text, lang, callback)
-lang=lang or r.Language or "en"
-local customDict=r.Localization and r.Localization.Translations and r.Localization.Translations[lang]
+if type(lang) == "function" and callback == nil then
+callback = lang
+lang = r.Language or "en"
+end
+lang = lang or r.Language or "en"
+local customDict = r.Localization and r.Localization.Translations and r.Localization.Translations[lang]
 if customDict and customDict[text] then
 if callback then callback(customDict[text]) end
 return customDict[text]
@@ -1114,23 +1127,27 @@ end
 end
 
 function r.UpdateLang(u)
-if u then
+if u and type(u)=="string" then
 r.Language=u
 end
 
-for v=1,#r.LocalizationObjects do
-local x=r.LocalizationObjects[v]
-if x.Object and x.Object.Parent~=nil then
-r.SetLangForObject(v)
-else
-r.LocalizationObjects[v]=nil
+local alive = {}
+for _, entry in ipairs(r.LocalizationObjects) do
+if entry and entry.Object then
+table.insert(alive, entry)
 end
+end
+r.LocalizationObjects = alive
+
+for idx=1, #r.LocalizationObjects do
+r.SetLangForObject(idx)
 end
 end
 
 function r.SetLanguage(u)
-r.Language=u
-r.UpdateLang()
+local lang = (type(u)=="string" and u) or "en"
+r.Language=lang
+r.UpdateLang(lang)
 end
 
 function r.Icon(u,v)
@@ -1152,7 +1169,7 @@ for A,B in next,v or{}do
 if A~="ThemeTag"then
 z[A]=B
 end
-if typeof(B)=="string" and B~="" and A=="Text" then
+if typeof(B)=="string" and B~="" and A=="Text" and not (v and (v.NoTranslate or v.NoTranslation)) then
 local C=string.match(B,"^"..(r.Localization and r.Localization.Prefix or "loc:").."(.+)")
 local F=#r.LocalizationObjects+1
 r.LocalizationObjects[F]={
@@ -1648,8 +1665,25 @@ Cache={},
 Pending={},
 }
 
+local function normalizeLang(lang)
+if not lang or type(lang) ~= "string" then return "en" end
+local l = string.lower(lang):gsub("_", "-")
+return l
+end
+
 function b.TranslateOnline(text, targetLang, callback)
-if not text or text == "" or targetLang == "en" then
+targetLang = normalizeLang(targetLang)
+if not text or text == "" or targetLang == "en" or targetLang:sub(1, 2) == "en" then
+if callback then callback(text) end
+return text
+end
+
+if not string.match(text, "%a") then
+if callback then callback(text) end
+return text
+end
+
+if string.match(text, "^https?://") or string.match(text, "^rbxassetid://") or string.match(text, "^video:") then
 if callback then callback(text) end
 return text
 end
@@ -1673,19 +1707,53 @@ b.Pending[targetLang][text] = callback and { callback } or {}
 task.spawn(function()
 local req = (syn and syn.request) or (http and http.request) or http_request or request or (getgenv and (getgenv().http_request or getgenv().request or getgenv().syn_request))
 local HttpService = game:GetService("HttpService")
-local url = "https://api.mymemory.translated.net/get?q=" .. HttpService:UrlEncode(text) .. "&langpair=en|" .. targetLang
-local success, res = pcall(function()
+local encoded = HttpService:UrlEncode(text)
+
+local function doHttp(url)
+local ok, body = pcall(function()
 if req then
-local response = req({ Url = url, Method = "GET" })
-return response and response.Body
+local r = req({
+Url = url,
+Method = "GET",
+Headers = {
+["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+},
+})
+return r and (r.Body or r.body)
 elseif game and game.HttpGet then
 return game:HttpGet(url)
 end
 end)
+if ok and type(body) == "string" and #body > 0 then
+return body
+end
+return nil
+end
 
 local translated = nil
-if success and res and #res > 0 then
-local decodeOk, data = pcall(function() return HttpService:JSONDecode(res) end)
+
+local gUrl = "https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=" .. HttpService:UrlEncode(targetLang) .. "&dt=t&q=" .. encoded
+local gRes = doHttp(gUrl)
+if gRes then
+local decodeOk, data = pcall(function() return HttpService:JSONDecode(gRes) end)
+if decodeOk and type(data) == "table" and type(data[1]) == "table" then
+local out = ""
+for _, seg in ipairs(data[1]) do
+if type(seg) == "table" and type(seg[1]) == "string" then
+out = out .. seg[1]
+end
+end
+if out ~= "" then
+translated = out
+end
+end
+end
+
+if not translated then
+local mUrl = "https://api.mymemory.translated.net/get?q=" .. encoded .. "&langpair=en|" .. HttpService:UrlEncode(targetLang)
+local mRes = doHttp(mUrl)
+if mRes then
+local decodeOk, data = pcall(function() return HttpService:JSONDecode(mRes) end)
 if decodeOk and data and data.responseData and data.responseData.translatedText then
 local trans = data.responseData.translatedText
 trans = trans:gsub("&quot;", '"'):gsub("&#39;", "'"):gsub("&amp;", "&")
@@ -1694,11 +1762,14 @@ translated = trans
 end
 end
 end
+end
+
+if translated and translated ~= "" then
+b.Cache[targetLang] = b.Cache[targetLang] or {}
+b.Cache[targetLang][text] = translated
+end
 
 local finalResult = translated or text
-b.Cache[targetLang] = b.Cache[targetLang] or {}
-b.Cache[targetLang][text] = finalResult
-
 local cbs = b.Pending[targetLang] and b.Pending[targetLang][text]
 if b.Pending[targetLang] then
 b.Pending[targetLang][text] = nil
@@ -15013,6 +15084,7 @@ Name="TextContainer",
 },{
 ao("TextLabel",{
 Text=aw.User.Anonymous and"Anonymous"or ak.LocalPlayer.DisplayName,
+NoTranslate=true,
 TextSize=17,
 ThemeTag={
 TextColor3="Text",
@@ -17926,19 +17998,40 @@ return aa.LocalizationModule:New(aA,as)
 end
 
 function aa.SetLanguage(az,aA)
+local lang = (type(az)=="string" and az) or (type(aA)=="string" and aA) or "en"
 if not as.Localization then
 as.Localization = { Enabled = true, Translations = {}, Prefix = "loc:", DefaultLanguage = "en" }
 end
 as.Localization.Enabled = true
-return as.SetLanguage(aA)
+return as.SetLanguage(lang)
 end
 
 function aa.AddTranslations(az,aA,aB)
 return as.AddTranslations(aA,aB)
 end
 
-function aa.Translate(az,aA,aB)
-return as.Translate(aA,aB)
+function aa.Translate(az,aA,aB,aC)
+local text, lang, cb
+if type(az) == "table" then
+text = aA
+if type(aB) == "function" then
+cb = aB
+lang = as.Language or "en"
+else
+lang = aB
+cb = aC
+end
+else
+text = az
+if type(aA) == "function" then
+cb = aA
+lang = as.Language or "en"
+else
+lang = aA
+cb = aB
+end
+end
+return as.Translate(text, lang, cb)
 end
 
 function aa.ToggleAcrylic(az,aA)
@@ -18165,6 +18258,16 @@ aa.Window=h
 
 if aA.Acrylic then
 au.init()
+end
+
+if aA.Language then
+aa:SetLanguage(aA.Language)
+elseif aA.Locale then
+aa:SetLanguage(aA.Locale)
+end
+
+function h.SetLanguage(self, lang)
+return aa:SetLanguage(lang)
 end
 
 
