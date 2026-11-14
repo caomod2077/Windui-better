@@ -10913,10 +10913,10 @@ local isCardSplit = am.Side or am.Column or am.Card == true
 local useTwoColumns
 if am.FullWidth == true or am.Span == "Full" then
 useTwoColumns = false
-elseif am.Side or am.Column then
-useTwoColumns = true
 elseif tab and tab.TwoColumns ~= nil then
 useTwoColumns = (tab.TwoColumns == true)
+elseif am.Side or am.Column then
+useTwoColumns = true
 elseif win and (win.TwoColumns or win.Columns == 2) then
 useTwoColumns = true
 else
@@ -12442,6 +12442,19 @@ return ao
 end
 
 function ao.New(ap,aq)
+local tabTwoCol
+if Window.CompactLayout then
+tabTwoCol = false
+elseif ap.TwoColumns ~= nil then
+tabTwoCol = (ap.TwoColumns == true)
+elseif ap.Columns ~= nil then
+tabTwoCol = (ap.Columns == 2)
+elseif Window and (Window.TwoColumns or Window.Columns == 2) then
+tabTwoCol = true
+else
+tabTwoCol = false
+end
+
 local ar={
 __type="Tab",
 Title=ap.Title or"Tab",
@@ -12460,7 +12473,7 @@ Selected=false,
 Index=nil,
 Parent=ap.Parent,
 Window=Window,
-TwoColumns=not Window.CompactLayout and ((ap.TwoColumns ~= nil and ap.TwoColumns) or (Window and (Window.TwoColumns or Window.Columns == 2)) or false),
+TwoColumns=tabTwoCol,
 UIElements={},
 Elements={},
 ContainerFrame=nil,
