@@ -1671,14 +1671,14 @@ end
 b.Pending[targetLang][text] = callback and { callback } or {}
 
 task.spawn(function()
-local req = (syn and syn.request) or (http and http.request) or http_request or request
+local req = (syn and syn.request) or (http and http.request) or http_request or request or (getgenv and (getgenv().http_request or getgenv().request or getgenv().syn_request))
 local HttpService = game:GetService("HttpService")
 local url = "https://api.mymemory.translated.net/get?q=" .. HttpService:UrlEncode(text) .. "&langpair=en|" .. targetLang
 local success, res = pcall(function()
 if req then
 local response = req({ Url = url, Method = "GET" })
 return response and response.Body
-elseif game.HttpGet then
+elseif game and game.HttpGet then
 return game:HttpGet(url)
 end
 end)
