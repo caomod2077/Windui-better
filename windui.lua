@@ -1042,30 +1042,37 @@ if not v or not v.Object or v.Object.Parent==nil then
 return
 end
 
+function r.SetLangForObject(u)
+local v=r.LocalizationObjects[u]
+if not v or not v.Object or v.Object.Parent==nil then
+return
+end
+
 local x=v.Object
 local orig=v.OriginalText or x.Text
 local z=v.TranslationId or orig
 local curLang=r.Language or "en"
 
-local customDict=r.Localization and r.Localization.Translations and r.Localization.Translations[curLang]
-local autoDict=a.load'e'.AutoDictionary and a.load'e'.AutoDictionary[curLang]
-
-local translated=nil
-if customDict and customDict[z] then
-translated=customDict[z]
-elseif customDict and customDict[orig] then
-translated=customDict[orig]
-elseif autoDict and autoDict[z] then
-translated=autoDict[z]
-elseif autoDict and autoDict[orig] then
-translated=autoDict[orig]
-end
-
-if translated then
-x.Text=translated
-else
+if curLang=="en" then
 x.Text=orig
+return
 end
+
+local customDict=r.Localization and r.Localization.Translations and r.Localization.Translations[curLang]
+if customDict and customDict[z] then
+x.Text=customDict[z]
+return
+elseif customDict and customDict[orig] then
+x.Text=customDict[orig]
+return
+end
+
+local autoModule=a.load'e'
+autoModule.TranslateOnline(orig, curLang, function(translated)
+if x and x.Parent and (r.Language or "en")==curLang then
+x.Text=translated
+end
+end)
 end
 
 function r.AddTranslations(lang, dict)
@@ -1081,13 +1088,14 @@ end
 r.UpdateLang()
 end
 
-function r.Translate(text, lang)
+function r.Translate(text, lang, callback)
 lang=lang or r.Language or "en"
 local customDict=r.Localization and r.Localization.Translations and r.Localization.Translations[lang]
-local autoDict=a.load'e'.AutoDictionary and a.load'e'.AutoDictionary[lang]
-if customDict and customDict[text] then return customDict[text] end
-if autoDict and autoDict[text] then return autoDict[text] end
-return text
+if customDict and customDict[text] then
+if callback then callback(customDict[text]) end
+return customDict[text]
+end
+return a.load'e'.TranslateOnline(text, lang, callback)
 end
 
 function r.ChangeTranslationKey(u,v,x)
@@ -1776,6 +1784,50 @@ en = {
 ["Khôi Phục Khẩn Cấp"] = "Emergency Reset",
 }
 }
+b.Cache = {}
+
+function b.TranslateOnline(text, targetLang, callback)
+if not text or text == "" or targetLang == "en" then
+if callback then callback(text) end
+return text
+end
+b.Cache[targetLang] = b.Cache[targetLang] or {}
+if b.Cache[targetLang][text] then
+if callback then callback(b.Cache[targetLang][text]) end
+return b.Cache[targetLang][text]
+end
+local dict = b.AutoDictionary and b.AutoDictionary[targetLang]
+if dict and dict[text] then
+b.Cache[targetLang][text] = dict[text]
+if callback then callback(dict[text]) end
+return dict[text]
+end
+task.spawn(function()
+local req = (syn and syn.request) or (http and http.request) or http_request or request
+local HttpService = game:GetService("HttpService")
+local url = "https://api.mymemory.translated.net/get?q=" .. HttpService:UrlEncode(text) .. "&langpair=en|" .. targetLang
+local success, res = pcall(function()
+if req then
+local response = req({ Url = url, Method = "GET" })
+return response and response.Body
+elseif game.HttpGet then
+return game:HttpGet(url)
+end
+end)
+if success and res and #res > 0 then
+local decodeOk, data = pcall(function() return HttpService:JSONDecode(res) end)
+if decodeOk and data and data.responseData and data.responseData.translatedText then
+local trans = data.responseData.translatedText
+trans = trans:gsub("&quot;", '"'):gsub("&#39;", "'"):gsub("&amp;", "&")
+b.Cache[targetLang][text] = trans
+if callback then callback(trans) end
+return
+end
+end
+if callback then callback(text) end
+end)
+return text
+end
 
 function b.New(d,e,f)
 local g={
@@ -4309,8 +4361,8 @@ Button=aa:Gradient({["0"]={Color=Color3.fromHex"#66003F",Transparency=0},["50"]=
 Icon=aa:Gradient({["0"]={Color=Color3.fromHex"#99004D",Transparency=0},["50"]={Color=Color3.fromHex"#CC3366",Transparency=0},["100"]={Color=Color3.fromHex"#FF6699",Transparency=0}},{Rotation=45}),
 ElementBackground=Color3.fromHex"#361629",ElementBackgroundTransparency=0,
 },
-["Liquid Glass"]={
-Name="Liquid Glass",
+["Ocean Blue"]={
+Name="Ocean Blue",
 Accent=aa:Gradient({["0"]={Color=Color3.fromHex"#00E5FF",Transparency=0},["50"]={Color=Color3.fromHex"#00B4D8",Transparency=0},["100"]={Color=Color3.fromHex"#0077B6",Transparency=0}},{Rotation=45}),
 Dialog=aa:Gradient({["0"]={Color=Color3.fromHex"#0A192F",Transparency=0},["50"]={Color=Color3.fromHex"#0D2538",Transparency=0},["100"]={Color=Color3.fromHex"#133E54",Transparency=0}},{Rotation=90}),
 Outline=aa:Gradient({["0"]={Color=Color3.fromHex"#38BDF8",Transparency=0},["50"]={Color=Color3.fromHex"#00E5FF",Transparency=0},["100"]={Color=Color3.fromHex"#7DD3FC",Transparency=0}},{Rotation=45}),
@@ -4335,8 +4387,8 @@ TabBackgroundHover=Color3.fromHex"#13364C",
 TabBackgroundActive=Color3.fromHex"#194562",
 TabTitle=Color3.fromHex"#F0FDFE",
 },
-LiquidGlass={
-Name="Liquid Glass",
+["Blue Something"]={
+Name="Blue Something",
 Accent=aa:Gradient({["0"]={Color=Color3.fromHex"#00E5FF",Transparency=0},["50"]={Color=Color3.fromHex"#00B4D8",Transparency=0},["100"]={Color=Color3.fromHex"#0077B6",Transparency=0}},{Rotation=45}),
 Dialog=aa:Gradient({["0"]={Color=Color3.fromHex"#0A192F",Transparency=0},["50"]={Color=Color3.fromHex"#0D2538",Transparency=0},["100"]={Color=Color3.fromHex"#133E54",Transparency=0}},{Rotation=90}),
 Outline=aa:Gradient({["0"]={Color=Color3.fromHex"#38BDF8",Transparency=0},["50"]={Color=Color3.fromHex"#00E5FF",Transparency=0},["100"]={Color=Color3.fromHex"#7DD3FC",Transparency=0}},{Rotation=45}),
@@ -4360,6 +4412,66 @@ TabBackground=Color3.fromHex"#0B1E2B",
 TabBackgroundHover=Color3.fromHex"#13364C",
 TabBackgroundActive=Color3.fromHex"#194562",
 TabTitle=Color3.fromHex"#F0FDFE",
+},
+["Liquid Glass"]={
+Name="Liquid Glass",
+Accent=Color3.fromHex"#00E5FF",
+Dialog=Color3.fromHex"#07111A",
+Outline=Color3.fromHex"#FFFFFF",
+Text=Color3.fromHex"#FFFFFF",
+Placeholder=Color3.fromHex"#94A3B8",
+Background=Color3.fromHex"#070F18",
+BackgroundTransparency=0.92,
+Button=Color3.fromHex"#00E5FF",
+Icon=Color3.fromHex"#00E5FF",
+Toggle=Color3.fromHex"#00E5FF",
+Slider=Color3.fromHex"#00E5FF",
+Checkbox=Color3.fromHex"#00E5FF",
+PanelBackground=Color3.fromHex"#FFFFFF",
+PanelBackgroundTransparency=0.96,
+ElementBackground=Color3.fromHex"#FFFFFF",
+ElementBackgroundTransparency=0.93,
+SectionBoxBackground=Color3.fromHex"#FFFFFF",
+SectionBoxBackgroundTransparency=0.95,
+SectionBoxBorder=Color3.fromHex"#FFFFFF",
+SectionBoxBorderTransparency=0.82,
+TabBackground=Color3.fromHex"#FFFFFF",
+TabBackgroundHover=Color3.fromHex"#FFFFFF",
+TabBackgroundHoverTransparency=0.92,
+TabBackgroundActive=Color3.fromHex"#00E5FF",
+TabBackgroundActiveTransparency=0.82,
+TabTitle=Color3.fromHex"#FFFFFF",
+Glass=true,
+},
+LiquidGlass={
+Name="Liquid Glass",
+Accent=Color3.fromHex"#00E5FF",
+Dialog=Color3.fromHex"#07111A",
+Outline=Color3.fromHex"#FFFFFF",
+Text=Color3.fromHex"#FFFFFF",
+Placeholder=Color3.fromHex"#94A3B8",
+Background=Color3.fromHex"#070F18",
+BackgroundTransparency=0.92,
+Button=Color3.fromHex"#00E5FF",
+Icon=Color3.fromHex"#00E5FF",
+Toggle=Color3.fromHex"#00E5FF",
+Slider=Color3.fromHex"#00E5FF",
+Checkbox=Color3.fromHex"#00E5FF",
+PanelBackground=Color3.fromHex"#FFFFFF",
+PanelBackgroundTransparency=0.96,
+ElementBackground=Color3.fromHex"#FFFFFF",
+ElementBackgroundTransparency=0.93,
+SectionBoxBackground=Color3.fromHex"#FFFFFF",
+SectionBoxBackgroundTransparency=0.95,
+SectionBoxBorder=Color3.fromHex"#FFFFFF",
+SectionBoxBorderTransparency=0.82,
+TabBackground=Color3.fromHex"#FFFFFF",
+TabBackgroundHover=Color3.fromHex"#FFFFFF",
+TabBackgroundHoverTransparency=0.92,
+TabBackgroundActive=Color3.fromHex"#00E5FF",
+TabBackgroundActiveTransparency=0.82,
+TabTitle=Color3.fromHex"#FFFFFF",
+Glass=true,
 },
 Dark={
 Name="Dark",
@@ -10926,6 +11038,7 @@ else
 useTwoColumns = false
 end
 
+if not am.Parent then
 if useTwoColumns and tab and tab.LeftColumn and tab.RightColumn then
 if tab.ColumnsHolder then tab.ColumnsHolder.Visible = true end
 local side = am.Side or am.Column
@@ -10934,7 +11047,7 @@ am.Parent = tab.RightColumn
 elseif side == "Left" or side == 1 or side == "left" or side == "LeftColumn" then
 am.Parent = tab.LeftColumn
 elseif am.FullWidth == true or am.Span == "Full" then
-am.Parent = tab.UIElements.ContainerFrame
+am.Parent = tab.UIElements and tab.UIElements.ContainerFrame
 else
 tab.__secCount = (tab.__secCount or 0) + 1
 if tab.__secCount % 2 == 0 then
@@ -10944,7 +11057,8 @@ am.Parent = tab.LeftColumn
 end
 end
 else
-am.Parent = am.Parent or (tab and tab.UIElements and tab.UIElements.ContainerFrame)
+am.Parent = tab and tab.UIElements and tab.UIElements.ContainerFrame
+end
 end
 if am.Tab and am.Tab.HideEmpty then
 am.Tab:HideEmpty()
@@ -13213,7 +13327,8 @@ local activeSub = nil
 local function selectSubPage(subKey)
 activeSub = subKey
 for k, pageData in pairs(subPages) do
-local isTarget = (k == subKey)
+if type(k) == "string" then
+local isTarget = (k == subKey or pageData.Title == subKey)
 pageData.Container.Visible = isTarget
 local btn = subButtons[k]
 if btn then
@@ -13228,6 +13343,7 @@ ak.Tween(btn.Pill, 0.12, { ImageTransparency = 1 }):Play()
 ak.Tween(btn.Label, 0.12, { TextTransparency = 0.4 }):Play()
 if btn.Icon then
 ak.Tween(btn.Icon.ImageLabel, 0.12, { ImageTransparency = 0.3 }):Play()
+end
 end
 end
 end
@@ -13291,6 +13407,8 @@ LayoutOrder = 2,
 al("UIListLayout", { FillDirection = "Vertical", SortOrder = "LayoutOrder", Padding = UDim.new(0, 10) }),
 })
 
+local secModule = a.load'T'
+
 local subObj = {
 Title = tTitle,
 Parent = pageContainer,
@@ -13304,12 +13422,29 @@ Elements = {},
 
 aA.Load(subObj, pageContainer, aA.Elements, Window, WindUI, nil, aA, aq, self)
 
-function subObj.Card(sself, copts)
+local function createSubCard(copts)
+if type(copts) == "string" then
+copts = { Title = copts }
+else
 copts = copts or {}
-copts.Tab = subObj
-copts.Parent = copts.Side == "Right" and sRight or sLeft
-return self:Section(copts)
 end
+copts.Tab = subObj
+copts.Window = Window
+copts.WindUI = WindUI
+local side = copts.Side or copts.Column
+if copts.FullWidth then
+copts.Parent = pageContainer
+elseif side == "Right" or side == 2 or side == "right" then
+copts.Parent = sRight
+else
+copts.Parent = sLeft
+end
+local _, sec = secModule.New(nil, copts)
+table.insert(subObj.Elements, sec)
+return sec
+end
+
+subObj.Card = function(sself, copts) return createSubCard(copts) end
 subObj.Section = subObj.Card
 subObj.Groupbox = subObj.Card
 
@@ -15120,6 +15255,7 @@ Position=UDim2.new(0.5,0,0.5,0),
 Name="Background",
 ThemeTag={
 ImageColor3="WindowBackground",
+ImageTransparency="BackgroundTransparency",
 },
 
 },{
@@ -16142,9 +16278,11 @@ ImageTransparency=0,
 end
 
 aw.UIElements.Main.Background.ImageTransparency=1
+local curThemeTrans = an.GetThemeProperty and an.GetThemeProperty("BackgroundTransparency", an.Theme)
+local targetBgTrans = (aw.Transparent and av.WindUI.TransparencyValue) or (typeof(curThemeTrans) == "number" and curThemeTrans) or 0
 ap(aw.UIElements.Main.Background,0.4,{
 
-ImageTransparency=aw.Transparent and av.WindUI.TransparencyValue or 0,
+ImageTransparency=targetBgTrans,
 },Enum.EasingStyle.Exponential,Enum.EasingDirection.Out):Play()
 
 if i then
@@ -17367,6 +17505,13 @@ end
 if targetTheme then
 aa.Theme=targetTheme
 as.SetTheme(targetTheme)
+
+pcall(function()
+if aa.Window and aa.Window.UIElements and aa.Window.UIElements.Main and aa.Window.UIElements.Main.Background then
+local bgTrans = targetTheme.BackgroundTransparency or (aa.Window.Transparent and aa.TransparencyValue) or 0
+aa.Window.UIElements.Main.Background.ImageTransparency = bgTrans
+end
+end)
 
 if aa.OnThemeChangeFunction then
 aa.OnThemeChangeFunction(targetTheme.Name or aA)
