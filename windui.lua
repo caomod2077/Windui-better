@@ -1042,12 +1042,6 @@ if not v or not v.Object or v.Object.Parent==nil then
 return
 end
 
-function r.SetLangForObject(u)
-local v=r.LocalizationObjects[u]
-if not v or not v.Object or v.Object.Parent==nil then
-return
-end
-
 local x=v.Object
 local orig=v.OriginalText or x.Text
 local z=v.TranslationId or orig
