@@ -13425,6 +13425,8 @@ end
 copts.Tab = subObj
 copts.Window = Window
 copts.WindUI = WindUI
+copts.ElementsModule = aA
+copts.UIScale = aq
 local side = copts.Side or copts.Column
 if copts.FullWidth then
 copts.Parent = pageContainer
