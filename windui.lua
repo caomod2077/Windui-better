@@ -10923,10 +10923,10 @@ else
 useTwoColumns = false
 end
 
-local isDefaultParent = (not am.Parent)
+local isDefaultParent = not am._isSubCard and ((not am.Parent)
 or (tab and tab.UIElements and am.Parent == tab.UIElements.ContainerFrame)
 or (tab and am.Parent == tab.Container)
-or (tab and tab.ColumnsHolder and am.Parent == tab.ColumnsHolder)
+or (tab and tab.ColumnsHolder and am.Parent == tab.ColumnsHolder))
 
 if isDefaultParent then
 if useTwoColumns and tab and tab.LeftColumn and tab.RightColumn then
@@ -10937,7 +10937,7 @@ am.Parent = tab.RightColumn
 elseif side == "Left" or side == 1 or side == "left" or side == "LeftColumn" then
 am.Parent = tab.LeftColumn
 elseif am.FullWidth == true or am.Span == "Full" then
-am.Parent = (tab.UIElements and tab.UIElements.ContainerFrame) or tab.Container or am.Parent
+am.Parent = (tab and tab.Container) or (tab and tab.UIElements and tab.UIElements.ContainerFrame) or am.Parent
 else
 tab.__secCount = (tab.__secCount or 0) + 1
 if tab.__secCount % 2 == 0 then
@@ -10947,7 +10947,7 @@ am.Parent = tab.LeftColumn
 end
 end
 else
-am.Parent = (tab and tab.UIElements and tab.UIElements.ContainerFrame) or (tab and tab.Container) or am.Parent
+am.Parent = (tab and tab.Container) or (tab and tab.UIElements and tab.UIElements.ContainerFrame) or am.Parent
 end
 end
 if am.Tab and am.Tab.HideEmpty then
@@ -13216,8 +13216,19 @@ local subPages = {}
 local subButtons = {}
 local activeSub = nil
 
+local function hideParentEmpty()
+if self.HideEmpty then self:HideEmpty() end
+for _, c in ipairs(sf:GetChildren()) do
+if c:IsA("Frame") and (c:FindFirstChild("EmptyPage") or (c.LayoutOrder == 9999 and c:FindFirstChildOfClass("ImageLabel"))) then
+c.Visible = false
+end
+end
+end
+hideParentEmpty()
+
 local function selectSubPage(subKey)
 activeSub = subKey
+hideParentEmpty()
 for k, pageData in pairs(subPages) do
 if type(k) == "string" then
 local isTarget = (k == subKey or pageData.Title == subKey)
@@ -13330,11 +13341,11 @@ RightColumn = isSubTwoCol and sRight or nil,
 ColumnsHolder = isSubTwoCol and subCols or nil,
 TwoColumns = isSubTwoCol,
 Tab = self,
-UIElements = { ContainerFrame = sf },
+UIElements = { ContainerFrame = pageContainer },
 Elements = {},
 }
 
-aA.Load(subObj, pageContainer, aA.Elements, Window, WindUI, nil, aA, aq, self)
+aA.Load(subObj, pageContainer, aA.Elements, Window, WindUI, nil, aA, aq, subObj)
 
 local function createSubCard(copts)
 if type(copts) == "string" then
@@ -13359,6 +13370,7 @@ end
 else
 copts.Parent = pageContainer
 end
+copts._isSubCard = true
 local _, sec = secModule.New(nil, copts)
 table.insert(subObj.Elements, sec)
 return sec
