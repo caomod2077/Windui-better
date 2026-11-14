@@ -2,7 +2,7 @@
 
 [English](README.md) | [Tieng Viet](README_VI.md)
 
-An enhanced edition of WindUI for Roblox with support for two-column card layouts, in-tab search filtering, nested sub-tabs with per-subtab column customization, built-in gradient themes (including Liquid Glass and Ocean Blue), universal dynamic auto-translation supporting any language, watermark stats, tab access control, interactive 3D viewports, and performance optimizations.
+An enhanced edition of WindUI for Roblox with support for two-column card layouts, in-tab search filtering, nested sub-tabs with per-subtab column customization, player profile card on the sidebar, built-in gradient themes (including Liquid Glass and Ocean Blue), universal dynamic auto-translation supporting any language, watermark stats, tab access control, interactive 3D viewports, and performance optimizations.
 
 Original library by Footagesus. Maintained and expanded by caomod2077.
 
@@ -17,6 +17,7 @@ Standard WindUI builds can experience frame drops and memory accumulation in com
 3. Zero-Allocation Watermark: Frame rate calculation replaces array mutations with lightweight timestamp accumulators, eliminating per-frame memory allocation and garbage collection churn.
 4. Visibility-Gated Render Loops: Icon rotation, rainbow animations, and watermark updates immediately pause when the window is closed or hidden, saving CPU cycles for the game engine.
 5. Lifecycle-Bounded Component Loops: Background loops in Countdown and animated elements automatically disconnect when their parent element is destroyed.
+6. Non-Blocking Translation Engine: Zero hardcoded dictionaries in library code. Background translation requests are deduplicated and cached with no HTTP traffic on startup.
 
 ---
 
@@ -29,16 +30,22 @@ local Window = WindUI:CreateWindow({
     Title = "My Script Hub",
     Author = "by Creator",
     Folder = "MyScriptHub",
-    Theme = "Liquid Glass",  -- "Liquid Glass" (Transparent) | "Ocean Blue" | "Dark" | etc.
+    Theme = "Dark",
     Size = UDim2.fromOffset(840, 540),
     TwoColumns = true,       -- Enable 2-column card layout (default: false)
     BackgroundBlur = false,   -- Background blur effect (default: false)
-    Glow = Color3.fromRGB(0, 229, 255),
+    Glow = Color3.fromRGB(0, 145, 255),
     IconAnimation = "Spin",  -- "Spin" | "Pulse" | "Rainbow"
     SidebarBanner = {
         Image = "rbxassetid://133610205520685",
         Height = 75,
         Title = "Hub Version",
+    },
+    User = {
+        Enabled = true,               -- Display player profile card on sidebar bottom
+        Anonymous = false,            -- Hide player name/avatar when true
+        Subtitle = "Premium Lifetime", -- Subtitle or badge text
+        Callback = function() end,    -- Click callback
     },
 })
 ```
@@ -80,7 +87,7 @@ Window:SetBackgroundBlur(false)
 | `Acrylic` | boolean | `false` | Enables frosted acrylic glass blur effect |
 | `AutoScale` | boolean | `true` | Automatically scales interface for mobile / small displays |
 | `ToggleKey` | Enum.KeyCode | `nil` | Keycode to hide or reveal the window |
-| `User` | table | `nil` | User card on bottom of sidebar: `{ Enabled, Anonymous, Subtitle, Callback }` |
+| `User` | table | `nil` | Player profile card on bottom of sidebar: `{ Enabled, Anonymous, Subtitle, Callback }` |
 | `Topbar` | table | `{ Height = 52 }` | Topbar options: `{ Height = 52, ButtonsType = "Default" / "Mac" }` |
 | `Background` | string | `nil` | Custom background image (`rbxassetid://`, `https://`) or video (`video:https://...webm`) |
 | `BackgroundImageTransparency` | number | `0` | Opacity of the background image (0 to 1) |
@@ -105,15 +112,29 @@ Window:SetBackgroundBlur(false)
 - `Window:SetToTheCenter()`: Centers window on screen.
 - `Window:SetBackgroundImage(string)`: Updates window background (assetid or URL).
 - `Window:SetBackgroundImageTransparency(number)`: Adjusts background image opacity (0 to 1).
+- `Window:SetBackgroundTransparency(number)`: Adjusts window frame transparency.
+- `Window:ToggleTransparency(boolean)`: Toggles window transparency on or off.
+- `Window:ToggleFullscreen()`: Toggles fullscreen window sizing.
+- `Window:LockAll()`, `Window:UnlockAll()`: Mass lock or unlock all controls in the entire window at once.
+- `Window:GetLocked()`, `Window:GetUnlocked()`: Returns list of locked or unlocked elements.
+- `Window:SetTitle(string)`, `Window:SetAuthor(string)`: Updates window title or author at runtime.
+- `Window:SetIconSize(number)`: Changes topbar icon size.
 - `Window:SetIconAnimation("Spin" | "Pulse" | "Rainbow")`: Changes or starts topbar icon animation.
 - `Window:AnimateTitle("Gradient" | "Shimmer")`: Starts moving gradient animation on window title.
 - `Window:SetSidebarBanner({ Image, Height, Title })`: Updates or creates sidebar banner.
+- `Window:CreateTopbarButton(name, icon, callback, order, isRight, color, iconSize)`: Adds custom icon buttons to the topbar.
+- `Window:DisableTopbarButtons(boolean)`: Disables topbar control buttons.
 - `Window:Toast({ Title, Content, Duration, Icon })`: Quick notification shortcut.
 - `Window:Dialog({ Title, Content, Buttons })`: Opens modal popup that can host interactive child elements.
 - `Window:EditOpenButton(table)`: Customizes floating toggle button for mobile/touch devices.
 - `Window:Section({ Title, Icon, Opened })`: Creates a collapsible sidebar section for grouping tabs.
 - `Window:Divider()`: Inserts a visual divider line in the sidebar.
 - `Window:OnOpen(fn)`, `Window:OnClose(fn)`, `Window:OnDestroy(fn)`: Window lifecycle event listeners.
+- `Window.User`:
+  - `Window.User:Enable()`: Shows player profile card.
+  - `Window.User:Disable()`: Hides player profile card.
+  - `Window.User:SetAnonymous(boolean)`: Hides player identity.
+  - `Window.User:SetSubtitle(string)`: Updates subtitle text beneath display name.
 - `Window.ConfigManager`:
   - `ConfigManager:CreateConfig(name)`: Returns config object with `:Save()`, `:Load()`, `:Delete()`, `:Set(k, v)`, `:Get(k)`.
   - `ConfigManager:AllConfigs()`: Returns table of existing config names.
@@ -129,13 +150,13 @@ Window:SetBackgroundBlur(false)
 - `WindUI:SetNotificationUpper(boolean)`: Positions toast notifications at the top-right (`true`) or bottom-right (`false`).
 - `WindUI:SetNotificationLower(boolean)`: Shifts notifications slightly down to clear custom bars.
 - `WindUI:SetDisplayOrder(number)`: Adjusts ScreenGui DisplayOrder / ZIndex above game GUIs (aliases: `SetZIndex`, `SetLayer`).
-- `WindUI:SetTheme(name)`: Changes active theme across all open interfaces. Supports flexible name matching (`"Liquid Glass"`, `"Ocean Blue"`, `"liquidglass"`, etc.).
+- `WindUI:SetTheme(name)`: Changes active theme across all open interfaces. Supports flexible name matching (`"Dark"`, `"Liquid Glass"`, `"Ocean Blue"`, etc.).
 - `WindUI:GetThemes()`: Returns dictionary of all registered themes.
 - `WindUI:GetCurrentTheme()`: Returns name string of current theme.
 - `WindUI:AddTheme(themeTable)`: Registers a custom theme palette.
 - `WindUI:Gradient(keypoints, options)`: Creates gradient sequence table with rotation for themes.
 - `WindUI:SetFont(fontAssetId)`: Changes global font family across all elements.
-- `WindUI:SetLanguage("en" | "vi" | "es" | "fr" | "ru" | "ja" | ...)`: Universal dynamic auto-translation. Automatically translates all UI text into ANY chosen language on the fly.
+- `WindUI:SetLanguage("en" | "vi" | "es" | "fr" | "ru" | "ja" | ...)`: Universal dynamic auto-translation. Automatically translates all UI text into ANY chosen language on the fly without hardcoded dictionaries.
 - `WindUI:AddTranslations(langCode, customDict)`: Adds custom manual translation overrides for any language.
 - `WindUI:Translate(text, langCode, callback)`: Translates any string dynamically with caching.
 - `WindUI:ToggleAcrylic(boolean)`: Toggles acrylic blur state globally.
@@ -165,6 +186,7 @@ Window:SetBackgroundBlur(false)
   })
   local LevelPage = sub["Level Farm"]
   LevelPage:Card({ Title = "Auto Level", Side = "Left" }):Toggle({ Title = "Enabled" })
+  LevelPage:Card({ Title = "Rewards", Side = "Right" }):Slider({ Title = "Multiplier", Value = 2 })
   ```
 - `Tab:AddSearch(placeholder)`: Embeds real-time filter input inside tab.
 - `Tab:Banner({ Image, Height, Title, Desc })`: Adds visual header banner across the tab.
@@ -255,7 +277,7 @@ local Window = WindUI:CreateWindow({
     Title = "WindUI Full API Showcase",
     Author = "by Developer",
     Folder = "WindUIFullShowcase",
-    Theme = "Liquid Glass", -- Liquid Glass (Transparent), Ocean Blue, Dark, Obsidian, Light, Mid Summer, etc.
+    Theme = "Dark", -- Default: Dark (also supports Liquid Glass, Ocean Blue, Obsidian, Light, Mid Summer, etc.)
     Size = UDim2.fromOffset(860, 580),
     TwoColumns = true,
     BackgroundBlur = false,
@@ -265,6 +287,19 @@ local Window = WindUI:CreateWindow({
         Image = "rbxassetid://133610205520685",
         Height = 72,
         Title = "WindUI v2.0",
+    },
+    -- Player Profile Card on the bottom-left sidebar
+    User = {
+        Enabled = true,               -- Display player thumbnail, display name, and subtitle
+        Anonymous = false,            -- When true, displays as Anonymous and hides avatar
+        Subtitle = "Premium Lifetime", -- Subtitle or status badge text
+        Callback = function()         -- Click callback when player profile card is clicked
+            WindUI:Notify({
+                Title = "Profile",
+                Content = "Logged in as " .. game:GetService("Players").LocalPlayer.DisplayName,
+                Duration = 3,
+            })
+        end,
     },
 })
 
@@ -283,7 +318,7 @@ Window:EnableSounds(true)
 -- Topbar Tag & Stats Watermark
 Window:Tag({
     Title = "PRO",
-    Color = Color3.fromRGB(0, 229, 255),
+    Color = Color3.fromRGB(0, 145, 255),
     Radius = 8,
 })
 
@@ -462,7 +497,7 @@ local ViewportCard = DisplayTab:Card({
 
 local demoPart = Instance.new("Part")
 demoPart.Size = Vector3.new(2, 2, 2)
-demoPart.Color = Color3.fromRGB(0, 229, 255)
+demoPart.Color = Color3.fromRGB(0, 191, 255)
 demoPart.Material = Enum.Material.Neon
 demoPart.Anchored = true
 
@@ -513,20 +548,49 @@ MediaCard:Paragraph({
     },
 })
 
+-- Layout and Grouping
+local ColumnsDemo = LayoutTab:Card({
+    Title = "Left Column Card",
+    Side = "Left",
+})
+ColumnsDemo:Button({ Title = "Left Column Action" })
+
+local RightDemo = LayoutTab:Card({
+    Title = "Right Column Card",
+    Side = "Right",
+})
+RightDemo:Button({ Title = "Right Column Action" })
+
+local FullWidthDemo = LayoutTab:Card({
+    Title = "Full Width Spanning Card",
+    FullWidth = true,
+})
+FullWidthDemo:Button({ Title = "Spans across both columns" })
+
+-- Horizontal group of buttons (HStack)
+local HStackDemo = LayoutTab:Card({
+    Title = "HStack Horizontal Group",
+    Side = "Left",
+})
+local hstack = HStackDemo:HStack()
+hstack:Button({ Title = "Btn 1" })
+hstack:Button({ Title = "Btn 2" })
+hstack:Button({ Title = "Btn 3" })
+
 -- Settings Tab
 local InterfaceSection = SettingsTab:Section({ Title = "Interface Options" })
 
 InterfaceSection:Dropdown({
     Title = "Theme Selector",
-    Values = { "Liquid Glass", "Ocean Blue", "Dark", "Obsidian", "Light", "Mid Summer", "Lunar Moon", "Winter Frost", "Elegant Night", "Lunar Abyss", "Lunar Eclipse", "Rose", "Plant", "Indigo", "Violet", "Amber", "Midnight", "MonokaiPro" },
-    Value = "Liquid Glass",
+    Values = { "Dark", "Liquid Glass", "Ocean Blue", "Obsidian", "Light", "Mid Summer", "Lunar Moon", "Winter Frost", "Elegant Night", "Lunar Abyss", "Lunar Eclipse", "Rose", "Plant", "Indigo", "Violet", "Amber", "Midnight", "MonokaiPro" },
+    Value = "Dark",
     Callback = function(theme)
         Window:SetTheme(theme)
     end,
 })
 
 InterfaceSection:Dropdown({
-    Title = "Language (Auto-Translation)",
+    Title = "Language (Universal Auto-Translation)",
     Values = { "English", "Tiếng Việt", "Español", "Français", "Русский", "日本語" },
     Value = "English",
     Callback = function(lang)
@@ -582,28 +646,34 @@ InterfaceSection:Toggle({
     end,
 })
 
-InterfaceSection:Slider({
-    Title = "UI Scale",
-    Value = { Min = 0.65, Max = 1.25, Default = 1.0 },
-    Step = 0.05,
-    Callback = function(scale)
-        Window:SetUIScale(scale)
+-- Player Profile Card Controls
+local UserSection = SettingsTab:Section({ Title = "Player Profile (Sidebar)" })
+
+UserSection:Toggle({
+    Title = "Show Player Profile",
+    Value = true,
+    Callback = function(enabled)
+        if enabled then
+            Window.User:Enable()
+        else
+            Window.User:Disable()
+        end
     end,
 })
 
-InterfaceSection:Button({
-    Title = "Interactive Dialog Modal",
-    Callback = function()
-        local dlg = Window:Dialog({
-            Title = "Dialog Controls",
-            Content = "Adjust settings inside popup modal:",
-            Buttons = {
-                { Title = "Apply", Variant = "Primary" },
-                { Title = "Cancel", Variant = "Secondary" },
-            },
-        })
-        dlg:Toggle({ Title = "Turbo Mode", Value = true })
-        dlg:Slider({ Title = "Speed Factor", Value = 75, Min = 10, Max = 100 })
+UserSection:Toggle({
+    Title = "Anonymous Mode",
+    Value = false,
+    Callback = function(anonymous)
+        Window.User:SetAnonymous(anonymous)
+    end,
+})
+
+UserSection:Input({
+    Title = "Custom Subtitle",
+    Value = "Premium Lifetime",
+    Callback = function(text)
+        Window.User:SetSubtitle(text)
     end,
 })
 
@@ -653,9 +723,9 @@ ControlsTab:Select()
 
 | Theme Name | Description |
 |---|---|
+| `Dark` | Standard clean modern dark theme (Default) |
 | `Liquid Glass` | Transparent frosted glass with cyan neon glow and see-through background |
 | `Ocean Blue` | Deep oceanic navy and cyan gradient palette (formerly Blue Something) |
-| `Dark` | Standard clean modern dark theme |
 | `Obsidian` | Dark charcoal base with orange accents |
 | `Light` | Clean bright daytime theme |
 | `Rose` | Dark wine and rose palette |

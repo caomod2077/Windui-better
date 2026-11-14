@@ -2,7 +2,7 @@
 
 [English](README.md) | [Tiếng Việt](README_VI.md)
 
-Phiên bản WindUI mở rộng cho Roblox, hỗ trợ giao diện 2 cột dạng Card, tìm kiếm tính năng trực tiếp trong Tab, thanh tab con lồng nhau (Sub-Tabs) cho phép tùy chỉnh 2 cột hoặc 1 cột cho từng trang riêng biệt, tích hợp sẵn các theme Gradient (bao gồm theme kính trong suốt Liquid Glass và Ocean Blue), hệ thống tự động dịch đa ngôn ngữ cho mọi thứ tiếng, hiển thị Watermark (FPS / Ping), phân quyền truy cập Tab theo UserId, khung hiển thị mô hình 3D tương tác (Viewport) và tối ưu hóa hiệu năng giảm giật lag.
+Phiên bản WindUI mở rộng cho Roblox, hỗ trợ giao diện 2 cột dạng Card, tìm kiếm tính năng trực tiếp trong Tab, thanh tab con lồng nhau (Sub-Tabs) cho phép tùy chỉnh 2 cột hoặc 1 cột cho từng trang riêng biệt, khung hiển thị hồ sơ người chơi (Player Profile Card) ở góc dưới Sidebar, tích hợp sẵn các theme Gradient (bao gồm theme kính trong suốt Liquid Glass và Ocean Blue), hệ thống tự động dịch đa ngôn ngữ thông minh cho mọi thứ tiếng không gò bó từ điển cứng, hiển thị Watermark (FPS / Ping), phân quyền truy cập Tab theo UserId, khung hiển thị mô hình 3D tương tác (Viewport) và tối ưu hóa hiệu năng giảm giật lag.
 
 Thư viện gốc bởi Footagesus. Bản mở rộng và duy trì bởi caomod2077.
 
@@ -17,6 +17,7 @@ Nhiều người dùng gặp hiện tượng tụt FPS hoặc đơ giao diện k
 3. Đo FPS / Ping không phân mảnh bộ nhớ (Zero-Allocation Watermark): Bỏ việc chèn và xóa mảng (`table.insert`/`table.remove`) liên tục mỗi frame, thay bằng bộ đếm tích lũy thời gian đơn giản không cấp phát mảng, giúp bộ dọn rác (GC) của Lua không bị quá tải.
 4. Tự ngắt vòng lặp khi ẩn giao diện: Hoạt ảnh xoay icon, chuyển màu cầu vồng và vòng lặp watermark sẽ tạm dừng hoàn toàn khi đóng cửa sổ hoặc ẩn phần tử, nhường 100% tài nguyên CPU cho game.
 5. Kiểm soát vòng đời vòng lặp nền: Các tác vụ đếm ngược (Countdown) tự động ngắt kết nối khi component cha bị gỡ bỏ.
+6. Hệ thống dịch không gây nghẽn: Xóa sạch toàn bộ từ điển cứng trong mã nguồn. Các yêu cầu dịch online chạy bất đồng bộ với cơ chế chống trùng lặp và lưu cache, không phát sinh bất kỳ request HTTP nào lúc khởi động ứng dụng.
 
 ---
 
@@ -29,16 +30,22 @@ local Window = WindUI:CreateWindow({
     Title = "My Script Hub",
     Author = "by Creator",
     Folder = "MyScriptHub",
-    Theme = "Liquid Glass",  -- "Liquid Glass" (Trong suốt) | "Ocean Blue" | "Dark" | v.v.
+    Theme = "Dark",         -- Mặc định: Dark (hỗ trợ Liquid Glass, Ocean Blue, Obsidian, Light, v.v.)
     Size = UDim2.fromOffset(840, 540),
     TwoColumns = true,       -- Bật bố cục 2 cột (mặc định: false)
     BackgroundBlur = false,   -- Làm mờ hậu cảnh (mặc định: false)
-    Glow = Color3.fromRGB(0, 229, 255),
+    Glow = Color3.fromRGB(0, 145, 255),
     IconAnimation = "Spin",  -- "Spin" | "Pulse" | "Rainbow"
     SidebarBanner = {
         Image = "rbxassetid://133610205520685",
         Height = 75,
         Title = "Hub Version",
+    },
+    User = {
+        Enabled = true,               -- Hiện khung hồ sơ người chơi ở góc dưới Sidebar
+        Anonymous = false,            -- Ẩn avatar và tên khi bật true
+        Subtitle = "Premium Lifetime", -- Dòng chữ phụ đề / trạng thái
+        Callback = function() end,    -- Bắt sự kiện khi click vào khung hồ sơ
     },
 })
 ```
@@ -61,7 +68,7 @@ Window:SetBackgroundBlur(false)
 | `Title` | string | `"UI Library"` | Tiêu đề chính hiển thị trên thanh topbar |
 | `Author` | string | `nil` | Phụ đề hoặc tên tác giả bên cạnh tiêu đề |
 | `Folder` | string | `nil` | Tên thư mục con lưu config bên trong thư mục `WindUI/` |
-| `Theme` | string | `"Dark"` | Tên theme khởi đầu từ danh sách có sẵn hoặc tự thêm |
+| `Theme` | string | `"Dark"` | Tên theme khởi đầu từ danh sách có sẵn hoặc tự thêm (Mặc định: Dark) |
 | `Size` | UDim2 | `UDim2.fromOffset(720, 470)` | Kích thước ban đầu của cửa sổ |
 | `MinSize` | Vector2 | `Vector2.new(460, 320)` | Kích thước thu nhỏ tối thiểu |
 | `MaxSize` | Vector2 | `Vector2.new(2560, 1600)` | Kích thước phóng to tối đa |
@@ -80,7 +87,7 @@ Window:SetBackgroundBlur(false)
 | `Acrylic` | boolean | `false` | Bật hiệu ứng kính mờ Acrylic |
 | `AutoScale` | boolean | `true` | Tự động co giãn kích thước phù hợp với màn hình mobile |
 | `ToggleKey` | Enum.KeyCode | `nil` | Phím tắt bàn phím để ẩn hoặc hiện cửa sổ |
-| `User` | table | `nil` | Khung thông tin người chơi ở góc dưới Sidebar |
+| `User` | table | `nil` | Khung thông tin người chơi ở góc dưới Sidebar: `{ Enabled, Anonymous, Subtitle, Callback }` |
 | `Topbar` | table | `{ Height = 52 }` | Tùy chọn topbar: `{ Height = 52, ButtonsType = "Default" / "Mac" }` |
 | `Background` | string | `nil` | Hình nền cửa sổ (assetid, link ảnh URL hoặc `video:link.webm`) |
 | `BackgroundImageTransparency` | number | `0` | Độ trong suốt ảnh nền (0 đến 1) |
@@ -105,15 +112,29 @@ Window:SetBackgroundBlur(false)
 - `Window:SetToTheCenter()`: Canh cửa sổ vào chính giữa màn hình.
 - `Window:SetBackgroundImage(string)`: Đổi ảnh nền cửa sổ (assetid hoặc link ảnh trực tiếp).
 - `Window:SetBackgroundImageTransparency(number)`: Đổi độ trong suốt của ảnh nền (0 đến 1).
+- `Window:SetBackgroundTransparency(number)`: Đổi độ trong suốt của khung cửa sổ.
+- `Window:ToggleTransparency(boolean)`: Bật hoặc tắt trạng thái trong suốt của cửa sổ.
+- `Window:ToggleFullscreen()`: Bật hoặc tắt chế độ phóng to toàn màn hình.
+- `Window:LockAll()`, `Window:UnlockAll()`: Khóa hoặc mở khóa hàng loạt toàn bộ phần tử trong cả cửa sổ.
+- `Window:GetLocked()`, `Window:GetUnlocked()`: Lấy danh sách các phần tử đang bị khóa hoặc mở khóa.
+- `Window:SetTitle(string)`, `Window:SetAuthor(string)`: Cập nhật tiêu đề hoặc phụ đề tác giả khi đang chạy.
+- `Window:SetIconSize(number)`: Đổi kích thước icon topbar.
 - `Window:SetIconAnimation("Spin" | "Pulse" | "Rainbow")`: Đổi hoặc kích hoạt hoạt ảnh cho icon topbar.
 - `Window:AnimateTitle("Gradient" | "Shimmer")`: Bật dải màu chuyển động lướt qua tiêu đề.
 - `Window:SetSidebarBanner({ Image, Height, Title })`: Cập nhật banner trên Sidebar.
+- `Window:CreateTopbarButton(name, icon, callback, order, isRight, color, iconSize)`: Thêm nút bấm icon tùy chỉnh lên thanh topbar.
+- `Window:DisableTopbarButtons(boolean)`: Vô hiệu hóa hoặc bật lại các nút đóng, thu nhỏ trên topbar.
 - `Window:Toast({ Title, Content, Duration, Icon })`: Hiện nhanh một thông báo ngắn.
 - `Window:Dialog({ Title, Content, Buttons })`: Mở hộp thoại modal popup, có thể chứa trực tiếp các control bên trong.
 - `Window:EditOpenButton(table)`: Tùy chỉnh nút bấm mở GUI nổi trên màn hình cho mobile.
 - `Window:Section({ Title, Icon, Opened })`: Tạo nhóm phân mục trên Sidebar để gom các Tab.
 - `Window:Divider()`: Thêm đường kẻ phân cách trong Sidebar.
 - `Window:OnOpen(fn)`, `Window:OnClose(fn)`, `Window:OnDestroy(fn)`: Bắt sự kiện khi cửa sổ đóng, mở hoặc bị xóa.
+- `Window.User`:
+  - `Window.User:Enable()`: Bật hiển thị khung hồ sơ người chơi.
+  - `Window.User:Disable()`: Ẩn khung hồ sơ người chơi.
+  - `Window.User:SetAnonymous(boolean)`: Bật hoặc tắt chế độ ẩn danh.
+  - `Window.User:SetSubtitle(string)`: Đổi dòng chữ phụ đề bên dưới tên hiển thị.
 - `Window.ConfigManager`:
   - `ConfigManager:CreateConfig(name)`: Tạo file config. Đối tượng trả về có: `:Save()`, `:Load()`, `:Delete()`, `:Set(k, v)`, `:Get(k)`.
   - `ConfigManager:AllConfigs()`: Lấy danh sách tên các config đã lưu.
@@ -129,7 +150,7 @@ Window:SetBackgroundBlur(false)
 - `WindUI:SetNotificationUpper(boolean)`: Đặt thông báo nằm ở góc trên bên phải (`true`) hoặc góc dưới bên phải (`false`).
 - `WindUI:SetNotificationLower(boolean)`: Hạ thấp vị trí thông báo để tránh cấn các thanh GUI game.
 - `WindUI:SetDisplayOrder(number)`: Đặt thứ tự hiển thị ScreenGui lên trên các GUI khác trong game (hỗ trợ alias `SetZIndex`, `SetLayer`).
-- `WindUI:SetTheme(name)`: Áp dụng theme trên toàn bộ thư viện. Hỗ trợ tên linh hoạt (`"Liquid Glass"`, `"Ocean Blue"`, `"liquidglass"`, v.v.).
+- `WindUI:SetTheme(name)`: Áp dụng theme trên toàn bộ thư viện. Hỗ trợ tên linh hoạt (`"Dark"`, `"Liquid Glass"`, `"Ocean Blue"`, v.v.).
 - `WindUI:GetThemes()`: Trả về bảng danh sách tất cả theme có sẵn.
 - `WindUI:GetCurrentTheme()`: Trả về chuỗi tên theme hiện tại.
 - `WindUI:AddTheme(themeTable)`: Đăng ký một bảng theme màu sắc tùy chỉnh mới.
@@ -255,7 +276,7 @@ local Window = WindUI:CreateWindow({
     Title = "WindUI Full API Showcase",
     Author = "by Developer",
     Folder = "WindUIFullShowcase",
-    Theme = "Liquid Glass", -- Liquid Glass (Transparent), Ocean Blue, Dark, Obsidian, Light, Mid Summer, etc.
+    Theme = "Dark", -- Default: Dark (also supports Liquid Glass, Ocean Blue, Obsidian, Light, Mid Summer, etc.)
     Size = UDim2.fromOffset(860, 580),
     TwoColumns = true,
     BackgroundBlur = false,
@@ -265,6 +286,19 @@ local Window = WindUI:CreateWindow({
         Image = "rbxassetid://133610205520685",
         Height = 72,
         Title = "WindUI v2.0",
+    },
+    -- Player Profile Card on the bottom-left sidebar
+    User = {
+        Enabled = true,               -- Display player thumbnail, display name, and subtitle
+        Anonymous = false,            -- When true, displays as Anonymous and hides avatar
+        Subtitle = "Premium Lifetime", -- Subtitle or status badge text
+        Callback = function()         -- Click callback when player profile card is clicked
+            WindUI:Notify({
+                Title = "Profile",
+                Content = "Logged in as " .. game:GetService("Players").LocalPlayer.DisplayName,
+                Duration = 3,
+            })
+        end,
     },
 })
 
@@ -283,7 +317,7 @@ Window:EnableSounds(true)
 -- Topbar Tag & Stats Watermark
 Window:Tag({
     Title = "PRO",
-    Color = Color3.fromRGB(0, 229, 255),
+    Color = Color3.fromRGB(0, 145, 255),
     Radius = 8,
 })
 
@@ -462,7 +496,7 @@ local ViewportCard = DisplayTab:Card({
 
 local demoPart = Instance.new("Part")
 demoPart.Size = Vector3.new(2, 2, 2)
-demoPart.Color = Color3.fromRGB(0, 229, 255)
+demoPart.Color = Color3.fromRGB(0, 191, 255)
 demoPart.Material = Enum.Material.Neon
 demoPart.Anchored = true
 
@@ -513,20 +547,49 @@ MediaCard:Paragraph({
     },
 })
 
+-- Layout and Grouping
+local ColumnsDemo = LayoutTab:Card({
+    Title = "Left Column Card",
+    Side = "Left",
+})
+ColumnsDemo:Button({ Title = "Left Column Action" })
+
+local RightDemo = LayoutTab:Card({
+    Title = "Right Column Card",
+    Side = "Right",
+})
+RightDemo:Button({ Title = "Right Column Action" })
+
+local FullWidthDemo = LayoutTab:Card({
+    Title = "Full Width Spanning Card",
+    FullWidth = true,
+})
+FullWidthDemo:Button({ Title = "Spans across both columns" })
+
+-- Horizontal group of buttons (HStack)
+local HStackDemo = LayoutTab:Card({
+    Title = "HStack Horizontal Group",
+    Side = "Left",
+})
+local hstack = HStackDemo:HStack()
+hstack:Button({ Title = "Btn 1" })
+hstack:Button({ Title = "Btn 2" })
+hstack:Button({ Title = "Btn 3" })
+
 -- Settings Tab
 local InterfaceSection = SettingsTab:Section({ Title = "Interface Options" })
 
 InterfaceSection:Dropdown({
     Title = "Theme Selector",
-    Values = { "Liquid Glass", "Ocean Blue", "Dark", "Obsidian", "Light", "Mid Summer", "Lunar Moon", "Winter Frost", "Elegant Night", "Lunar Abyss", "Lunar Eclipse", "Rose", "Plant", "Indigo", "Violet", "Amber", "Midnight", "MonokaiPro" },
-    Value = "Liquid Glass",
+    Values = { "Dark", "Liquid Glass", "Ocean Blue", "Obsidian", "Light", "Mid Summer", "Lunar Moon", "Winter Frost", "Elegant Night", "Lunar Abyss", "Lunar Eclipse", "Rose", "Plant", "Indigo", "Violet", "Amber", "Midnight", "MonokaiPro" },
+    Value = "Dark",
     Callback = function(theme)
         Window:SetTheme(theme)
     end,
 })
 
 InterfaceSection:Dropdown({
-    Title = "Language (Auto-Translation)",
+    Title = "Language (Universal Auto-Translation)",
     Values = { "English", "Tiếng Việt", "Español", "Français", "Русский", "日本語" },
     Value = "English",
     Callback = function(lang)
@@ -582,28 +645,34 @@ InterfaceSection:Toggle({
     end,
 })
 
-InterfaceSection:Slider({
-    Title = "UI Scale",
-    Value = { Min = 0.65, Max = 1.25, Default = 1.0 },
-    Step = 0.05,
-    Callback = function(scale)
-        Window:SetUIScale(scale)
+-- Player Profile Card Controls
+local UserSection = SettingsTab:Section({ Title = "Player Profile (Sidebar)" })
+
+UserSection:Toggle({
+    Title = "Show Player Profile",
+    Value = true,
+    Callback = function(enabled)
+        if enabled then
+            Window.User:Enable()
+        else
+            Window.User:Disable()
+        end
     end,
 })
 
-InterfaceSection:Button({
-    Title = "Interactive Dialog Modal",
-    Callback = function()
-        local dlg = Window:Dialog({
-            Title = "Dialog Controls",
-            Content = "Adjust settings inside popup modal:",
-            Buttons = {
-                { Title = "Apply", Variant = "Primary" },
-                { Title = "Cancel", Variant = "Secondary" },
-            },
-        })
-        dlg:Toggle({ Title = "Turbo Mode", Value = true })
-        dlg:Slider({ Title = "Speed Factor", Value = 75, Min = 10, Max = 100 })
+UserSection:Toggle({
+    Title = "Anonymous Mode",
+    Value = false,
+    Callback = function(anonymous)
+        Window.User:SetAnonymous(anonymous)
+    end,
+})
+
+UserSection:Input({
+    Title = "Custom Subtitle",
+    Value = "Premium Lifetime",
+    Callback = function(text)
+        Window.User:SetSubtitle(text)
     end,
 })
 
@@ -653,9 +722,9 @@ ControlsTab:Select()
 
 | Tên Theme | Mô tả |
 |---|---|
+| `Dark` | Giao diện tối tiêu chuẩn (Mặc định) |
 | `Liquid Glass` | Kính trong suốt nhìn xuyên thấu thế giới game, viền dạ quang xanh ngọc và khung mờ |
 | `Ocean Blue` | Tông màu đại dương xanh thẳm và dải gradient cyan (tên cũ Blue Something) |
-| `Dark` | Giao diện tối tiêu chuẩn |
 | `Obsidian` | Nền than tối kết hợp màu cam |
 | `Light` | Giao diện sáng ban ngày |
 | `Rose` | Tông màu rượu vang và cánh hồng tối |
