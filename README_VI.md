@@ -28,7 +28,7 @@ local WindUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/caomod
 
 local Window = WindUI:CreateWindow({
     Title = "My Script Hub",
-    Author = "by Creator",
+    Author = "by Caomod2077",
     Folder = "MyScriptHub",
     Theme = "Dark",         -- Mặc định: Dark (hỗ trợ Liquid Glass, Ocean Blue, Obsidian, Light, v.v.)
     Size = UDim2.fromOffset(840, 540),
@@ -278,7 +278,7 @@ local WindUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/caomod
 
 local Window = WindUI:CreateWindow({
     Title = "WindUI Full API Showcase",
-    Author = "by Developer",
+    Author = "by Caomod2077",
     Folder = "WindUIFullShowcase",
     Theme = "Dark", -- Default: Dark (also supports Liquid Glass, Ocean Blue, Obsidian, Light, Mid Summer, etc.)
     Size = UDim2.fromOffset(860, 580),
@@ -336,7 +336,7 @@ local watermark = Window:Watermark({
 local HomeSection = Window:Section({ Title = "Home", Icon = "star", Opened = true })
 local ControlsTab = HomeSection:Tab({ Title = "Controls", Icon = "sliders-horizontal" })
 local SubTabsTab = HomeSection:Tab({ Title = "Sub-Tabs Demo", Icon = "layers" })
-local DisplayTab = HomeSection:Tab({ Title = "3D & Display", Icon = "box" })
+local DisplayTab = HomeSection:Tab({ Title = "3D & Display", Icon = "box", TwoColumns = false })
 
 Window:Divider()
 
@@ -491,12 +491,10 @@ combatCard:Button({
     end,
 })
 
--- 3D Viewport Model Viewer
+-- 3D Viewport Model Viewer (Bố cục 1 cột)
 local ViewportCard = DisplayTab:Card({
     Title = "3D Viewport Viewer",
     Icon = "box",
-    Side = "Left",
-    FullWidth = true,
 })
 
 local demoPart = Instance.new("Part")
@@ -515,7 +513,6 @@ local viewport = ViewportCard:Viewport({
 local MediaCard = DisplayTab:Card({
     Title = "Progress & Code Display",
     Icon = "file-code",
-    Side = "Left",
 })
 
 local progress = MediaCard:ProgressBar({
