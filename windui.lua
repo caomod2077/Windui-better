@@ -13553,34 +13553,123 @@ Name = "Input",
 }),
 })
 
+local origOpenedState = {}
 local tb = searchBg.Outline.Input
 tb:GetPropertyChangedSignal("Text"):Connect(function()
 local query = string.lower(tb.Text):match("^%s*(.-)%s*$")
-local function checkCol(col)
-if not col then return end
-for _, card in ipairs(col:GetChildren()) do
-if card:IsA("GuiObject") and not card:IsA("UIListLayout") then
-if query == "" then
-card.Visible = true
+
+local function filterCard(card)
+if not (card:IsA("GuiObject") and not card:IsA("UIListLayout") and not card:IsA("UIPadding")) then
+return
+end
+if card.Name == "TabSearchBar" or card.Name == "SubTabsNav" or card.Name == "TabBanner" or card.Name == "ScrollSliderHolder" or card.Name == "ColumnsHolder" or card.LayoutOrder == 9999 then
+return
+end
+if card.Name:find("^SubPage_") then
+local subCols = card:FindFirstChild("ColumnsHolder")
+if subCols and subCols:FindFirstChild("LeftColumn") and subCols:FindFirstChild("RightColumn") then
+for _, subCard in ipairs(subCols.LeftColumn:GetChildren()) do filterCard(subCard) end
+for _, subCard in ipairs(subCols.RightColumn:GetChildren()) do filterCard(subCard) end
 else
+for _, subCard in ipairs(card:GetChildren()) do filterCard(subCard) end
+end
+return
+end
+
 local outline = card:FindFirstChild("Outline")
 local top = outline and outline:FindFirstChild("Top")
-local title = ""
-if top then
+local content = outline and outline:FindFirstChild("Content")
+
+if top and content then
+if query == "" then
+card.Visible = true
+if origOpenedState[card] ~= nil then
+content.Visible = origOpenedState[card]
+local div = outline:FindFirstChild("Divider")
+if div then div.Visible = origOpenedState[card] end
+origOpenedState[card] = nil
+end
+for _, elem in ipairs(content:GetChildren()) do
+if elem:IsA("GuiObject") and not elem:IsA("UIListLayout") and not elem:IsA("UIPadding") then
+elem.Visible = true
+end
+end
+else
+local secTitle = ""
 for _, d in ipairs(top:GetDescendants()) do
 if d:IsA("TextLabel") and d.Text ~= "" then
-title = string.lower(d.Text)
+secTitle = string.lower(d.Text)
+break
+end
+end
+local secTitleMatches = (secTitle ~= "" and string.find(secTitle, query, 1, true) ~= nil)
+
+local hasAnyElemMatch = false
+for _, elem in ipairs(content:GetChildren()) do
+if elem:IsA("GuiObject") and not elem:IsA("UIListLayout") and not elem:IsA("UIPadding") then
+local elemMatches = false
+for _, lbl in ipairs(elem:GetDescendants()) do
+if lbl:IsA("TextLabel") and lbl.Text ~= "" and lbl.Name ~= "Locked" then
+if string.find(string.lower(lbl.Text), query, 1, true) then
+elemMatches = true
 break
 end
 end
 end
-card.Visible = (title:find(query, 1, true) ~= nil)
+if secTitleMatches then
+elem.Visible = true
+else
+elem.Visible = elemMatches
+end
+if elemMatches then
+hasAnyElemMatch = true
 end
 end
 end
+
+if secTitleMatches or hasAnyElemMatch then
+card.Visible = true
+if hasAnyElemMatch then
+if origOpenedState[card] == nil then
+origOpenedState[card] = content.Visible
 end
-checkCol(self.LeftColumn)
-checkCol(self.RightColumn)
+content.Visible = true
+local div = outline:FindFirstChild("Divider")
+if div then div.Visible = true end
+end
+else
+card.Visible = false
+end
+end
+else
+if query == "" then
+card.Visible = true
+else
+local matches = false
+for _, lbl in ipairs(card:GetDescendants()) do
+if lbl:IsA("TextLabel") and lbl.Text ~= "" and lbl.Name ~= "Locked" then
+if string.find(string.lower(lbl.Text), query, 1, true) then
+matches = true
+break
+end
+end
+end
+card.Visible = matches
+end
+end
+end
+
+if self.LeftColumn then
+for _, card in ipairs(self.LeftColumn:GetChildren()) do filterCard(card) end
+end
+if self.RightColumn then
+for _, card in ipairs(self.RightColumn:GetChildren()) do filterCard(card) end
+end
+for _, card in ipairs(sf:GetChildren()) do
+if card ~= self.ColumnsHolder then
+filterCard(card)
+end
+end
 end)
 
 return searchHolder
