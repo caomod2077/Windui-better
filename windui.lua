@@ -11169,7 +11169,8 @@ local dividerLine=af("Frame",{
 Size=UDim2.new(1,0,0,1),
 ThemeTag={BackgroundColor3="Outline"},
 BackgroundColor3=Color3.fromRGB(255,255,255),
-BackgroundTransparency=0.9,
+BackgroundTransparency=an.Opened and 0.9 or 1,
+Visible=an.Opened,
 BorderSizePixel=0,
 Name="Divider",
 LayoutOrder=2,
@@ -11242,7 +11243,9 @@ ai(topButton, 0.12, { BackgroundTransparency = 0.95 }):Play()
 if outlineFrame then
 ai(outlineFrame, 0.18, { ImageTransparency = 0.65 }):Play()
 end
+if an.Opened then
 ai(dividerLine, 0.18, { BackgroundTransparency = 0.75 }):Play()
+end
 ai(titleLabel, 0.15, { TextTransparency = 0 }):Play()
 end)
 
@@ -11251,7 +11254,9 @@ ai(topButton, 0.18, { BackgroundTransparency = 1 }):Play()
 if outlineFrame then
 ai(outlineFrame, 0.22, { ImageTransparency = 0.85 }):Play()
 end
+if an.Opened then
 ai(dividerLine, 0.22, { BackgroundTransparency = 0.9 }):Play()
+end
 ai(titleLabel, 0.18, { TextTransparency = an.TextTransparency }):Play()
 end)
 
@@ -11287,6 +11292,7 @@ end
 function an.Open(av)
 an.Opened=true
 contentFrame.Visible=true
+dividerLine.Visible=true
 ai(ap, 0.2, { Rotation = 180 }, Enum.EasingStyle.Quad, Enum.EasingDirection.Out):Play()
 ai(dividerLine, 0.18, { BackgroundTransparency = 0.9 }):Play()
 end
@@ -11296,6 +11302,11 @@ an.Opened=false
 contentFrame.Visible=false
 ai(ap, 0.18, { Rotation = 0 }, Enum.EasingStyle.Quad, Enum.EasingDirection.Out):Play()
 ai(dividerLine, 0.18, { BackgroundTransparency = 1 }):Play()
+task.delay(0.18, function()
+if not an.Opened then
+dividerLine.Visible=false
+end
+end)
 end
 
 function an.Flash(self, color)
