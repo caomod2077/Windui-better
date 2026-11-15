@@ -1710,6 +1710,7 @@ task.spawn(function()
 local req = (syn and syn.request) or (http and http.request) or http_request or request or (getgenv and (getgenv().http_request or getgenv().request or getgenv().syn_request))
 local HttpService = game:GetService("HttpService")
 local encoded = HttpService:UrlEncode(text)
+local tl = HttpService:UrlEncode(targetLang)
 
 local function doHttp(url)
 local ok, body = pcall(function()
@@ -1718,7 +1719,7 @@ local r = req({
 Url = url,
 Method = "GET",
 Headers = {
-["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
 },
 })
 return r and (r.Body or r.body)
@@ -1732,47 +1733,74 @@ end
 return nil
 end
 
-local translated = nil
+local function parseTranslationResponse(body)
+if not body or type(body) ~= "string" or #body == 0 then return nil end
+local decodeOk, data = pcall(function() return HttpService:JSONDecode(body) end)
+if not decodeOk or not data then return nil end
 
-local gUrl = "https://clients5.google.com/translate_a/t?client=dict-chrome-ex&sl=auto&tl=" .. HttpService:UrlEncode(targetLang) .. "&q=" .. encoded
-local gRes = doHttp(gUrl)
-if gRes then
-local decodeOk, data = pcall(function() return HttpService:JSONDecode(gRes) end)
-if decodeOk and type(data) == "table" and type(data[1]) == "table" and type(data[1][1]) == "string" then
-translated = data[1][1]
+if type(data) == "table" and data.responseData and type(data.responseData) == "table" then
+local t = data.responseData.translatedText
+if t and type(t) == "string" and t ~= "" and not t:find("MYMEMORY WARNING") and not t:find("IS AN INVALID") then
+t = t:gsub("&quot;", '"'):gsub("&#39;", "'"):gsub("&amp;", "&")
+return t
 end
 end
+if type(data) == "table" and type(data.translation) == "string" and data.translation ~= "" then
+return data.translation
+end
+if type(data) == "table" and type(data.translatedText) == "string" and data.translatedText ~= "" then
+return data.translatedText
+end
 
-if not translated then
-local gtxUrl = "https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=" .. HttpService:UrlEncode(targetLang) .. "&dt=t&q=" .. encoded
-local gtxRes = doHttp(gtxUrl)
-if gtxRes then
-local decodeOk, data = pcall(function() return HttpService:JSONDecode(gtxRes) end)
-if decodeOk and type(data) == "table" and type(data[1]) == "table" then
-local out = ""
+if type(data) == "table" and data[1] ~= nil then
+if type(data[1]) == "table" and type(data[1][1]) == "string" and data[1][1] ~= "" then
+return data[1][1]
+end
+if type(data[1]) == "string" and data[1] ~= "" then
+return data[1]
+end
+if type(data[1]) == "table" then
+local full = ""
 for _, seg in ipairs(data[1]) do
 if type(seg) == "table" and type(seg[1]) == "string" then
-out = out .. seg[1]
+full = full .. seg[1]
 end
 end
-if out ~= "" then
-translated = out
-end
+if full ~= "" then
+return full
 end
 end
 end
 
-if not translated then
-local mUrl = "https://api.mymemory.translated.net/get?q=" .. encoded .. "&langpair=en|" .. HttpService:UrlEncode(targetLang)
-local mRes = doHttp(mUrl)
-if mRes then
-local decodeOk, data = pcall(function() return HttpService:JSONDecode(mRes) end)
-if decodeOk and data and data.responseData and data.responseData.translatedText then
-local trans = data.responseData.translatedText
-trans = trans:gsub("&quot;", '"'):gsub("&#39;", "'"):gsub("&amp;", "&")
-if trans and trans ~= "" and not trans:find("MYMEMORY WARNING") then
-translated = trans
+return nil
 end
+
+local endpoints = {
+"https://clients5.google.com/translate_a/t?client=dict-chrome-ex&sl=auto&tl=" .. tl .. "&q=" .. encoded,
+"https://clients1.google.com/translate_a/t?client=dict-chrome-ex&sl=auto&tl=" .. tl .. "&q=" .. encoded,
+"https://clients2.google.com/translate_a/t?client=dict-chrome-ex&sl=auto&tl=" .. tl .. "&q=" .. encoded,
+"https://clients3.google.com/translate_a/t?client=dict-chrome-ex&sl=auto&tl=" .. tl .. "&q=" .. encoded,
+"https://clients4.google.com/translate_a/t?client=dict-chrome-ex&sl=auto&tl=" .. tl .. "&q=" .. encoded,
+"https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=" .. tl .. "&dt=t&q=" .. encoded,
+"https://clients1.google.com/translate_a/single?client=gtx&sl=auto&tl=" .. tl .. "&dt=t&q=" .. encoded,
+"https://clients5.google.com/translate_a/single?client=gtx&sl=auto&tl=" .. tl .. "&dt=t&q=" .. encoded,
+"https://clients2.google.com/translate_a/single?client=gtx&sl=auto&tl=" .. tl .. "&dt=t&q=" .. encoded,
+"https://clients3.google.com/translate_a/single?client=gtx&sl=auto&tl=" .. tl .. "&dt=t&q=" .. encoded,
+"https://clients4.google.com/translate_a/single?client=gtx&sl=auto&tl=" .. tl .. "&dt=t&q=" .. encoded,
+"https://clients5.google.com/translate_a/t?client=at&sl=auto&tl=" .. tl .. "&q=" .. encoded,
+"https://clients1.google.com/translate_a/t?client=at&sl=auto&tl=" .. tl .. "&q=" .. encoded,
+"https://api.mymemory.translated.net/get?q=" .. encoded .. "&langpair=en|" .. tl .. "&de=robloxwindui%40gmail.com",
+"https://api.mymemory.translated.net/get?q=" .. encoded .. "&langpair=en|" .. tl .. "&de=windui_dev%40outlook.com",
+}
+
+local translated = nil
+for _, endpointUrl in ipairs(endpoints) do
+local body = doHttp(endpointUrl)
+if body then
+local res = parseTranslationResponse(body)
+if res and res ~= "" then
+translated = res
+break
 end
 end
 end
