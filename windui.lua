@@ -1734,10 +1734,20 @@ end
 
 local translated = nil
 
-local gUrl = "https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=" .. HttpService:UrlEncode(targetLang) .. "&dt=t&q=" .. encoded
+local gUrl = "https://clients5.google.com/translate_a/t?client=dict-chrome-ex&sl=auto&tl=" .. HttpService:UrlEncode(targetLang) .. "&q=" .. encoded
 local gRes = doHttp(gUrl)
 if gRes then
 local decodeOk, data = pcall(function() return HttpService:JSONDecode(gRes) end)
+if decodeOk and type(data) == "table" and type(data[1]) == "table" and type(data[1][1]) == "string" then
+translated = data[1][1]
+end
+end
+
+if not translated then
+local gtxUrl = "https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=" .. HttpService:UrlEncode(targetLang) .. "&dt=t&q=" .. encoded
+local gtxRes = doHttp(gtxUrl)
+if gtxRes then
+local decodeOk, data = pcall(function() return HttpService:JSONDecode(gtxRes) end)
 if decodeOk and type(data) == "table" and type(data[1]) == "table" then
 local out = ""
 for _, seg in ipairs(data[1]) do
@@ -1747,6 +1757,7 @@ end
 end
 if out ~= "" then
 translated = out
+end
 end
 end
 end
@@ -7834,7 +7845,18 @@ al:Lock()
 end
 
 
-local ay=(ak.Tab and ak.Tab.UIElements and ak.Tab.UIElements.ContainerFrame) or (ak.Tab and ak.Tab.Container) or (ak.Window and ak.Window.UIElements and ak.Window.UIElements.SideBar)
+local function setScrolling(enabled)
+pcall(function()
+local cur = (ak.Tab and ak.Tab.UIElements and ak.Tab.UIElements.ContainerFrame) or (ak.Tab and ak.Tab.Container) or (ak.Window and ak.Window.UIElements and ak.Window.UIElements.SideBar)
+while cur and cur ~= game do
+if cur:IsA("ScrollingFrame") then
+cur.ScrollingEnabled = enabled
+return
+end
+cur = cur.Parent
+end
+end)
+end
 
 function al.Set(az,aA,aB)
 if as then
@@ -7851,7 +7873,7 @@ or aB.UserInputType==Enum.UserInputType.Touch
 then
 if aB then
 am=(aB.UserInputType==Enum.UserInputType.Touch)
-ay.ScrollingEnabled=false
+setScrolling(false)
 ai=true
 
 local b=am and aB.Position.X or ac:GetMouseLocation().X
@@ -7908,7 +7930,7 @@ then
 an:Disconnect()
 ao:Disconnect()
 ai=false
-ay.ScrollingEnabled=true
+setScrolling(true)
 
 ak.WindUI.CurrentInput=nil
 
@@ -11797,7 +11819,8 @@ Focused=an.Focused~=false,
 
 local ap=false
 local aq=false
-local ar,as=0
+local ar=0
+local as=Vector2.new()
 
 local at=ai.NewRoundFrame(an.Window.ElementConfig.UICorner,"Squircle",{
 Size=UDim2.new(1,0,0,ao.Height),
@@ -11826,86 +11849,78 @@ ao.Object,
 }),
 })
 
-local function IsTouchInsideViewport(au)
-local av=at.CanvasGroup.Viewport.AbsolutePosition
-local aw=at.CanvasGroup.Viewport.AbsoluteSize
-
-return au.X>=av.X
-and au.X<=av.X+aw.X
-and au.Y>=av.Y
-and au.Y<=av.Y+aw.Y
+local vpFrame = at.CanvasGroup.Viewport
+if ao.Camera and not ao.Camera.Parent then
+ao.Camera.Parent = vpFrame
 end
 
-local au=an.WindUI.GenerateGUID()
-
-ai.AddSignal(at.CanvasGroup.Viewport.MouseEnter,function()
-if ao.Interactive and an.Tab and an.Tab.UIElements and an.Tab.UIElements.ContainerFrame then
-an.Tab.UIElements.ContainerFrame.ScrollingEnabled=false
-end
-end)
-
-ai.AddSignal(at.CanvasGroup.Viewport.InputEnded,function(av)
-if
-av.UserInputType==Enum.UserInputType.MouseMovement
-or av.UserInputType==Enum.UserInputType.Touch
-then
-if an.Tab and an.Tab.UIElements and an.Tab.UIElements.ContainerFrame then
-an.Tab.UIElements.ContainerFrame.ScrollingEnabled=true
-end
-end
-end)
-
-ai.AddSignal(at.CanvasGroup.Viewport.InputBegan,function(av)
-if ao.Interactive then
-if
-(av.UserInputType==Enum.UserInputType.MouseButton1)
-or(av.UserInputType==Enum.UserInputType.Touch and not aq)
-then
-if an.WindUI.CurrentInput and an.WindUI.CurrentInput~=au then
+local function setScrollState(enabled)
+pcall(function()
+local cur = (an.Tab and an.Tab.UIElements and an.Tab.UIElements.ContainerFrame) or (an.Tab and an.Tab.Container) or at.Parent
+while cur and cur ~= game do
+if cur:IsA("ScrollingFrame") then
+cur.ScrollingEnabled = enabled
 return
 end
+cur = cur.Parent
+end
+end)
+end
 
-an.WindUI.CurrentInput=au
+local function IsTouchInsideViewport(au)
+local av=vpFrame.AbsolutePosition
+local aw=vpFrame.AbsoluteSize
+return au.X>=av.X and au.X<=av.X+aw.X and au.Y>=av.Y and au.Y<=av.Y+aw.Y
+end
 
+ai.AddSignal(vpFrame.MouseEnter,function()
+if ao.Interactive then
+setScrollState(false)
+end
+end)
+
+ai.AddSignal(vpFrame.MouseLeave,function()
+if ao.Interactive and not ap then
+setScrollState(true)
+end
+end)
+
+ai.AddSignal(vpFrame.InputBegan,function(av)
+if ao.Interactive then
+if (av.UserInputType==Enum.UserInputType.MouseButton1) or (av.UserInputType==Enum.UserInputType.Touch and not aq) then
 ap=true
-as=av.Position
+as=Vector2.new(av.Position.X, av.Position.Y)
+setScrollState(false)
 end
 end
 end)
 
 ai.AddSignal(af.InputEnded,function(av)
 if ao.Interactive then
-if
-av.UserInputType==Enum.UserInputType.MouseButton1
-or av.UserInputType==Enum.UserInputType.Touch
-then
-if an.WindUI.CurrentInput and an.WindUI.CurrentInput~=au then
-return
-end
-
-an.WindUI.CurrentInput=nil
-
+if av.UserInputType==Enum.UserInputType.MouseButton1 or av.UserInputType==Enum.UserInputType.Touch then
+if ap then
 ap=false
+setScrollState(true)
+end
 end
 end
 end)
 
 ai.AddSignal(af.InputChanged,function(av)
 if ao.Interactive and ap and not aq then
-if
-av.UserInputType==Enum.UserInputType.MouseMovement
-or av.UserInputType==Enum.UserInputType.Touch
-then
-local aw=av.Position-as
-as=av.Position
+if av.UserInputType==Enum.UserInputType.MouseMovement or av.UserInputType==Enum.UserInputType.Touch then
+local currentPos = Vector2.new(av.Position.X, av.Position.Y)
+local delta = currentPos - as
+as = currentPos
 
+if ao.Object and ao.Camera then
 local ax=ao.Object:GetPivot().Position
 local ay=ao.Camera
 
-local az=CFrame.fromAxisAngle(Vector3.new(0,1,0),-aw.X*0.02)
+local az=CFrame.fromAxisAngle(Vector3.new(0,1,0),-delta.X*0.01)
 ay.CFrame=CFrame.new(ax)*az*CFrame.new(-ax)*ay.CFrame
 
-local aA=CFrame.fromAxisAngle(ay.CFrame.RightVector,-aw.Y*0.02)
+local aA=CFrame.fromAxisAngle(ay.CFrame.RightVector,-delta.Y*0.01)
 local aB=CFrame.new(ax)*aA*CFrame.new(-ax)*ay.CFrame
 
 if aB.UpVector.Y>0.1 then
@@ -11913,13 +11928,16 @@ ay.CFrame=aB
 end
 end
 end
+end
 end)
 
-ai.AddSignal(at.CanvasGroup.Viewport.InputChanged,function(av)
+ai.AddSignal(vpFrame.InputChanged,function(av)
 if ao.Interactive then
 if av.UserInputType==Enum.UserInputType.MouseWheel then
-local aw=av.Position.Z*2
+local aw=av.Position.Z*1.5
+if ao.Camera then
 ao.Camera.CFrame+=ao.Camera.CFrame.LookVector*aw
+end
 end
 end
 end)
@@ -11934,7 +11952,7 @@ aq=true
 ap=false
 ar=(av[1]-av[2]).Magnitude
 elseif ay==Enum.UserInputState.Change then
-if aq then
+if aq and ao.Camera then
 local az=(av[1]-av[2]).Magnitude
 local aA=(az-ar)*0.03
 ar=az
@@ -11947,14 +11965,13 @@ end
 end)
 
 local function FocusCamera()
-local av=ao.Object:IsA"BasePart"and ao.Object.Size
-or select(2,ao.Object:GetBoundingBox(0))
+if not ao.Object or not ao.Camera then return end
+local av=ao.Object:IsA"BasePart"and ao.Object.Size or select(2,ao.Object:GetBoundingBox(0))
 local aw=math.max(av.X,av.Y,av.Z)
 local ax=aw*2
 local ay=ao.Object:GetPivot().Position
 
-ao.Camera.CFrame=
-CFrame.new(ay+Vector3.new(0,aw/2,ax),ay)
+ao.Camera.CFrame=CFrame.new(ay+Vector3.new(0,aw/2,ax),ay)
 end
 
 if ao.Focused then
@@ -11970,7 +11987,10 @@ ao.Object:Destroy()
 end
 
 ao.Object=aw
-ao.Object.Parent=at.CanvasGroup.Viewport
+ao.Object.Parent=vpFrame
+if ao.Camera and not ao.Camera.Parent then
+ao.Camera.Parent=vpFrame
+end
 end
 
 function ao.SetHeight(av,aw)
@@ -11985,12 +12005,15 @@ end
 
 function ao.SetCamera(av,aw)
 ao.Camera=aw
-at.CanvasGroup.Viewport.CurrentCamera=aw
+if ao.Camera and not ao.Camera.Parent then
+ao.Camera.Parent=vpFrame
+end
+vpFrame.CurrentCamera=aw
 end
 
 function ao.SetInteractive(av,aw)
 ao.Interactive=aw
-at.CanvasGroup.Viewport.Active=aw
+vpFrame.Active=aw
 end
 
 ao.Main=at
